@@ -1340,6 +1340,7 @@ async function handleOAuthCallback(code) {
     if (!token) {
       console.error("No access_token in response", data);
       cleanUrl();
+      sessionStorage.removeItem(STORAGE_VERIFIER_KEY);
       showError("signin-error", "Sign-in failed: no access token returned. Please try again.");
       showScreen("screen-signin");
       return;
@@ -1352,6 +1353,7 @@ async function handleOAuthCallback(code) {
   } catch (e) {
     console.error("OAuth callback error:", e);
     cleanUrl();
+    sessionStorage.removeItem(STORAGE_VERIFIER_KEY);
     showError("signin-error", "Sign-in failed. Please try again or DM support in the Discord.");
     showScreen("screen-signin");
   }
@@ -1481,6 +1483,8 @@ document.querySelectorAll(".gift-option").forEach(function (el) {
 });
 
 $("btn-submit").addEventListener("click", function () {
+  const submitBtn = $("btn-submit");
+  if (submitBtn.disabled) return;
   clearError("form-error");
 
   if (!selectedGift) {
@@ -1517,6 +1521,11 @@ $("btn-submit").addEventListener("click", function () {
     return;
   }
 
+  // Disable submit button immediately to block rapid double-submits.
+  submitBtn.disabled = true;
+  const originalLabel = submitBtn.textContent;
+  submitBtn.textContent = "Submitting…";
+
   claimId = generateClaimId();
 
   // Mark claimed locally BEFORE webhook fire so a rapid double-submit is blocked.
@@ -1544,6 +1553,9 @@ $("btn-submit").addEventListener("click", function () {
   hydrateSuccessScreen(payload);
   showScreen("screen-success");
   setTimeout(fireConfetti, 200);
+
+  // Restore label after transition (in case admin returns to form via clear).
+  submitBtn.textContent = originalLabel;
 });
 
 function postToSheet(payload) {
