@@ -1337,21 +1337,6 @@ function fireConfetti() {
     card.addEventListener("mouseleave", onLeave);
   });
 
-  // Logo follows mouse globally — anywhere on screen tilts the logo a bit
-  const logoWrap = document.querySelector(".brand-logo .logo-img-wrap");
-  if (logoWrap) {
-    let lraf = null;
-    document.addEventListener("mousemove", function (e) {
-      const x = (e.clientX / window.innerWidth)  - 0.5;
-      const y = (e.clientY / window.innerHeight) - 0.5;
-      if (lraf) return;
-      lraf = requestAnimationFrame(function () {
-        logoWrap.style.transform =
-          "rotateY(" + (x * 28).toFixed(2) + "deg) rotateX(" + (-y * 22).toFixed(2) + "deg)";
-        lraf = null;
-      });
-    });
-  }
 })();
 
 </script>
