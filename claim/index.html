@@ -1216,11 +1216,7 @@
 // CONFIG — EDIT THESE THREE BLOCKS WHEN DEPLOYING
 // =============================================================================
 
-// 1) Paste your Google Apps Script Web App URL here (see APPSSCRIPT.gs).
-//    Used to log every confirmed claim to a Google Sheet.
-const GOOGLE_SHEETS_WEBHOOK_URL = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE";
-
-// 2) Stripe payment links per region.
+// 1) Stripe payment links per region.
 //    Create 2 Stripe Payment Links — one for US shipping, one for
 //    International — and paste each URL here. While these are empty,
 //    the page runs in "reserve claim" mode: users finish the flow and
@@ -1438,11 +1434,9 @@ $("btn-back-confirm").addEventListener("click", () => showScreen("screen-confirm
 
 $("btn-pay").addEventListener("click", (e) => {
   if (!$("btn-pay").href) { e.preventDefault(); return; }
-  logClaim("payment-initiated");
 });
 
 $("btn-already-paid").addEventListener("click", () => {
-  logClaim("payment-self-confirmed");
   hydrateSuccessScreen("paid");
   showScreen("screen-success");
   setTimeout(fireConfetti, 200);
@@ -1450,7 +1444,6 @@ $("btn-already-paid").addEventListener("click", () => {
 
 // Reserve-claim button (used when no Stripe link is configured yet)
 $("btn-reserve").addEventListener("click", () => {
-  logClaim("claim-reserved");
   hydrateSuccessScreen("reserved");
   showScreen("screen-success");
   setTimeout(fireConfetti, 200);
@@ -1500,40 +1493,6 @@ function fireConfetti() {
     root.appendChild(c);
   }
   setTimeout(() => { root.innerHTML = ""; }, 6000);
-}
-
-// =============================================================================
-// LOG CLAIM TO GOOGLE SHEET (fire-and-forget)
-// =============================================================================
-function logClaim(status) {
-  if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.indexOf("PASTE_") === 0) return;
-  const r = currentRecord;
-  const payload = {
-    claim_id: claimId,
-    submitted_at: new Date().toISOString(),
-    status: status,
-    email: r.email,
-    discord: r.discord,
-    name: r.name,
-    gift: r.gift,
-    region: r.region,
-    address1: r.address1,
-    address2: r.address2,
-    city: r.city,
-    state: r.state,
-    zip: r.zip,
-    country: r.country,
-    phone: r.phone,
-    shipping_price_usd: SHIPPING_PRICES_USD[r.region] || ""
-  };
-  try {
-    fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-  } catch (e) {}
 }
 
 // =============================================================================
