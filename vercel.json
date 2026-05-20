@@ -1,5 +1,12 @@
 {
   "buildCommand": null,
   "outputDirectory": ".",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    {
+      "has": [{ "type": "host", "value": "gifts.3mtrading.ca" }],
+      "source": "/(.*)",
+      "destination": "/claim/$1"
+    }
+  ]
 }
