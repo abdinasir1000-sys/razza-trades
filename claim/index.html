@@ -1020,7 +1020,7 @@ const WHOP_PRODUCT_IDS = [
   "prod_HcZD3fcfRozcO",  // Early 3M Bot Access
   "prod_VbFTraKdXaxTG"   // 3M Trading Lifetime
 ];
-const GOOGLE_SHEETS_WEBHOOK_URL = "PASTE_APPS_SCRIPT_URL_HERE";
+const CLAIM_API_URL = "PASTE_RAILWAY_URL_HERE"; // e.g. https://your-app.railway.app
 
 // =============================================================================
 // HELPERS
@@ -1387,16 +1387,15 @@ $("btn-submit").addEventListener("click", function () {
 });
 
 function postToSheet(payload) {
-  if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.indexOf("PASTE_") === 0) return;
+  if (!CLAIM_API_URL || CLAIM_API_URL.indexOf("PASTE_") === 0) return;
   try {
-    fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+    fetch(CLAIM_API_URL + "/claim", {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
   } catch (e) {
-    console.warn("Sheets webhook failed:", e);
+    console.warn("Claim API failed:", e);
   }
 }
 
