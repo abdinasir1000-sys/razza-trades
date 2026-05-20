@@ -1174,7 +1174,21 @@ async function verifyMembership(token) {
       username: me.preferred_username || me.name || ""
     };
 
-    // 2. Check double-claim
+    // 2. Server-side check: has this Whop user already claimed?
+    if (whopUser.id) {
+      try {
+        const checkResp = await fetch("/api/check-claim?whop_user_id=" + encodeURIComponent(whopUser.id));
+        if (checkResp.ok) {
+          const checkData = await checkResp.json();
+          if (checkData.claimed) {
+            showScreen("screen-already");
+            return;
+          }
+        }
+      } catch (e) { console.warn("check-claim failed:", e); }
+    }
+
+    // 3. Local fallback check (kept for offline safety)
     if (whopUser.email && alreadyClaimed(whopUser.email)) {
       showScreen("screen-already");
       return;
@@ -1232,7 +1246,7 @@ document.querySelectorAll(".gift-option").forEach(function (el) {
   });
 });
 
-$("btn-submit").addEventListener("click", function () {
+$("btn-submit").addEventListener("click", async function () {
   const submitBtn = $("btn-submit");
   if (submitBtn.disabled) return;
   clearError("form-error");
@@ -1298,7 +1312,19 @@ $("btn-submit").addEventListener("click", function () {
     whop_user_id: whopUser ? (whopUser.id || "") : ""
   };
 
-  postToSheet(payload);
+  const submitResult = await submitClaim(payload);
+  if (submitResult.alreadyClaimed) {
+    submitBtn.textContent = originalLabel;
+    submitBtn.disabled = false;
+    showScreen("screen-already");
+    return;
+  }
+  if (!submitResult.ok) {
+    submitBtn.textContent = originalLabel;
+    submitBtn.disabled = false;
+    showError("form-error", "We couldn't save your claim. Please try again or DM support in the Discord.");
+    return;
+  }
 
   markClaimed(payload.email, payload.claim_id);
 
@@ -1314,15 +1340,19 @@ $("btn-submit").addEventListener("click", function () {
   }
 });
 
-function postToSheet(payload) {
+async function submitClaim(payload) {
   try {
-    fetch("/api/submit-claim", {
+    const resp = await fetch("/api/submit-claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+    if (resp.status === 409) return { ok: false, alreadyClaimed: true };
+    if (!resp.ok) return { ok: false };
+    return { ok: true };
   } catch (e) {
     console.warn("Claim submit failed:", e);
+    return { ok: false };
   }
 }
 
