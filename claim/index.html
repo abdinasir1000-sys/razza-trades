@@ -69,7 +69,6 @@
      ANIMATED BACKGROUND LAYERS
      ========================================================= */
   .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-  #bg-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.85; }
 
   .bg-grid {
     background-image:
@@ -250,16 +249,10 @@
   }
   h1 .accent {
     background: linear-gradient(120deg, var(--green-bright) 0%, var(--green) 30%, var(--green-core) 60%, var(--green-bright) 100%);
-    background-size: 250% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: gradientSlide 6s ease-in-out infinite;
     display: inline-block;
-  }
-  @keyframes gradientSlide {
-    0%, 100% { background-position: 0% 50%; }
-    50%      { background-position: 100% 50%; }
   }
   h2 {
     font-family: 'Rajdhani', sans-serif;
@@ -317,10 +310,8 @@
     -webkit-mask-composite: xor;
             mask-composite: exclude;
     opacity: 0.6;
-    animation: cardHalo 8s linear infinite;
     pointer-events: none;
   }
-  @keyframes cardHalo { to { transform: rotate(360deg); } }
   .card:hover::before { opacity: 1; }
   .card-green { border-color: var(--green-border); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6), 0 0 60px rgba(126, 207, 126, 0.15); }
   .card-quiet { border-color: var(--border); }
@@ -332,13 +323,8 @@
     top: 0; left: -50%;
     width: 50%; height: 1px;
     background: linear-gradient(90deg, transparent, var(--green-bright), transparent);
-    animation: shineMove 5s linear infinite;
     pointer-events: none;
     z-index: 1;
-  }
-  @keyframes shineMove {
-    0%   { left: -50%; }
-    100% { left: 100%; }
   }
 
   .field { margin-bottom: 1.3rem; }
@@ -481,27 +467,7 @@
     top: -60%; right: -25%;
     width: 240px; height: 240px;
     background: radial-gradient(circle, rgba(126, 207, 126, 0.22), transparent 65%);
-    animation: orbDrift 8s ease-in-out infinite alternate;
     pointer-events: none;
-  }
-  /* Holographic shimmer overlay sliding across the gift card */
-  .gift-card::after {
-    content: "";
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(110deg,
-      transparent 35%,
-      rgba(126, 207, 126, 0.06) 45%,
-      rgba(168, 232, 168, 0.12) 50%,
-      rgba(126, 207, 126, 0.06) 55%,
-      transparent 65%);
-    animation: holoShimmer 7s ease-in-out infinite;
-    pointer-events: none;
-  }
-  @keyframes holoShimmer {
-    0%, 30%   { left: -100%; }
-    65%, 100% { left: 100%; }
   }
   .gift-stage {
     position: relative;
@@ -516,7 +482,6 @@
     inset: 4px;
     border-radius: 50%;
     border: 1px dashed rgba(126, 207, 126, 0.35);
-    animation: ringSpin 10s linear infinite;
   }
   .gift-icon-3d {
     position: relative;
@@ -525,14 +490,8 @@
     font-size: 2.5rem;
     line-height: 1;
     transform-style: preserve-3d;
-    animation: giftSpin 8s linear infinite;
     filter: drop-shadow(0 8px 18px rgba(74, 128, 80, 0.55));
     z-index: 2;
-  }
-  @keyframes giftSpin {
-    0%   { transform: rotateY(0deg) rotateX(10deg); }
-    50%  { transform: rotateY(180deg) rotateX(-10deg); }
-    100% { transform: rotateY(360deg) rotateX(10deg); }
   }
   .gift-stage::after {
     content: "";
@@ -542,11 +501,6 @@
     width: 60%; height: 8px;
     background: radial-gradient(ellipse, rgba(126, 207, 126, 0.55), transparent 70%);
     border-radius: 50%;
-    animation: shadowPulse 2.5s ease-in-out infinite;
-  }
-  @keyframes shadowPulse {
-    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.6; }
-    50%      { transform: translateX(-50%) scaleX(0.75); opacity: 1; }
   }
   .gift-name { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
   .gift-sub { font-size: 0.66rem; color: var(--text-dim); font-family: 'Space Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.18em; margin-top: 4px; font-weight: 700; }
@@ -637,42 +591,6 @@
   }
 
   /* =========================================================
-     FLOATING ITEMS
-     ========================================================= */
-  .floaters { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .floaters span {
-    position: absolute;
-    font-size: 1.2rem;
-    opacity: 0.08;
-    animation: floatY 12s ease-in-out infinite;
-    filter: blur(0.5px);
-  }
-  @keyframes floatY {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50%      { transform: translateY(-30px) rotate(15deg); }
-  }
-
-  /* Rising green ember particles */
-  .embers { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
-  .embers i {
-    position: absolute;
-    bottom: -20px;
-    width: 4px; height: 4px;
-    background: radial-gradient(circle, #a8e8a8, transparent 70%);
-    border-radius: 50%;
-    animation: emberRise linear infinite;
-    opacity: 0;
-    filter: blur(0.5px);
-  }
-  @keyframes emberRise {
-    0%   { transform: translateY(0) translateX(0); opacity: 0; }
-    10%  { opacity: 0.8; }
-    50%  { transform: translateY(-50vh) translateX(20px); }
-    90%  { opacity: 0.5; }
-    100% { transform: translateY(-110vh) translateX(-15px); opacity: 0; }
-  }
-
-  /* =========================================================
      UTILITIES
      ========================================================= */
   .text-center { text-align: center; }
@@ -688,7 +606,6 @@
 <body>
 
   <!-- ANIMATED BACKGROUND LAYERS -->
-  <canvas id="bg-canvas" class="bg-layer"></canvas>
   <div class="bg-layer bg-grid"></div>
   <div class="bg-layer bg-orbs"></div>
   <div class="bg-layer bg-chart" aria-hidden="true">
@@ -707,28 +624,6 @@
   </div>
   <div class="bg-layer bg-scan"></div>
   <div class="bg-layer bg-vignette"></div>
-
-  <!-- Floating decorative gift icons -->
-  <div class="floaters" aria-hidden="true">
-    <span style="top:12%; left:8%;  animation-delay: 0s;">☕</span>
-    <span style="top:22%; left:88%; animation-delay: 2s;">📱</span>
-    <span style="top:55%; left:6%;  animation-delay: 4s;">🎨</span>
-    <span style="top:68%; left:92%; animation-delay: 1s;">☕</span>
-    <span style="top:85%; left:14%; animation-delay: 3s;">📱</span>
-    <span style="top:38%; left:94%; animation-delay: 5s;">🎁</span>
-  </div>
-
-  <!-- Rising ember particles (CSS-driven, lightweight) -->
-  <div class="embers" aria-hidden="true">
-    <i style="left:5%;  animation-duration:14s; animation-delay: 0s;"></i>
-    <i style="left:15%; animation-duration:18s; animation-delay: 2s;"></i>
-    <i style="left:28%; animation-duration:16s; animation-delay: 5s;"></i>
-    <i style="left:42%; animation-duration:20s; animation-delay: 1s;"></i>
-    <i style="left:55%; animation-duration:13s; animation-delay: 8s;"></i>
-    <i style="left:68%; animation-duration:17s; animation-delay: 3s;"></i>
-    <i style="left:78%; animation-duration:15s; animation-delay: 6s;"></i>
-    <i style="left:90%; animation-duration:19s; animation-delay: 4s;"></i>
-  </div>
 
   <div class="container">
 
@@ -767,7 +662,7 @@
     <!-- ========== SCREEN 3a: NO ACTIVE MEMBERSHIP ========== -->
     <section id="screen-no-access" class="screen">
       <div class="card card-quiet text-center">
-        <div style="font-size: 3.5rem; color: var(--red-bright); margin-bottom: 0.6rem; animation: pillFloat 3s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(210, 45, 30, 0.4));">✕</div>
+        <div style="font-size: 3.5rem; color: var(--red-bright); margin-bottom: 0.6rem; filter: drop-shadow(0 0 18px rgba(210, 45, 30, 0.4));">✕</div>
         <h1 class="text-center">No Active <span class="accent">Membership</span></h1>
         <p class="lede" style="margin: 0.5rem auto 1.5rem;">
           No active membership found. This gift is for active 3M Trading members only. If you think this is a mistake, DM support in the Discord.
@@ -782,7 +677,7 @@
     <!-- ========== SCREEN 3b: ALREADY CLAIMED ========== -->
     <section id="screen-already" class="screen">
       <div class="card card-quiet text-center">
-        <div style="font-size: 3.5rem; color: var(--text-faint); margin-bottom: 0.6rem; animation: pillFloat 3s ease-in-out infinite;">ⓘ</div>
+        <div style="font-size: 3.5rem; color: var(--text-faint); margin-bottom: 0.6rem;">ⓘ</div>
         <h1 class="text-center">Already Claimed</h1>
         <p class="lede" style="margin: 0.5rem auto 1.5rem;">This account has already submitted a claim. If you need to update your shipping info or there&rsquo;s an issue, reach out in the 3M Trading Discord support channel.</p>
         <button class="btn btn-ghost" id="btn-clear-claim" style="max-width: 320px; margin: 0 auto; display: block;">Start over (admin)</button>
@@ -1459,98 +1354,6 @@ function fireConfetti() {
   }
 })();
 
-// =============================================================================
-// PARTICLE STARFIELD CANVAS BACKGROUND
-// =============================================================================
-(function () {
-  const cv = document.getElementById("bg-canvas");
-  if (!cv) return;
-  const ctx = cv.getContext("2d");
-  let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let particles = [];
-  let mx = 0.5, my = 0.5;
-
-  function resize() {
-    W = window.innerWidth; H = window.innerHeight;
-    cv.width = W * dpr; cv.height = H * dpr;
-    cv.style.width = W + "px"; cv.style.height = H + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    seed();
-  }
-  function seed() {
-    const target = Math.min(110, Math.floor((W * H) / 14000));
-    particles = [];
-    for (let i = 0; i < target; i++) {
-      particles.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        z: 0.3 + Math.random() * 0.7,           // depth
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
-        r: 0.7 + Math.random() * 1.5,
-        hue: Math.random() < 0.18 ? 14 : 0,     // a few warm dots
-        twk: Math.random() * Math.PI * 2
-      });
-    }
-  }
-  function frame(t) {
-    ctx.clearRect(0, 0, W, H);
-    // subtle radial vignette
-    const grad = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, Math.max(W, H) * 0.7);
-    grad.addColorStop(0, "rgba(20, 5, 5, 0.0)");
-    grad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-
-    const ox = (mx - 0.5) * 12, oy = (my - 0.5) * 12;
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      p.x += p.vx; p.y += p.vy; p.twk += 0.04;
-      if (p.x < -10) p.x = W + 10; else if (p.x > W + 10) p.x = -10;
-      if (p.y < -10) p.y = H + 10; else if (p.y > H + 10) p.y = -10;
-      const alpha = (0.35 + 0.4 * Math.sin(p.twk)) * p.z;
-      const px = p.x + ox * p.z;
-      const py = p.y + oy * p.z;
-      ctx.beginPath();
-      if (p.hue === 14) {
-        ctx.fillStyle = "rgba(168, 232, 168," + alpha + ")";
-        ctx.shadowBlur = 10; ctx.shadowColor = "rgba(126, 207, 126, 0.8)";
-      } else {
-        ctx.fillStyle = "rgba(255,255,255," + (alpha * 0.55) + ")";
-        ctx.shadowBlur = 0;
-      }
-      ctx.arc(px, py, p.r * p.z, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
-
-    // soft constellation lines between close-by particles
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i], b = particles[j];
-        const dx = a.x - b.x, dy = a.y - b.y;
-        const d = dx * dx + dy * dy;
-        if (d < 10000) {
-          const op = (1 - d / 10000) * 0.10;
-          ctx.strokeStyle = "rgba(126, 207, 126," + op + ")";
-          ctx.lineWidth = 0.6;
-          ctx.beginPath();
-          ctx.moveTo(a.x + ox * a.z, a.y + oy * a.z);
-          ctx.lineTo(b.x + ox * b.z, b.y + oy * b.z);
-          ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-
-  window.addEventListener("mousemove", function (e) {
-    mx = e.clientX / window.innerWidth;
-    my = e.clientY / window.innerHeight;
-  });
-  window.addEventListener("resize", resize, { passive: true });
-  resize();
-  requestAnimationFrame(frame);
-})();
 </script>
 </body>
 </html>
