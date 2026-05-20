@@ -781,36 +781,7 @@
       </div>
     </section>
 
-    <!-- ========== SCREEN 3a: NO ACTIVE MEMBERSHIP ========== -->
-    <section id="screen-no-access" class="screen">
-      <div class="brand-row">
-        <div class="brand">
-          <div class="brand-logo">
-            <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" class="brand-logo-img" />
-          </div>
-          <div class="brand-text">
-            <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
-          </div>
-        </div>
-        <div class="brand-live">
-          <span class="led"></span> System · Live
-        </div>
-      </div>
-      <div class="card card-quiet text-center">
-        <div style="font-size: 3.5rem; color: var(--red-bright); margin-bottom: 0.6rem; filter: drop-shadow(0 0 18px rgba(210, 45, 30, 0.4));">✕</div>
-        <h1 class="text-center">No Active <span class="accent">Membership</span></h1>
-        <p class="lede" style="margin: 0.5rem auto 1.5rem;">
-          No active membership found. This gift is for active 3M Trading members only. If you think this is a mistake, DM support in the Discord.
-        </p>
-        <button class="btn btn-ghost" id="btn-back-signin" style="max-width: 360px; margin: 0 auto; display: block;">&larr; Back to sign in (try a different account)</button>
-        <p class="footer-note" style="margin-top: 1.5rem;">
-          Questions? Reach out in the 3M Trading Discord support channel.
-        </p>
-      </div>
-    </section>
-
-    <!-- ========== SCREEN 3b: ALREADY CLAIMED ========== -->
+    <!-- ========== SCREEN 3: ALREADY CLAIMED ========== -->
     <section id="screen-already" class="screen">
       <div class="brand-row">
         <div class="brand">
@@ -1013,13 +984,6 @@
 // =============================================================================
 const WHOP_CLIENT_ID = "app_uA0OBcqHmdBC8m";
 const WHOP_REDIRECT_URI = "https://gifts.3mtrading.ca/";
-// Any of these 4 products = active member
-const WHOP_PRODUCT_IDS = [
-  "prod_eUA1e6aB3o0Fg",  // VIP Mentorship
-  "prod_wyFY1Vxi71uyB",  // Elite Member
-  "prod_HcZD3fcfRozcO",  // Early 3M Bot Access
-  "prod_VbFTraKdXaxTG"   // 3M Trading Lifetime
-];
 const CLAIM_API_URL = "PASTE_RAILWAY_URL_HERE"; // e.g. https://your-app.railway.app
 
 // =============================================================================
@@ -1212,38 +1176,7 @@ async function verifyMembership(token) {
       username: me.username || ""
     };
 
-    // 2. Get active memberships
-    const memResp = await fetch("https://api.whop.com/v5/me/memberships?status=active", {
-      headers: { "Authorization": "Bearer " + token }
-    });
-    if (!memResp.ok) {
-      console.error("GET /me/memberships failed:", memResp.status);
-      sessionStorage.removeItem(STORAGE_TOKEN_KEY);
-      showError("signin-error", "Couldn't check your membership. Please try again.");
-      showScreen("screen-signin");
-      return;
-    }
-    const memData = await memResp.json();
-    const memberships = Array.isArray(memData)
-      ? memData
-      : (memData.data || memData.memberships || memData.results || []);
-
-    let hasAccess = false;
-    if (WHOP_PRODUCT_IDS.length > 0) {
-      hasAccess = memberships.some(function (m) {
-        const pid = m && (m.product_id || m.product || (m.product && m.product.id));
-        return WHOP_PRODUCT_IDS.indexOf(pid) !== -1;
-      });
-    } else {
-      hasAccess = memberships.length > 0;
-    }
-
-    if (!hasAccess) {
-      showScreen("screen-no-access");
-      return;
-    }
-
-    // 3. Check double-claim
+    // 2. Check double-claim
     if (whopUser.email && alreadyClaimed(whopUser.email)) {
       showScreen("screen-already");
       return;
@@ -1269,13 +1202,6 @@ $("btn-signin").addEventListener("click", function () {
     return;
   }
   startOAuth();
-});
-
-$("btn-back-signin").addEventListener("click", function () {
-  sessionStorage.removeItem(STORAGE_TOKEN_KEY);
-  whopUser = null;
-  clearError("signin-error");
-  showScreen("screen-signin");
 });
 
 // =============================================================================
