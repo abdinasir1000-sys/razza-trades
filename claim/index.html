@@ -230,17 +230,15 @@
     transform-style: preserve-3d;
     animation: logoTumble 9s ease-in-out infinite;
   }
-  .brand-logo .logo-img-wrap img,
-  .brand-logo .logo-img-wrap svg {
+  .brand-logo .logo-img-wrap img {
     width: 100%; height: 100%;
     object-fit: contain;
     display: block;
+    background: transparent;
+    /* Knock out any dark background pixels against the dark page bg so
+       only the green logo glyphs remain visible. */
+    mix-blend-mode: screen;
   }
-  /* When the remote PNG fails to load (e.g. blocked region), we show the
-     SVG fallback by hiding the broken img and showing the SVG. */
-  .brand-logo .logo-fallback { display: none; }
-  .brand-logo[data-fallback="1"] .logo-img-wrap img { display: none; }
-  .brand-logo[data-fallback="1"] .logo-fallback { display: block; }
   @keyframes logoFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-4px); }
@@ -949,32 +947,7 @@
             <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb"
                  alt="3M Trading"
                  width="68" height="68"
-                 loading="eager"
-                 onerror="document.getElementById('brand-logo').dataset.fallback='1'" />
-            <!-- Chunky-pixel SVG fallback in the same green 3D style as the real logo,
-                 used if the remote image can't load -->
-            <svg class="logo-fallback" viewBox="0 0 68 68" aria-hidden="true">
-              <defs>
-                <linearGradient id="lf-bevel" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%"  stop-color="#a8e8a8"/>
-                  <stop offset="50%" stop-color="#1FA834"/>
-                  <stop offset="100%" stop-color="#0e6420"/>
-                </linearGradient>
-              </defs>
-              <!-- "3" -->
-              <path fill="url(#lf-bevel)" d="M6 10 h20 v6 h-14 v6 h12 v6 h-12 v6 h14 v6 H6 V40 h12 v-2 H6 v-6 h12 v-2 H6 z"/>
-              <!-- "M" -->
-              <path fill="url(#lf-bevel)" d="M34 10 h6 l5 10 l5 -10 h6 v36 h-6 V24 l-5 8 l-5 -8 v22 h-6 z"/>
-              <!-- "TRADING" small line -->
-              <g fill="#1FA834">
-                <rect x="6"  y="52" width="56" height="3"/>
-                <rect x="10" y="55" width="3"  height="6"/>
-                <rect x="20" y="55" width="3"  height="6"/>
-                <rect x="30" y="55" width="3"  height="6"/>
-                <rect x="40" y="55" width="3"  height="6"/>
-                <rect x="50" y="55" width="3"  height="6"/>
-              </g>
-            </svg>
+                 loading="eager" />
           </div>
           <span class="logo-beam"></span>
           <div class="logo-sparks" aria-hidden="true">
