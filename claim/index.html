@@ -984,7 +984,6 @@
 // =============================================================================
 const WHOP_CLIENT_ID = "app_uA0OBcqHmdBC8m";
 const WHOP_REDIRECT_URI = "https://gifts.3mtrading.ca/";
-const CLAIM_API_URL = "PASTE_RAILWAY_URL_HERE"; // e.g. https://your-app.railway.app
 
 // =============================================================================
 // HELPERS
@@ -1313,15 +1312,14 @@ $("btn-submit").addEventListener("click", function () {
 });
 
 function postToSheet(payload) {
-  if (!CLAIM_API_URL || CLAIM_API_URL.indexOf("PASTE_") === 0) return;
   try {
-    fetch(CLAIM_API_URL + "/claim", {
+    fetch("/api/submit-claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
   } catch (e) {
-    console.warn("Claim API failed:", e);
+    console.warn("Claim submit failed:", e);
   }
 }
 
