@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Claim Your Free 3M Gift | 3M Trading</title>
+<meta name="description" content="VIP member free 3M gift claim portal." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #050505;
+    --bg-card: rgba(15, 15, 17, 0.7);
+    --bg-card-2: rgba(20, 20, 22, 0.55);
+    --red: #D22D1E;
+    --red-bright: #F04030;
+    --red-dim: #A82318;
+    --red-deep: #8B1A1A;
+    --red-glow: rgba(210, 45, 30, 0.18);
+    --red-border: rgba(210, 45, 30, 0.35);
+    --gold: #E8B547;
+    --green: #7ECF7E;
+    --green-mid: #4A8050;
+    --green-dim: #3A6B3A;
+    --green-border: rgba(58, 107, 58, 0.4);
+    --text: #f5f5f3;
+    --text-mid: rgba(255, 255, 255, 0.7);
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --text-faint: rgba(255, 255, 255, 0.3);
+    --border: rgba(255, 255, 255, 0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body { position: relative; }
+
+  /* =========================================================
+     ANIMATED BACKGROUND LAYERS
+     ========================================================= */
+  .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  #bg-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.85; }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(210, 45, 30, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(210, 45, 30, 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 90%);
+    animation: gridPan 32s linear infinite;
+    z-index: 1;
+  }
+  @keyframes gridPan {
+    from { background-position: 0 0; }
+    to   { background-position: 56px 56px; }
+  }
+  .bg-orbs {
+    z-index: 2;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 20%, rgba(210, 45, 30, 0.18), transparent 60%),
+      radial-gradient(ellipse 500px 350px at 80% 75%, rgba(232, 181, 71, 0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 50% 100%, rgba(58, 107, 58, 0.10), transparent 70%);
+    animation: orbDrift 22s ease-in-out infinite alternate;
+  }
+  @keyframes orbDrift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(2vw, -1vh, 0) scale(1.05); }
+    100% { transform: translate3d(-1vw, 1vh, 0) scale(0.97); }
+  }
+  .bg-vignette {
+    z-index: 3;
+    background: radial-gradient(ellipse 110% 90% at 50% 50%, transparent 50%, var(--bg) 100%);
+  }
+  .bg-scan {
+    z-index: 4;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
+
+  /* =========================================================
+     TOP BAR
+     ========================================================= */
+  .topbar {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(90deg, var(--red-deep), #B22222, var(--red-deep));
+    background-size: 200% 100%;
+    color: white;
+    text-align: center;
+    padding: 0.55rem 1rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    animation: shimmerBar 6s linear infinite;
+  }
+  @keyframes shimmerBar {
+    from { background-position: 0 0; }
+    to   { background-position: 200% 0; }
+  }
+  .topbar .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: livePulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(255,255,255,0.9);
+    vertical-align: middle;
+  }
+  @keyframes livePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.35); opacity: 0.7; }
+  }
+
+  /* =========================================================
+     LAYOUT
+     ========================================================= */
+  a { color: inherit; text-decoration: none; }
+  button, input, select, textarea { font-family: inherit; font-size: inherit; }
+  input, select, textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--red);
+    background: rgba(210, 45, 30, 0.04);
+    box-shadow: 0 0 0 3px rgba(210, 45, 30, 0.15);
+  }
+  label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.45rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 600;
+  }
+
+  .container {
+    position: relative;
+    z-index: 10;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+
+  .brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; }
+  .brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    perspective: 400px;
+  }
+  .brand .accent {
+    background: linear-gradient(135deg, var(--red-bright), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    animation: tinyTilt 5s ease-in-out infinite;
+  }
+  @keyframes tinyTilt {
+    0%, 100% { transform: rotateY(0deg); }
+    50%      { transform: rotateY(15deg); }
+  }
+  .brand-meta {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .brand-meta::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--green);
+    animation: livePulse 2s ease-in-out infinite;
+  }
+
+  .pill {
+    display: inline-block;
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    border-radius: 100px;
+    padding: 0.32rem 0.95rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: #ff8a7a;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 0 24px rgba(210, 45, 30, 0.15);
+    animation: pillFloat 4s ease-in-out infinite;
+  }
+  @keyframes pillFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+    line-height: 1.05;
+    font-weight: 900;
+    margin-bottom: 0.95rem;
+    letter-spacing: -0.025em;
+  }
+  h1 .accent {
+    background: linear-gradient(120deg, var(--red-bright) 0%, #FF6B5C 30%, var(--gold) 60%, var(--red-bright) 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientSlide 6s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes gradientSlide {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--text-mid);
+    font-size: 1.05rem;
+    margin-bottom: 2.2rem;
+    line-height: 1.7;
+    max-width: 580px;
+  }
+
+  /* =========================================================
+     CARDS WITH 3D TILT
+     ========================================================= */
+  .card {
+    position: relative;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--red-border);
+    border-radius: 14px;
+    padding: 2.25rem 2.4rem;
+    margin-bottom: 1.5rem;
+    transform-style: preserve-3d;
+    transition: transform 0.18s ease-out, box-shadow 0.3s;
+    box-shadow:
+      0 30px 60px -30px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+      0 0 40px rgba(210, 45, 30, 0.06);
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 14px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 30%, rgba(210, 45, 30, 0.5) 50%, transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .card:hover::before { opacity: 1; }
+  .card-green { border-color: var(--green-border); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6), 0 0 50px rgba(126, 207, 126, 0.1); }
+  .card-quiet { border-color: var(--border); }
+
+  /* Shimmer accent line across card */
+  .card-shine {
+    position: absolute;
+    top: 0; left: -50%;
+    width: 50%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red-bright), transparent);
+    animation: shineMove 5s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shineMove {
+    0%   { left: -50%; }
+    100% { left: 100%; }
+  }
+
+  .field { margin-bottom: 1.3rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
+
+  /* =========================================================
+     BUTTONS
+     ========================================================= */
+  .btn {
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(135deg, var(--red-dim), var(--red-bright));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    overflow: hidden;
+    transition: transform 0.12s, box-shadow 0.25s, filter 0.2s;
+    box-shadow: 0 10px 30px -10px rgba(210, 45, 30, 0.6), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  }
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.55s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 18px 40px -10px rgba(210, 45, 30, 0.7), 0 0 0 1px rgba(255,255,255,0.1) inset; }
+  .btn:hover::after { transform: translateX(100%); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-green { background: linear-gradient(135deg, var(--green-dim), var(--green-mid)); box-shadow: 0 10px 30px -10px rgba(74, 128, 80, 0.6), 0 0 0 1px rgba(255,255,255,0.06) inset; }
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    box-shadow: none;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: var(--text-dim); color: var(--text); transform: translateY(-1px); box-shadow: none; }
+  .btn-ghost::after { display: none; }
+
+  /* =========================================================
+     ALERTS
+     ========================================================= */
+  .alert {
+    padding: 0.9rem 1.1rem;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    margin-bottom: 1.3rem;
+    display: none;
+    animation: alertIn 0.3s ease-out;
+  }
+  .alert.show { display: block; }
+  .alert-error { background: var(--red-glow); border: 1px solid var(--red-border); color: #ff8a7a; }
+  .alert-info { background: rgba(58, 107, 58, 0.12); border: 1px solid var(--green-border); color: var(--green); }
+  @keyframes alertIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* =========================================================
+     SUMMARY ROWS
+     ========================================================= */
+  .summary { background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.3rem 1.6rem; margin-bottom: 1.5rem; backdrop-filter: blur(6px); }
+  .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px solid var(--border); gap: 1rem; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); font-weight: 600; }
+  .summary-value { color: var(--text); font-weight: 500; text-align: right; max-width: 65%; word-break: break-word; }
+
+  /* =========================================================
+     GIFT CARD WITH 3D ICON
+     ========================================================= */
+  .gift-card {
+    display: flex; align-items: center; gap: 1.2rem;
+    background: linear-gradient(135deg, rgba(210, 45, 30, 0.06), rgba(232, 181, 71, 0.02));
+    border: 1px solid var(--red-border);
+    border-radius: 10px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .gift-card::before {
+    content: "";
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(232, 181, 71, 0.18), transparent 65%);
+    animation: orbDrift 8s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  .gift-stage {
+    position: relative;
+    width: 70px; height: 70px;
+    perspective: 600px;
+    flex-shrink: 0;
+  }
+  .gift-icon-3d {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem;
+    line-height: 1;
+    transform-style: preserve-3d;
+    animation: giftSpin 8s linear infinite;
+    filter: drop-shadow(0 6px 14px rgba(210, 45, 30, 0.4));
+    z-index: 2;
+  }
+  @keyframes giftSpin {
+    0%   { transform: rotateY(0deg) rotateX(10deg); }
+    50%  { transform: rotateY(180deg) rotateX(-10deg); }
+    100% { transform: rotateY(360deg) rotateX(10deg); }
+  }
+  .gift-stage::after {
+    content: "";
+    position: absolute;
+    bottom: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 60%; height: 8px;
+    background: radial-gradient(ellipse, rgba(210, 45, 30, 0.5), transparent 70%);
+    border-radius: 50%;
+    animation: shadowPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes shadowPulse {
+    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.6; }
+    50%      { transform: translateX(-50%) scaleX(0.75); opacity: 1; }
+  }
+  .gift-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; }
+  .gift-sub { font-size: 0.74rem; color: var(--text-dim); font-family: 'JetBrains Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; font-weight: 600; }
+
+  /* =========================================================
+     PRICE BLOCK
+     ========================================================= */
+  .price-block { text-align: center; padding: 2rem 0 0.8rem; position: relative; }
+  .price-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(210, 45, 30, 0.15), transparent 60%);
+    pointer-events: none;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.05); }
+  }
+  .price {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 3.4rem;
+    font-weight: 900;
+    background: linear-gradient(120deg, var(--red-bright), var(--gold), var(--red-bright));
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+    animation: gradientSlide 4s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+  }
+  .price-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; position: relative; z-index: 2; }
+
+  .checkbox-row { display: flex; gap: 0.75rem; align-items: flex-start; margin: 1.3rem 0; cursor: pointer; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; }
+  .checkbox-row:hover { border-color: var(--red-border); background: var(--red-glow); }
+  .checkbox-row input { width: auto; margin-top: 0.2rem; accent-color: var(--red); }
+  .checkbox-row span { font-size: 0.88rem; color: var(--text-mid); line-height: 1.55; }
+
+  /* =========================================================
+     STEP INDICATOR
+     ========================================================= */
+  .step-indicator { display: flex; gap: 0.55rem; margin-bottom: 2.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); flex-wrap: wrap; font-weight: 600; }
+  .step-indicator .step { padding: 0.42rem 0.85rem; border: 1px solid var(--border); border-radius: 100px; transition: all 0.25s; position: relative; }
+  .step-indicator .step.active { color: var(--red-bright); border-color: var(--red-border); background: var(--red-glow); box-shadow: 0 0 18px rgba(210, 45, 30, 0.2); }
+  .step-indicator .step.done { color: var(--green); border-color: var(--green-border); background: rgba(58, 107, 58, 0.08); }
+
+  .footer-note { color: var(--text-faint); font-size: 0.78rem; text-align: center; margin-top: 2rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; line-height: 1.7; }
+
+  /* =========================================================
+     SCREEN TRANSITIONS
+     ========================================================= */
+  .screen { display: none; }
+  .screen.active { display: block; animation: screenIn 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes screenIn {
+    0%   { opacity: 0; transform: translateY(24px) scale(0.985); filter: blur(8px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+  .screen.active > * { animation: itemIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .screen.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .screen.active > *:nth-child(2) { animation-delay: 0.12s; }
+  .screen.active > *:nth-child(3) { animation-delay: 0.18s; }
+  .screen.active > *:nth-child(4) { animation-delay: 0.24s; }
+  .screen.active > *:nth-child(5) { animation-delay: 0.30s; }
+  @keyframes itemIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .editable-toggle { font-size: 0.74rem; color: var(--red-bright); cursor: pointer; background: rgba(210, 45, 30, 0.08); border: 1px solid var(--red-border); padding: 0.4rem 0.7rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 100px; font-weight: 600; transition: all 0.2s; }
+  .editable-toggle:hover { background: var(--red); color: white; }
+
+  .button-row { display: flex; gap: 0.9rem; margin-top: 1.6rem; }
+  .button-row .btn { flex: 1; }
+
+  /* =========================================================
+     SUCCESS SCREEN
+     ========================================================= */
+  .success-check {
+    font-size: 0; text-align: center; margin: 0 auto 1rem;
+    width: 96px; height: 96px;
+    position: relative;
+  }
+  .success-check svg { width: 100%; height: 100%; }
+  .check-circle { stroke: var(--green); stroke-width: 3; fill: none; stroke-dasharray: 283; stroke-dashoffset: 283; animation: checkCircle 0.8s ease-out 0.1s forwards; filter: drop-shadow(0 0 18px rgba(126, 207, 126, 0.6)); }
+  .check-path { stroke: var(--green); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: checkPath 0.45s ease-out 0.9s forwards; }
+  @keyframes checkCircle { to { stroke-dashoffset: 0; } }
+  @keyframes checkPath { to { stroke-dashoffset: 0; } }
+
+  /* Confetti */
+  .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 100; }
+  .confetti i {
+    position: absolute;
+    width: 8px; height: 14px;
+    top: -20px;
+    opacity: 0;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(110vh) rotate(720deg); }
+  }
+
+  /* =========================================================
+     FLOATING ITEMS
+     ========================================================= */
+  .floaters { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .floaters span {
+    position: absolute;
+    font-size: 1.2rem;
+    opacity: 0.06;
+    animation: floatY 12s ease-in-out infinite;
+    filter: blur(0.5px);
+  }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-30px) rotate(15deg); }
+  }
+
+  /* =========================================================
+     UTILITIES
+     ========================================================= */
+  .text-center { text-align: center; }
+  .mb-0 { margin-bottom: 0; }
+  .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
+
+  /* Reduced motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ANIMATED BACKGROUND LAYERS -->
+  <canvas id="bg-canvas" class="bg-layer"></canvas>
+  <div class="bg-layer bg-grid"></div>
+  <div class="bg-layer bg-orbs"></div>
+  <div class="bg-layer bg-scan"></div>
+  <div class="bg-layer bg-vignette"></div>
+
+  <!-- Floating decorative gift icons -->
+  <div class="floaters" aria-hidden="true">
+    <span style="top:12%; left:8%;  animation-delay: 0s;">☕</span>
+    <span style="top:22%; left:88%; animation-delay: 2s;">📱</span>
+    <span style="top:55%; left:6%;  animation-delay: 4s;">🎨</span>
+    <span style="top:68%; left:92%; animation-delay: 1s;">☕</span>
+    <span style="top:85%; left:14%; animation-delay: 3s;">📱</span>
+    <span style="top:38%; left:94%; animation-delay: 5s;">🎁</span>
+  </div>
+
+  <div class="topbar">
+    <span class="dot"></span><strong>VIP MEMBERS ONLY</strong> &middot; Free 3M Gift Claim Portal &middot; LIVE
+  </div>
+
+  <div class="container">
+    <div class="brand-row">
+      <div class="brand">3M<span class="accent">.</span>TRADING</div>
+      <div class="brand-meta">CLAIM PORTAL &middot; ONLINE</div>
+    </div>
+
+    <!-- ========== SCREEN 1: VERIFY ========== -->
+    <section id="screen-verify" class="screen active">
+      <span class="pill">▲ VIP REWARD UNLOCKED</span>
+      <h1>Claim Your <span class="accent">Free 3M</span> Gift</h1>
+      <p class="lede">
+        As promised, every VIP member gets a free 3M reward. Verify with the email and zip/postal code you used on the original form to confirm and ship your gift.
+      </p>
+
+      <div class="step-indicator">
+        <span class="step active">01 &middot; Verify</span>
+        <span class="step">02 &middot; Confirm</span>
+        <span class="step">03 &middot; Ship payment</span>
+      </div>
+
+      <div class="card" data-tilt>
+        <span class="card-shine"></span>
+        <div id="verify-error" class="alert alert-error"></div>
+        <div class="field">
+          <label for="v-email">Your email</label>
+          <input type="email" id="v-email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="v-zip">Zip / postal code</label>
+          <input type="text" id="v-zip" placeholder="from your original form submission" autocomplete="postal-code" />
+        </div>
+        <button class="btn" id="btn-verify">Verify &amp; Continue &rarr;</button>
+      </div>
+
+      <p class="footer-note">
+        Only members who filled out the original 3M Free Gift Form can claim.<br />
+        Lost access? DM your Discord support contact.
+      </p>
+    </section>
+
+    <!-- ========== SCREEN 2: CONFIRM ========== -->
+    <section id="screen-confirm" class="screen">
+      <span class="pill">▲ Step 02 of 03</span>
+      <h1>Confirm Your <span class="accent">Order</span></h1>
+      <p class="lede">Review what you submitted on the original form. Edit anything that needs updating, then confirm to move on to shipping payment.</p>
+
+      <div class="step-indicator">
+        <span class="step done">✓ Verify</span>
+        <span class="step active">02 &middot; Confirm</span>
+        <span class="step">03 &middot; Ship payment</span>
+      </div>
+
+      <div class="card" data-tilt>
+        <span class="card-shine"></span>
+        <div class="gift-card">
+          <div class="gift-stage">
+            <div class="gift-icon-3d" id="confirm-gift-icon">☕</div>
+          </div>
+          <div style="flex:1;">
+            <div class="gift-name" id="confirm-gift-name">3M Coffee Mug</div>
+            <div class="gift-sub">Your selected free gift</div>
+          </div>
+          <button type="button" class="editable-toggle" id="toggle-gift">Change</button>
+        </div>
+
+        <div class="field" id="gift-edit" style="display: none;">
+          <label for="e-gift">Gift selection</label>
+          <select id="e-gift">
+            <option value="3M Coffee Mug">☕ 3M Coffee Mug</option>
+            <option value="3M Sticker Packet">🎨 3M Sticker Packet</option>
+            <option value="3M Phone Case">📱 3M Phone Case</option>
+          </select>
+        </div>
+
+        <h2 style="margin-top: 1.5rem; margin-bottom: 1.1rem; font-size: 1.2rem;">Shipping details</h2>
+
+        <div class="field">
+          <label for="e-name">Recipient name</label>
+          <input type="text" id="e-name" />
+        </div>
+        <div class="field">
+          <label for="e-address1">Address line 1</label>
+          <input type="text" id="e-address1" />
+        </div>
+        <div class="field">
+          <label for="e-address2">Address line 2 <span style="text-transform:none;">(optional)</span></label>
+          <input type="text" id="e-address2" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="e-city">City</label>
+            <input type="text" id="e-city" />
+          </div>
+          <div class="field">
+            <label for="e-state">State / Region</label>
+            <input type="text" id="e-state" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="e-zip">Zip / Postal</label>
+            <input type="text" id="e-zip" />
+          </div>
+          <div class="field">
+            <label for="e-country">Country</label>
+            <input type="text" id="e-country" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="e-phone">Phone (for delivery)</label>
+          <input type="tel" id="e-phone" />
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="e-ackship" />
+          <span>I understand that <strong>3M Trading covers the cost of the gift</strong>, and that <strong>I am responsible for the cost of shipping</strong> to my address.</span>
+        </label>
+
+        <div class="button-row">
+          <button class="btn btn-ghost" id="btn-back-verify">&larr; Back</button>
+          <button class="btn" id="btn-confirm">Confirm &amp; Continue &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCREEN 3: PAY SHIPPING ========== -->
+    <section id="screen-pay" class="screen">
+      <span class="pill">▲ Step 03 of 03</span>
+      <h1>Pay <span class="accent">Shipping</span></h1>
+      <p class="lede">Your gift is covered &mdash; you just cover shipping. Click below to complete payment through our secure checkout. Your claim is locked in once payment goes through.</p>
+
+      <div class="step-indicator">
+        <span class="step done">✓ Verify</span>
+        <span class="step done">✓ Confirm</span>
+        <span class="step active">03 &middot; Ship payment</span>
+      </div>
+
+      <div class="card" data-tilt>
+        <span class="card-shine"></span>
+        <div class="gift-card">
+          <div class="gift-stage">
+            <div class="gift-icon-3d" id="pay-gift-icon">☕</div>
+          </div>
+          <div style="flex:1;">
+            <div class="gift-name" id="pay-gift-name">3M Coffee Mug</div>
+            <div class="gift-sub" id="pay-gift-ship-to">Shipping to —</div>
+          </div>
+        </div>
+
+        <div class="price-block">
+          <div class="price" id="pay-price">$0.00</div>
+          <div class="price-sub" id="pay-price-sub">Shipping cost &middot; one-time</div>
+        </div>
+
+        <div id="pay-alert" class="alert alert-info" style="margin-top: 1.5rem;">
+          Payment link for your region is being finalized. Please check back shortly or DM support on Discord.
+        </div>
+
+        <a class="btn" id="btn-pay" target="_blank" rel="noopener" style="text-align:center; text-decoration:none; margin-top: 1.5rem;">🔒 Pay Shipping Securely &rarr;</a>
+
+        <button class="btn btn-ghost" id="btn-already-paid" style="margin-top: 0.85rem;">I&#39;ve completed payment</button>
+
+        <p class="footer-note" style="margin-top: 1.5rem;">Secure checkout via Stripe. Your card details never touch our servers.</p>
+      </div>
+
+      <div class="text-center">
+        <button class="btn btn-ghost" id="btn-back-confirm" style="max-width: 240px; display: inline-block; width: auto;">&larr; Back to order</button>
+      </div>
+    </section>
+
+    <!-- ========== SCREEN 4: SUCCESS ========== -->
+    <section id="screen-success" class="screen">
+      <div class="card card-green text-center">
+        <span class="card-shine" style="background: linear-gradient(90deg, transparent, var(--green), transparent);"></span>
+        <div class="success-check" aria-hidden="true">
+          <svg viewBox="0 0 100 100">
+            <circle class="check-circle" cx="50" cy="50" r="45"></circle>
+            <polyline class="check-path" points="28,52 44,68 74,36"></polyline>
+          </svg>
+        </div>
+        <h1 class="text-center"><span class="accent" style="background: linear-gradient(120deg, var(--green), #B8F0B8); -webkit-background-clip: text; background-clip: text;">You're Locked In</span></h1>
+        <p class="lede" style="margin: 0.5rem auto 2rem;">
+          Your claim is confirmed. We'll process your order and ship to the address on file. You'll get tracking info via email and Discord DM once it goes out.
+        </p>
+
+        <div class="summary" style="text-align: left;">
+          <div class="summary-row">
+            <span class="summary-label">Gift</span>
+            <span class="summary-value" id="success-gift">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Shipping to</span>
+            <span class="summary-value" id="success-name">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Address</span>
+            <span class="summary-value" id="success-address">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Claim ID</span>
+            <span class="summary-value" id="success-id" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--gold);">—</span>
+          </div>
+        </div>
+
+        <p class="footer-note" style="margin-top: 1.5rem;">
+          Keep an eye on your email or Discord DMs for shipping updates.<br />
+          Questions? Reach out in the 3M Trading Discord.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== ALREADY CLAIMED ========== -->
+    <section id="screen-already" class="screen">
+      <div class="card card-quiet text-center">
+        <div style="font-size: 3.5rem; color: var(--text-faint); margin-bottom: 0.6rem; animation: pillFloat 3s ease-in-out infinite;">ⓘ</div>
+        <h1 class="text-center">Already Claimed</h1>
+        <p class="lede" style="margin: 0.5rem auto 1.5rem;">This account has already submitted a claim. If you need to update your shipping info or there&rsquo;s an issue, reach out in the 3M Trading Discord support channel.</p>
+        <button class="btn btn-ghost" id="btn-clear-claim" style="max-width: 320px; margin: 0 auto; display: block;">Start over (admin)</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script>
+"use strict";
+
+// =============================================================================
+// CONFIG — EDIT THESE THREE BLOCKS WHEN DEPLOYING
+// =============================================================================
+
+// 1) Paste your Google Apps Script Web App URL here (see APPSSCRIPT.gs).
+//    Used to log every confirmed claim to a Google Sheet.
+const GOOGLE_SHEETS_WEBHOOK_URL = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+// 2) Stripe payment links per region per gift.
+//    Create 6 payment links in your Stripe dashboard (US/INTL x 3 gifts)
+//    and paste each URL here. Until you do, the page shows a friendly
+//    "payment link being finalized" message instead.
+const PAYMENT_LINKS = {
+  US: {
+    "3M Coffee Mug":     "",
+    "3M Sticker Packet": "",
+    "3M Phone Case":     ""
+  },
+  INTL: {
+    "3M Coffee Mug":     "",
+    "3M Sticker Packet": "",
+    "3M Phone Case":     ""
+  }
+};
+
+// 3) Shipping prices shown to the customer (for display).
+//    Match these to your Stripe payment-link amounts.
+const SHIPPING_PRICES_USD = {
+  US:   { "3M Coffee Mug": 8,  "3M Sticker Packet": 5,  "3M Phone Case": 8 },
+  INTL: { "3M Coffee Mug": 25, "3M Sticker Packet": 10, "3M Phone Case": 25 }
+};
+
+// =============================================================================
+// WHITELIST — embedded from the original Google Form CSV (39 entries)
+// =============================================================================
+const WHITELIST = [{"email":"official.wound@gmail.com","zip":"90240","name":"Mikael Kurtti","discord":"wound","gift":"3M Coffee Mug","address1":"Sarvivälkkeentie 2 C 26","address2":"","city":"Oulu","state":"Pohjois-Pohjanmaa","country":"Finland","region":"INTL","phone":"+358465222951"},{"email":"kminaa2012@gmail.com","zip":"T5Y 0C5","name":"Keanu Mina-Aguillon","discord":"keanureeves_","gift":"3M Coffee Mug","address1":"#308-309 clareview station drive NW","address2":"buzz 349","city":"Edmonton","state":"Alberta","country":"Canada","region":"INTL","phone":"7807181607"},{"email":"playergrendak@gmail.com","zip":"763 62","name":"Jiri Ruman","discord":"grend_.","gift":"3M Coffee Mug","address1":"Bedricha Smetany, 663","address2":"","city":"Tlumacov","state":"Zlinsky kraj","country":"Czechia","region":"INTL","phone":"+420604573678"},{"email":"exaanseyy@gmail.com","zip":"70360","name":"José Villarreal","discord":"DeeK","gift":"3M Coffee Mug","address1":"47 Cobblestone E","address2":"","city":"Houma","state":"Louisiana","country":"United States","region":"US","phone":"6022995246"},{"email":"zepedajmb2834@gmail.com","zip":"48026","name":"Brayan zepeda","discord":"Lil_Tama420","gift":"3M Phone Case","address1":"31151 Kelly Rd","address2":"","city":"Fraser","state":"MI","country":"Estados Unidos","region":"US","phone":"5862920716"},{"email":"lukedrimmel@gmail.com","zip":"32308","name":"luke drimmel","discord":"bigchungas6767_","gift":"3M Coffee Mug","address1":"805 Miccosukee road","address2":"B","city":"tallahassee","state":"florida","country":"US","region":"US","phone":"8505452142"},{"email":"jpospisil03@gmail.com","zip":"628 00","name":"Jiří Pospíšil","discord":"ZapteriX","gift":"3M Coffee Mug","address1":"Houbalova 9/2090","address2":"","city":"Brno","state":"Jihomoravský kraj","country":"Czechia","region":"INTL","phone":"773178029"},{"email":"danielpernat10@gmail.com","zip":"52210","name":"Daniel Pernat","discord":"daniel","gift":"3M Phone Case","address1":"Obala palih Boraca 1","address2":"","city":"Rovinj","state":"Istra","country":"Croatia","region":"INTL","phone":"0989844710"},{"email":"jerog151@gmail.com","zip":"10305","name":"Jehycoth Romero Gullock","discord":"onlaggy","gift":"3M Coffee Mug","address1":"San Antonio, Desamparados, Urb Las Rotondas 3 - 150m este 150m norte del Ekono de San Antonio","address2":"","city":"Desamparados","state":"San Jose","country":"Costa Rica","region":"INTL","phone":"+506 83148071"},{"email":"rubiano97.nr@gmail.com","zip":"H7C 1Z4","name":"Nico Rubiano","discord":"NIXO","gift":"3M Coffee Mug","address1":"1089 rue Naud","address2":"","city":"Laval","state":"Quebec","country":"Canada","region":"INTL","phone":"5147088185"},{"email":"zekekozart@gmail.com","zip":"23970","name":"Zeke Kozart","discord":"Paidvillain","gift":"3M Sticker Packet","address1":"606 Windsor St","address2":"","city":"South Hill","state":"VA","country":"United States","region":"US","phone":"4342653749"},{"email":"yousefmesh2003@gmail.com","zip":"T6V1L3","name":"Yousif Al Mishhedani","discord":"Yousefmesh","gift":"3M Phone Case","address1":"111 Cote Crescent","address2":"","city":"Edmonton","state":"Alberta","country":"Canada","region":"INTL","phone":"7807229504"},{"email":"kartergurke10@gmail.com","zip":"R0H0R0","name":"Karter Gurke","discord":"_kman.","gift":"3M Coffee Mug","address1":"27 Hampton St E Box 837","address2":"","city":"MacGregor","state":"Manitoba","country":"Canada","region":"INTL","phone":"2048723473"},{"email":"dimi4510@gmail.com","zip":"09150","name":"Dmitry Kutyrev","discord":"dimi4510","gift":"3M Phone Case","address1":"C/ San Anton, 7","address2":"","city":"Santibañez-Zarzaguda","state":"Burgos","country":"Spain","region":"INTL","phone":"+34605607720"},{"email":"mickhelralph@gmail.com","zip":"101101","name":"Mickhel Ralph","discord":"iamloadfx","gift":"3M Coffee Mug","address1":"Petit Valley Simeon Road Sparrow Drive","address2":"","city":"Port of Spain","state":"Petit Valley","country":"Trinidad","region":"INTL","phone":"18682952432"},{"email":"braydenclements@gmail.com","zip":"93257","name":"","discord":"cantbekaos","gift":"3M Coffee Mug","address1":"859 W Mulberry Ave","address2":"","city":"Porterville","state":"California","country":"United States","region":"US","phone":"(+1)559-359-9078"},{"email":"brandonherrera655@gmail.com","zip":"85020","name":"Brandon Herrera","discord":"TimmyTheFish711","gift":"3M Coffee Mug","address1":"7810 n 14 st apt 2019","address2":"","city":"Phoenix","state":"AZ","country":"United States","region":"US","phone":"6024711422"},{"email":"untalanuziel@gmail.com","zip":"28029","name":"Uziel Sabadi","discord":"Uzi","gift":"3M Coffee Mug","address1":"Calle de los Cedros 69 2 Izq","address2":"Madrid","city":"Madrid","state":"Madrid","country":"Spain","region":"INTL","phone":"+34 635 025 343"},{"email":"gamertagbeast35@gmail.com","zip":"67859","name":"Arturo Carrillo","discord":"7_weenusss","gift":"3M Phone Case","address1":"19800 Panhandle rd","address2":"","city":"Kismet","state":"KS","country":"United States","region":"US","phone":"6206216435"},{"email":"cjmartinez2448@gmail.com","zip":"91762","name":"Christian Martinez","discord":"cmar2448","gift":"3M Phone Case","address1":"911 W 5th Street","address2":"","city":"Ontario","state":"CA","country":"United States","region":"US","phone":"9097302053"},{"email":"ugsmusicofficial@gmail.com","zip":"87507","name":"Christophur Montano-Payne","discord":"@docapotheca","gift":"3M Sticker Packet","address1":"4650 Airport Rd #186","address2":"","city":"Santa Fe","state":"New Mexico","country":"United States Of America (USA)","region":"US","phone":"1-505-487-6436"},{"email":"sajidiqbal475@gmail.com","zip":"T3J 4Z2","name":"Sajid iqbal","discord":"rraggyy","gift":"3M Coffee Mug","address1":"99 Martha’s meadow close","address2":"","city":"Calgary","state":"AB","country":"Canada","region":"INTL","phone":"5877007372"},{"email":"walkertevans115@gmail.com","zip":"L0r1W0","name":"walker","discord":"hurkpal","gift":"3M Coffee Mug","address1":"77 provident way","address2":"","city":"Hamilton","state":"Ontario","country":"Canada","region":"INTL","phone":"2897750870"},{"email":"elishasalinas14@gmail.com","zip":"76111","name":"Eli Salinas","discord":"_stpofficial","gift":"3M Phone Case","address1":"2313 N Chandler Dr E","address2":"","city":"Fort Worth","state":"TX","country":"United States","region":"US","phone":"6822792173"},{"email":"alex97tv@hotmail.com","zip":"J5Y 3P4","name":"Alexis Nguyen Roy","discord":"Frosted","gift":"3M Coffee Mug","address1":"229 Calixa Lavallee","address2":"","city":"Repentigny","state":"QC","country":"Canada","region":"INTL","phone":"5145893593"},{"email":"cwood11144@gmail.com","zip":"3224","name":"Chris wood","discord":"CdubZ","gift":"3M Coffee Mug","address1":"10 Wiggs rd","address2":"","city":"Moolap","state":"VIC","country":"Australia","region":"INTL","phone":"0437677998"},{"email":"altenburgmaksym@gmail.com","zip":"70190","name":"Maksym Eeltsje Altenburg","discord":"Maksyyyyyyyym","gift":"3M Coffee Mug","address1":"Klotzstraße 17","address2":"","city":"Stuttgart","state":"Baden Württemberg","country":"Deutschland","region":"INTL","phone":"015224417972"},{"email":"thegreatduck55@gmail.com","zip":"T3A5S8","name":"daivik khullar","discord":"dktradez.","gift":"3M Coffee Mug","address1":"55 hidden mews NW","address2":"","city":"calgary","state":"Alberta","country":"Canada","region":"INTL","phone":"6047917865"},{"email":"marielkeys8@gmail.com","zip":"50220","name":"Marko Ortiz","discord":"Marko","gift":"3M Phone Case","address1":"2907 WARFORD ST APT 8","address2":"","city":"PERRY","state":"Iowa","country":"United States","region":"US","phone":"5152293404"},{"email":"oli.mayer@t-online.de","zip":"86316","name":"Olivér Mayer","discord":"oliiii0345","gift":"3M Sticker Packet","address1":"Blattenweg 18","address2":"","city":"Friedberg","state":"Bayern","country":"Germany","region":"INTL","phone":"16094466238"},{"email":"businessherrera17@gmail.com","zip":"60651","name":"Francisco Herrera","discord":"BUSINESSHERRERA17","gift":"3M Phone Case","address1":"924 N Leamington Ave","address2":"","city":"Chicago","state":"Illinois","country":"United States","region":"US","phone":"7736796580"},{"email":"efraincasango1@gmail.com","zip":"29621","name":"Efrain Casango","discord":"Mex_ex","gift":"3M Phone Case","address1":"624 E orr st anderson sc 29621","address2":"","city":"Anderson","state":"Sc","country":"United States","region":"US","phone":"8646344739"},{"email":"jasserc47@gmail.com","zip":"T3N1R4","name":"Jasser Cruz","discord":"Herofox44","gift":"3M Phone Case","address1":"40 cornerstone crescent NE","address2":"iPhone 17 pro max","city":"Calgary","state":"Alberta","country":"Canada","region":"INTL","phone":"8254884581"},{"email":"mohdshad024@gmail.com","zip":"0000","name":"Muhammed Shad","discord":"","gift":"3M Coffee Mug","address1":"105, Rami residence-1","address2":"Liwan-2, Dubai,UAE","city":"Dubai","state":"Dubai","country":"United Arab Emirates","region":"INTL","phone":"+971 52 113 4716"},{"email":"ediidris2003@gmail.com","zip":"M4H 1C9","name":"Idris Ali Idris","discord":"iidris1","gift":"3M Phone Case","address1":"6 Milepost Place","address2":"Apt 607","city":"Toronto","state":"ON","country":"Canada","region":"INTL","phone":"4374381812"},{"email":"jayromaldonado2007@gmail.com","zip":"11550","name":"Jayro Maldonado","discord":"Saintss6473","gift":"3M Phone Case","address1":"55 Mason Street","address2":"","city":"Hempstead","state":"NY","country":"United States","region":"US","phone":"5164263247"},{"email":"999iamonds@gmail.com","zip":"80537","name":"Jordan Gutierrez-Andrews","discord":"Sillygoose0800(Death Enclaimed","gift":"3M Coffee Mug","address1":"457 Lapis pl","address2":"","city":"Loveland","state":"Colorado","country":"USA","region":"US","phone":"9706891466"},{"email":"isaachamilton756@gmail.com","zip":"Y0A1B0","name":"Isaac Hamilton","discord":"isaac_669","gift":"3M Sticker Packet","address1":"General Delivery, Teslin YT","address2":"","city":"Teslin","state":"Yukon","country":"Canada","region":"INTL","phone":"2363306144"},{"email":"tyasiacandy23@gmail.com","zip":"29445","name":"Trinity Turner","discord":"trin022.","gift":"3M Phone Case","address1":"2302 Etiwan dr","address2":"","city":"Goose creek","state":"SC","country":"United States","region":"US","phone":"8435138825"}];
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+const $ = (id) => document.getElementById(id);
+const normZip = (z) => (z || "").toString().toUpperCase().replace(/\s+/g, "").trim();
+const normEmail = (e) => (e || "").toString().toLowerCase().trim();
+const GIFT_ICONS = { "3M Coffee Mug": "☕", "3M Sticker Packet": "🎨", "3M Phone Case": "📱" };
+
+let currentRecord = null;
+let claimId = null;
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showError(elId, msg) {
+  const el = $(elId);
+  el.textContent = msg;
+  el.classList.add("show");
+}
+function clearError(elId) { $(elId).classList.remove("show"); }
+
+function findMatch(email, zip) {
+  const e = normEmail(email);
+  const z = normZip(zip);
+  return WHITELIST.find((r) => normEmail(r.email) === e && normZip(r.zip) === z) || null;
+}
+
+function generateClaimId() {
+  return "3M-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+function alreadyClaimed(email) {
+  try {
+    const log = JSON.parse(localStorage.getItem("3m_claims") || "{}");
+    return log[normEmail(email)] || null;
+  } catch (e) { return null; }
+}
+function markClaimed(email, id) {
+  try {
+    const log = JSON.parse(localStorage.getItem("3m_claims") || "{}");
+    log[normEmail(email)] = { id, at: new Date().toISOString() };
+    localStorage.setItem("3m_claims", JSON.stringify(log));
+  } catch (e) {}
+}
+
+// =============================================================================
+// SCREEN 1: VERIFY
+// =============================================================================
+$("btn-verify").addEventListener("click", () => {
+  clearError("verify-error");
+  const email = $("v-email").value;
+  const zip = $("v-zip").value;
+  if (!email || !zip) {
+    showError("verify-error", "Please enter both your email and zip/postal code.");
+    return;
+  }
+  const match = findMatch(email, zip);
+  if (!match) {
+    showError("verify-error", "We couldn’t find that combination. Use the exact email and zip from your original 3M Free Gift Form submission. If you’re stuck, DM support on Discord.");
+    return;
+  }
+  const prior = alreadyClaimed(email);
+  if (prior) {
+    currentRecord = Object.assign({}, match);
+    claimId = prior.id;
+    showScreen("screen-already");
+    return;
+  }
+  currentRecord = Object.assign({}, match);
+  hydrateConfirmScreen();
+  showScreen("screen-confirm");
+});
+
+["v-email", "v-zip"].forEach((id) => {
+  $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") $("btn-verify").click(); });
+});
+
+// =============================================================================
+// SCREEN 2: CONFIRM
+// =============================================================================
+function hydrateConfirmScreen() {
+  const r = currentRecord;
+  $("confirm-gift-icon").textContent = GIFT_ICONS[r.gift] || "🎁";
+  $("confirm-gift-name").textContent = r.gift;
+  $("e-gift").value = r.gift;
+  $("e-name").value = r.name;
+  $("e-address1").value = r.address1;
+  $("e-address2").value = r.address2;
+  $("e-city").value = r.city;
+  $("e-state").value = r.state;
+  $("e-zip").value = r.zip;
+  $("e-country").value = r.country;
+  $("e-phone").value = r.phone;
+  $("e-ackship").checked = false;
+}
+
+$("toggle-gift").addEventListener("click", () => {
+  const edit = $("gift-edit");
+  const isOpen = edit.style.display !== "none";
+  edit.style.display = isOpen ? "none" : "block";
+  $("toggle-gift").textContent = isOpen ? "Change" : "Hide";
+});
+
+$("e-gift").addEventListener("change", () => {
+  const g = $("e-gift").value;
+  $("confirm-gift-icon").textContent = GIFT_ICONS[g] || "🎁";
+  $("confirm-gift-name").textContent = g;
+});
+
+$("btn-back-verify").addEventListener("click", () => showScreen("screen-verify"));
+
+$("btn-confirm").addEventListener("click", () => {
+  if (!$("e-ackship").checked) {
+    alert("Please acknowledge that you are responsible for shipping costs before continuing.");
+    return;
+  }
+  currentRecord.gift = $("e-gift").value;
+  currentRecord.name = $("e-name").value.trim();
+  currentRecord.address1 = $("e-address1").value.trim();
+  currentRecord.address2 = $("e-address2").value.trim();
+  currentRecord.city = $("e-city").value.trim();
+  currentRecord.state = $("e-state").value.trim();
+  currentRecord.zip = $("e-zip").value.trim();
+  currentRecord.country = $("e-country").value.trim();
+  currentRecord.phone = $("e-phone").value.trim();
+  if (!currentRecord.name || !currentRecord.address1 || !currentRecord.city || !currentRecord.zip || !currentRecord.country) {
+    alert("Please fill in all required shipping fields (name, address, city, zip, country).");
+    return;
+  }
+  claimId = claimId || generateClaimId();
+  hydratePayScreen();
+  showScreen("screen-pay");
+});
+
+// =============================================================================
+// SCREEN 3: PAY SHIPPING
+// =============================================================================
+function animatePrice(el, targetAmount) {
+  if (typeof targetAmount !== "number") { el.textContent = "$—"; return; }
+  const dur = 800;
+  const start = performance.now();
+  function tick(t) {
+    const p = Math.min(1, (t - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const v = (targetAmount * eased);
+    el.textContent = "$" + v.toFixed(2);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function hydratePayScreen() {
+  const r = currentRecord;
+  $("pay-gift-icon").textContent = GIFT_ICONS[r.gift] || "🎁";
+  $("pay-gift-name").textContent = r.gift;
+  $("pay-gift-ship-to").textContent = "Shipping to " + (r.city || "") + ", " + (r.country || "");
+
+  const price = (SHIPPING_PRICES_USD[r.region] || {})[r.gift];
+  animatePrice($("pay-price"), typeof price === "number" ? price : null);
+  $("pay-price-sub").textContent = (r.region === "US" ? "U.S. shipping" : "International shipping") + " · one-time";
+
+  const link = (PAYMENT_LINKS[r.region] || {})[r.gift];
+  const payBtn = $("btn-pay");
+  const alertEl = $("pay-alert");
+  if (link && /^https?:\/\//i.test(link)) {
+    payBtn.href = link;
+    payBtn.style.display = "block";
+    alertEl.classList.remove("show");
+  } else {
+    payBtn.removeAttribute("href");
+    payBtn.style.display = "none";
+    alertEl.classList.add("show");
+  }
+}
+
+$("btn-back-confirm").addEventListener("click", () => showScreen("screen-confirm"));
+
+$("btn-pay").addEventListener("click", (e) => {
+  if (!$("btn-pay").href) { e.preventDefault(); return; }
+  logClaim("payment-initiated");
+});
+
+$("btn-already-paid").addEventListener("click", () => {
+  logClaim("payment-self-confirmed");
+  hydrateSuccessScreen();
+  showScreen("screen-success");
+  setTimeout(fireConfetti, 200);
+});
+
+// =============================================================================
+// SCREEN 4: SUCCESS
+// =============================================================================
+function hydrateSuccessScreen() {
+  const r = currentRecord;
+  $("success-gift").textContent = r.gift;
+  $("success-name").textContent = r.name;
+  const addr = [r.address1, r.address2, r.city, r.state, r.zip, r.country].filter(Boolean).join(", ");
+  $("success-address").textContent = addr;
+  $("success-id").textContent = claimId;
+  markClaimed(r.email, claimId);
+}
+
+$("btn-clear-claim").addEventListener("click", () => {
+  if (confirm("Clear local claim record? (admin tool, use only if you need to re-submit)")) {
+    localStorage.removeItem("3m_claims");
+    location.reload();
+  }
+});
+
+function fireConfetti() {
+  const root = $("confetti");
+  root.innerHTML = "";
+  const colors = ["#D22D1E", "#F04030", "#E8B547", "#7ECF7E", "#ffffff"];
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement("i");
+    const col = colors[Math.floor(Math.random() * colors.length)];
+    c.style.background = col;
+    c.style.left = (Math.random() * 100) + "vw";
+    c.style.width = (5 + Math.random() * 7) + "px";
+    c.style.height = (10 + Math.random() * 12) + "px";
+    c.style.animationDuration = (2.5 + Math.random() * 2.5) + "s";
+    c.style.animationDelay = (Math.random() * 0.5) + "s";
+    c.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+    root.appendChild(c);
+  }
+  setTimeout(() => { root.innerHTML = ""; }, 6000);
+}
+
+// =============================================================================
+// LOG CLAIM TO GOOGLE SHEET (fire-and-forget)
+// =============================================================================
+function logClaim(status) {
+  if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.indexOf("PASTE_") === 0) return;
+  const r = currentRecord;
+  const payload = {
+    claim_id: claimId,
+    submitted_at: new Date().toISOString(),
+    status: status,
+    email: r.email,
+    discord: r.discord,
+    name: r.name,
+    gift: r.gift,
+    region: r.region,
+    address1: r.address1,
+    address2: r.address2,
+    city: r.city,
+    state: r.state,
+    zip: r.zip,
+    country: r.country,
+    phone: r.phone,
+    shipping_price_usd: (SHIPPING_PRICES_USD[r.region] || {})[r.gift] || ""
+  };
+  try {
+    fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {}
+}
+
+// =============================================================================
+// 3D CARD TILT (mouse-tracking parallax)
+// =============================================================================
+(function () {
+  const isCoarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  if (isCoarse) return;
+  document.querySelectorAll("[data-tilt]").forEach((card) => {
+    let raf = null;
+    function onMove(e) {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width  - 0.5;
+      const y = (e.clientY - rect.top)  / rect.height - 0.5;
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        card.style.transform =
+          "perspective(1100px) rotateX(" + (-y * 5).toFixed(2) +
+          "deg) rotateY(" + (x * 6).toFixed(2) + "deg) translateZ(0)";
+      });
+    }
+    function onLeave() {
+      if (raf) cancelAnimationFrame(raf);
+      card.style.transform = "perspective(1100px) rotateX(0) rotateY(0)";
+    }
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseleave", onLeave);
+  });
+})();
+
+// =============================================================================
+// PARTICLE STARFIELD CANVAS BACKGROUND
+// =============================================================================
+(function () {
+  const cv = document.getElementById("bg-canvas");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let particles = [];
+  let mx = 0.5, my = 0.5;
+
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+  }
+  function seed() {
+    const target = Math.min(110, Math.floor((W * H) / 14000));
+    particles = [];
+    for (let i = 0; i < target; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        z: 0.3 + Math.random() * 0.7,           // depth
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        r: 0.7 + Math.random() * 1.5,
+        hue: Math.random() < 0.18 ? 14 : 0,     // a few warm dots
+        twk: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    // subtle radial vignette
+    const grad = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, Math.max(W, H) * 0.7);
+    grad.addColorStop(0, "rgba(20, 5, 5, 0.0)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+    const ox = (mx - 0.5) * 12, oy = (my - 0.5) * 12;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.twk += 0.04;
+      if (p.x < -10) p.x = W + 10; else if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10; else if (p.y > H + 10) p.y = -10;
+      const alpha = (0.35 + 0.4 * Math.sin(p.twk)) * p.z;
+      const px = p.x + ox * p.z;
+      const py = p.y + oy * p.z;
+      ctx.beginPath();
+      if (p.hue === 14) {
+        ctx.fillStyle = "rgba(232, 90, 70," + alpha + ")";
+        ctx.shadowBlur = 8; ctx.shadowColor = "rgba(210,45,30,0.7)";
+      } else {
+        ctx.fillStyle = "rgba(255,255,255," + (alpha * 0.55) + ")";
+        ctx.shadowBlur = 0;
+      }
+      ctx.arc(px, py, p.r * p.z, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // soft constellation lines between close-by particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d = dx * dx + dy * dy;
+        if (d < 10000) {
+          const op = (1 - d / 10000) * 0.08;
+          ctx.strokeStyle = "rgba(210, 45, 30," + op + ")";
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x + ox * a.z, a.y + oy * a.z);
+          ctx.lineTo(b.x + ox * b.z, b.y + oy * b.z);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("mousemove", (e) => {
+    mx = e.clientX / window.innerWidth;
+    my = e.clientY / window.innerHeight;
+  });
+  window.addEventListener("resize", resize, { passive: true });
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
