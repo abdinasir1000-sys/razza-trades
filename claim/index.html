@@ -1376,6 +1376,7 @@ async function verifyMembership(token) {
     });
     if (!meResp.ok) {
       console.error("GET /me failed:", meResp.status);
+      sessionStorage.removeItem(STORAGE_TOKEN_KEY);
       showError("signin-error", "Couldn't fetch your Whop profile. Please try again.");
       showScreen("screen-signin");
       return;
@@ -1394,6 +1395,7 @@ async function verifyMembership(token) {
     });
     if (!memResp.ok) {
       console.error("GET /me/memberships failed:", memResp.status);
+      sessionStorage.removeItem(STORAGE_TOKEN_KEY);
       showError("signin-error", "Couldn't check your membership. Please try again.");
       showScreen("screen-signin");
       return;
@@ -1429,6 +1431,7 @@ async function verifyMembership(token) {
     showScreen("screen-form");
   } catch (e) {
     console.error("verifyMembership error:", e);
+    sessionStorage.removeItem(STORAGE_TOKEN_KEY);
     showError("signin-error", "We hit an error verifying your membership. Please try again.");
     showScreen("screen-signin");
   }
@@ -1554,8 +1557,10 @@ $("btn-submit").addEventListener("click", function () {
   showScreen("screen-success");
   setTimeout(fireConfetti, 200);
 
-  // Restore label after transition (in case admin returns to form via clear).
+  // Restore label + re-enable submit button (defense in depth in case the
+  // user navigates back to the form via the admin reset path).
   submitBtn.textContent = originalLabel;
+  submitBtn.disabled = false;
 });
 
 function postToSheet(payload) {
@@ -1591,7 +1596,8 @@ $("btn-clear-claim").addEventListener("click", function () {
     localStorage.removeItem(STORAGE_CLAIMS_KEY);
     sessionStorage.removeItem(STORAGE_TOKEN_KEY);
     sessionStorage.removeItem(STORAGE_VERIFIER_KEY);
-    location.href = WHOP_REDIRECT_URI || location.pathname;
+    // Reload on the current origin so preview / staging deploys still work.
+    location.href = location.pathname;
   }
 });
 
