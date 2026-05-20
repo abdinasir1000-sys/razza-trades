@@ -725,8 +725,8 @@
       </div>
       <div class="stats-strip">
         <div class="stat">
-          <div class="stat-num">39</div>
-          <div class="stat-label">Eligible VIP Claims</div>
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Free Gift</div>
         </div>
         <div class="stat">
           <div class="stat-num">16</div>
@@ -737,10 +737,10 @@
           <div class="stat-label">Window Status</div>
         </div>
       </div>
-      <span class="pill">Free VIP Members Only</span>
+      <span class="pill">Free Gift — 3M Trading Community</span>
       <h1>Claim Your <span class="accent">Free 3M</span> Gift</h1>
       <p class="lede">
-        Active 3M Trading members get a free gift. Verify with your Whop account below to claim yours.
+        Sign in with your Whop account to claim your free gift. Select your item, fill in your details, and we'll handle the rest.
       </p>
 
       <div class="card" data-tilt>
@@ -748,7 +748,7 @@
         <div id="signin-error" class="alert alert-error"></div>
         <button class="btn" id="btn-signin">Verify with Whop &rarr;</button>
         <p class="footer-note" style="margin-top: 1.5rem;">
-          Active 3M Trading members only
+          Sign in with Whop to continue
         </p>
       </div>
     </section>
@@ -909,7 +909,7 @@
           <span>I understand I may be responsible for covering the cost of shipping.</span>
         </label>
 
-        <button class="btn" id="btn-submit">Claim My Gift &rarr;</button>
+        <button class="btn" id="btn-submit">Proceed to Payment &rarr;</button>
       </div>
     </section>
 
@@ -984,6 +984,7 @@
 // =============================================================================
 const WHOP_CLIENT_ID = "app_uA0OBcqHmdBC8m";
 const WHOP_REDIRECT_URI = "https://gifts.3mtrading.ca/";
+const WHOP_CHECKOUT_URL = "PASTE_WHOP_CHECKOUT_URL_HERE";
 
 // =============================================================================
 // HELPERS
@@ -1301,14 +1302,18 @@ $("btn-submit").addEventListener("click", function () {
 
   postToSheet(payload);
 
-  hydrateSuccessScreen(payload);
-  showScreen("screen-success");
-  setTimeout(fireConfetti, 200);
+  markClaimed(payload.email, payload.claim_id);
 
-  // Restore label + re-enable submit button (defense in depth in case the
-  // user navigates back to the form via the admin reset path).
-  submitBtn.textContent = originalLabel;
-  submitBtn.disabled = false;
+  if (WHOP_CHECKOUT_URL && WHOP_CHECKOUT_URL.indexOf("PASTE_") !== 0) {
+    submitBtn.textContent = "Redirecting to payment…";
+    setTimeout(function () { window.location.href = WHOP_CHECKOUT_URL; }, 800);
+  } else {
+    hydrateSuccessScreen(payload);
+    showScreen("screen-success");
+    setTimeout(fireConfetti, 200);
+    submitBtn.textContent = originalLabel;
+    submitBtn.disabled = false;
+  }
 });
 
 function postToSheet(payload) {
