@@ -1,12 +1,4 @@
 {
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "framework": null,
-  "functions": {
-    "api/whop-token.js": { "memory": 128 },
-    "api/submit-claim.js": { "memory": 128 },
-    "api/get-claims.js": { "memory": 128 }
-  },
   "rewrites": [
     {
       "has": [{ "type": "host", "value": "gifts.3mtrading.ca" }],
