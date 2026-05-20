@@ -5,8 +5,8 @@
   "rewrites": [
     {
       "has": [{ "type": "host", "value": "gifts.3mtrading.ca" }],
-      "source": "/((?!api(?:/|$)).*)",
-      "destination": "/claim/$1"
+      "source": "/",
+      "destination": "/claim/index.html"
     }
   ]
 }
