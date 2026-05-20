@@ -1292,9 +1292,6 @@ $("btn-submit").addEventListener("click", async function () {
 
   claimId = generateClaimId();
 
-  // Mark claimed locally BEFORE webhook fire so a rapid double-submit is blocked.
-  markClaimed(email, claimId);
-
   const payload = {
     claim_id: claimId,
     submitted_at: new Date().toISOString(),
