@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
   if (!process.env.CLAIM_API_KEY || req.query.key !== process.env.CLAIM_API_KEY) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -41,4 +41,4 @@ export default async function handler(req, res) {
     console.error("get-claims error:", err);
     return res.status(500).json({ error: "Server error" });
   }
-}
+};

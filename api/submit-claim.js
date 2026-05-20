@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -36,4 +36,4 @@ export default async function handler(req, res) {
     console.error("submit-claim error:", err);
     return res.status(500).json({ ok: false });
   }
-}
+};
