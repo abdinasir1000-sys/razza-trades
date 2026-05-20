@@ -790,6 +790,31 @@
   .button-row { display: flex; gap: 0.9rem; margin-top: 1.6rem; }
   .button-row .btn { flex: 1; }
 
+  /* Reserve-claim holding state */
+  .reserve-box {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    position: relative;
+  }
+  .reserve-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(126, 207, 126, 0.16), transparent 60%);
+    pointer-events: none;
+    animation: pulseGlow 3.5s ease-in-out infinite;
+  }
+  .reserve-icon {
+    font-size: 2.6rem;
+    margin-bottom: 0.6rem;
+    animation: pillFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 6px 14px rgba(126, 207, 126, 0.45));
+    position: relative; z-index: 2;
+  }
+  .reserve-box h2,
+  .reserve-box p,
+  .reserve-box button { position: relative; z-index: 2; }
+
   /* =========================================================
      SUCCESS SCREEN
      ========================================================= */
@@ -1101,13 +1126,13 @@
 
     <!-- ========== SCREEN 3: PAY SHIPPING ========== -->
     <section id="screen-pay" class="screen">
-      <span class="pill">▲ Step 03 of 03</span>
-      <h1>Pay <span class="accent">Shipping</span></h1>
-      <p class="lede">Your gift is covered &mdash; you just cover shipping. Click below to complete payment through our secure checkout. Your claim is locked in once payment goes through.</p>
+      <span class="pill" id="pay-pill">Step 03 of 03</span>
+      <h1 id="pay-title">Pay <span class="accent">Shipping</span></h1>
+      <p class="lede" id="pay-lede">Your gift is covered &mdash; you just cover shipping. Click below to complete payment through our secure checkout. Your claim is locked in once payment goes through.</p>
 
       <div class="step-indicator">
-        <span class="step done">✓ Verify</span>
-        <span class="step done">✓ Confirm</span>
+        <span class="step done">&check; Verify</span>
+        <span class="step done">&check; Confirm</span>
         <span class="step active">03 &middot; Ship payment</span>
       </div>
 
@@ -1119,24 +1144,37 @@
           </div>
           <div style="flex:1;">
             <div class="gift-name" id="pay-gift-name">3M Coffee Mug</div>
-            <div class="gift-sub" id="pay-gift-ship-to">Shipping to —</div>
+            <div class="gift-sub" id="pay-gift-ship-to">Shipping to &mdash;</div>
           </div>
         </div>
 
-        <div class="price-block">
+        <!-- PRICE BLOCK — visible only when we have a price to show -->
+        <div class="price-block" id="pay-price-block" style="display:none;">
           <div class="price" id="pay-price">$0.00</div>
           <div class="price-sub" id="pay-price-sub">Shipping cost &middot; one-time</div>
         </div>
 
-        <div id="pay-alert" class="alert alert-info" style="margin-top: 1.5rem;">
-          Payment link for your region is being finalized. Please check back shortly or DM support on Discord.
+        <!-- HOLDING STATE — when payment link is not yet configured.
+             Shown by default; the script hides this and switches to the
+             stripe-checkout state when a payment link exists. -->
+        <div id="pay-state-reserve">
+          <div class="reserve-box">
+            <div class="reserve-icon">📩</div>
+            <h2 style="margin-bottom: 0.4rem;">Reserve Your Claim</h2>
+            <p style="color: var(--text-mid); margin-bottom: 1.2rem; font-size: 0.95rem;">
+              We&rsquo;re finalizing the secure payment link for your region. Click below to lock in your claim &mdash; we&rsquo;ll DM you the shipping payment link directly in the 3M Trading Discord within 24 hours.
+            </p>
+            <button class="btn" id="btn-reserve">Lock In My Claim &rarr;</button>
+            <p class="footer-note" style="margin-top: 1rem;">Your shipping address is saved. You only pay once the link is sent.</p>
+          </div>
         </div>
 
-        <a class="btn" id="btn-pay" target="_blank" rel="noopener" style="text-align:center; text-decoration:none; margin-top: 1.5rem;">🔒 Pay Shipping Securely &rarr;</a>
-
-        <button class="btn btn-ghost" id="btn-already-paid" style="margin-top: 0.85rem;">I&#39;ve completed payment</button>
-
-        <p class="footer-note" style="margin-top: 1.5rem;">Secure checkout via Stripe. Your card details never touch our servers.</p>
+        <!-- LIVE-CHECKOUT STATE — when a Stripe link is configured -->
+        <div id="pay-state-checkout" style="display:none;">
+          <a class="btn" id="btn-pay" target="_blank" rel="noopener" style="text-align:center; text-decoration:none; margin-top: 1.5rem;">🔒 Pay Shipping Securely &rarr;</a>
+          <button class="btn btn-ghost" id="btn-already-paid" style="margin-top: 0.85rem;">I&#39;ve completed payment</button>
+          <p class="footer-note" style="margin-top: 1.5rem;">Secure checkout via Stripe. Your card details never touch our servers.</p>
+        </div>
       </div>
 
       <div class="text-center">
@@ -1154,8 +1192,8 @@
             <polyline class="check-path" points="28,52 44,68 74,36"></polyline>
           </svg>
         </div>
-        <h1 class="text-center">You're <span class="accent">Locked In</span></h1>
-        <p class="lede" style="margin: 0.5rem auto 2rem;">
+        <h1 class="text-center" id="success-headline">You're <span class="accent">Locked In</span></h1>
+        <p class="lede" id="success-lede" style="margin: 0.5rem auto 2rem;">
           Your claim is confirmed. We'll process your order and ship to the address on file. You'll get tracking info via email and Discord DM once it goes out.
         </p>
 
@@ -1209,28 +1247,24 @@
 //    Used to log every confirmed claim to a Google Sheet.
 const GOOGLE_SHEETS_WEBHOOK_URL = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-// 2) Stripe payment links per region per gift.
-//    Create 6 payment links in your Stripe dashboard (US/INTL x 3 gifts)
-//    and paste each URL here. Until you do, the page shows a friendly
-//    "payment link being finalized" message instead.
+// 2) Stripe payment links per region.
+//    Create 2 Stripe Payment Links — one for US shipping, one for
+//    International — and paste each URL here. While these are empty,
+//    the page runs in "reserve claim" mode: users finish the flow and
+//    you DM them the payment link in Discord later. Drop the URLs in
+//    when you have them and the page becomes self-serve checkout.
 const PAYMENT_LINKS = {
-  US: {
-    "3M Coffee Mug":     "",
-    "3M Sticker Packet": "",
-    "3M Phone Case":     ""
-  },
-  INTL: {
-    "3M Coffee Mug":     "",
-    "3M Sticker Packet": "",
-    "3M Phone Case":     ""
-  }
+  US:   "",
+  INTL: ""
 };
 
-// 3) Shipping prices shown to the customer (for display).
-//    Match these to your Stripe payment-link amounts.
+// 3) Shipping price shown to the customer (USD).
+//    Set when you know the number; until then, the page just says
+//    "Shipping cost confirmed at checkout" instead of a dollar value.
+//    The gift itself is free — only shipping is charged.
 const SHIPPING_PRICES_USD = {
-  US:   { "3M Coffee Mug": 8,  "3M Sticker Packet": 5,  "3M Phone Case": 8 },
-  INTL: { "3M Coffee Mug": 25, "3M Sticker Packet": 10, "3M Phone Case": 25 }
+  US:   null,   // e.g. 8
+  INTL: null    // e.g. 25
 };
 
 // =============================================================================
@@ -1398,21 +1432,32 @@ function hydratePayScreen() {
   $("pay-gift-name").textContent = r.gift;
   $("pay-gift-ship-to").textContent = "Shipping to " + (r.city || "") + ", " + (r.country || "");
 
-  const price = (SHIPPING_PRICES_USD[r.region] || {})[r.gift];
-  animatePrice($("pay-price"), typeof price === "number" ? price : null);
-  $("pay-price-sub").textContent = (r.region === "US" ? "U.S. shipping" : "International shipping") + " · one-time";
+  const link = PAYMENT_LINKS[r.region];
+  const hasLink = link && /^https?:\/\//i.test(link);
 
-  const link = (PAYMENT_LINKS[r.region] || {})[r.gift];
-  const payBtn = $("btn-pay");
-  const alertEl = $("pay-alert");
-  if (link && /^https?:\/\//i.test(link)) {
-    payBtn.href = link;
-    payBtn.style.display = "block";
-    alertEl.classList.remove("show");
+  if (hasLink) {
+    // Live checkout mode
+    $("pay-title").innerHTML = 'Pay <span class="accent">Shipping</span>';
+    $("pay-lede").textContent = "Your gift is covered — you just cover shipping. Click below to complete payment through our secure checkout. Your claim is locked in once payment goes through.";
+    $("pay-state-reserve").style.display = "none";
+    $("pay-state-checkout").style.display = "block";
+    $("btn-pay").href = link;
+    const price = SHIPPING_PRICES_USD[r.region];
+    const priceBlock = $("pay-price-block");
+    if (typeof price === "number") {
+      priceBlock.style.display = "block";
+      animatePrice($("pay-price"), price);
+      $("pay-price-sub").textContent = (r.region === "US" ? "U.S. shipping" : "International shipping") + " · one-time";
+    } else {
+      priceBlock.style.display = "none";
+    }
   } else {
-    payBtn.removeAttribute("href");
-    payBtn.style.display = "none";
-    alertEl.classList.add("show");
+    // Reserve-claim mode (no payment link yet)
+    $("pay-title").innerHTML = 'Reserve <span class="accent">Your Claim</span>';
+    $("pay-lede").textContent = "Your gift is free — you'll only cover shipping. We're finalizing the secure payment link; reserve your claim now and we'll DM you the link in Discord.";
+    $("pay-state-reserve").style.display = "block";
+    $("pay-state-checkout").style.display = "none";
+    $("pay-price-block").style.display = "none";
   }
 }
 
@@ -1425,7 +1470,15 @@ $("btn-pay").addEventListener("click", (e) => {
 
 $("btn-already-paid").addEventListener("click", () => {
   logClaim("payment-self-confirmed");
-  hydrateSuccessScreen();
+  hydrateSuccessScreen("paid");
+  showScreen("screen-success");
+  setTimeout(fireConfetti, 200);
+});
+
+// Reserve-claim button (used when no Stripe link is configured yet)
+$("btn-reserve").addEventListener("click", () => {
+  logClaim("claim-reserved");
+  hydrateSuccessScreen("reserved");
   showScreen("screen-success");
   setTimeout(fireConfetti, 200);
 });
@@ -1433,13 +1486,20 @@ $("btn-already-paid").addEventListener("click", () => {
 // =============================================================================
 // SCREEN 4: SUCCESS
 // =============================================================================
-function hydrateSuccessScreen() {
+function hydrateSuccessScreen(mode) {
   const r = currentRecord;
   $("success-gift").textContent = r.gift;
   $("success-name").textContent = r.name;
   const addr = [r.address1, r.address2, r.city, r.state, r.zip, r.country].filter(Boolean).join(", ");
   $("success-address").textContent = addr;
   $("success-id").textContent = claimId;
+  if (mode === "reserved") {
+    $("success-headline").innerHTML = 'Claim <span class="accent">Reserved</span>';
+    $("success-lede").textContent = "Your claim is locked in. We'll DM you the secure shipping payment link in the 3M Trading Discord shortly. Once you pay, we'll process and ship your gift.";
+  } else {
+    $("success-headline").innerHTML = "You're <span class=\"accent\">Locked In</span>";
+    $("success-lede").textContent = "Your claim is confirmed. We'll process your order and ship to the address on file. You'll get tracking info via email and Discord DM once it goes out.";
+  }
   markClaimed(r.email, claimId);
 }
 
@@ -1491,7 +1551,7 @@ function logClaim(status) {
     zip: r.zip,
     country: r.country,
     phone: r.phone,
-    shipping_price_usd: (SHIPPING_PRICES_USD[r.region] || {})[r.gift] || ""
+    shipping_price_usd: SHIPPING_PRICES_USD[r.region] || ""
   };
   try {
     fetch(GOOGLE_SHEETS_WEBHOOK_URL, {

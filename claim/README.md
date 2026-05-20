@@ -9,25 +9,20 @@ Static, animated VIP-only gift claim page for the 39 members who filled out the 
 3. **Pay shipping** — region-aware (US vs international) price shown, then redirected to your Stripe payment link.
 4. **Success** — claim summary + confetti, claim logged to Google Sheet, repeat claims blocked.
 
-## Three things to fill in before going live
+## Deploy-now-fill-in-later config
 
-Open `claim/index.html` and edit the three config blocks at the top of the `<script>` section:
+You can deploy this site with **zero** config filled in. Until you add a Stripe link, the page runs in "reserve claim" mode — users finish the flow, the system records their claim, and you DM them the payment link in Discord later. Once you paste the links in, the site automatically switches to self-serve checkout.
 
-### 1. `GOOGLE_SHEETS_WEBHOOK_URL`
-Follow the setup steps inside `APPSSCRIPT.gs`. You'll deploy a Google Apps Script as a web app, then paste the resulting URL into this constant.
+Open `claim/index.html` and edit the three config blocks at the top of the `<script>` section as you're ready:
 
-### 2. `PAYMENT_LINKS`
-Create 6 Stripe Payment Links (https://dashboard.stripe.com/payment-links) — one per region/gift combo:
+### 1. `GOOGLE_SHEETS_WEBHOOK_URL` *(optional)*
+Adds a row to a Google Sheet every time someone reserves or pays. Without it, claims still work — they just aren't logged centrally. Setup steps live in `APPSSCRIPT.gs` (~5 min).
 
-| | Coffee Mug | Sticker Packet | Phone Case |
-|---|---|---|---|
-| US | $X | $Y | $Z |
-| International | $X | $Y | $Z |
+### 2. `PAYMENT_LINKS` *(optional — drives self-serve checkout)*
+Two Stripe Payment Links — one for US shipping, one for International. While both are empty, the site asks users to "Reserve My Claim" and tells them you'll DM the payment link.
 
-Paste each URL into the matching slot. While slots are empty, the site shows a friendly "payment link being finalized" message instead of a broken button — so it's safe to deploy in stages.
-
-### 3. `SHIPPING_PRICES_USD`
-Update the displayed price for each gift / region. Keep these in sync with what the customer will actually be charged on the Stripe page.
+### 3. `SHIPPING_PRICES_USD` *(optional)*
+US flat shipping price, INTL flat shipping price. The gift itself is free; only shipping is charged. While null, the price isn't shown — the customer just sees "Shipping cost confirmed at checkout".
 
 ## Deploying to `gifts.3mtrading.ca`
 
