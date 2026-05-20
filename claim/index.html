@@ -8,41 +8,62 @@
 <meta name="description" content="VIP member free 3M gift claim portal." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
     --bg: #050505;
-    --bg-card: rgba(15, 15, 17, 0.7);
-    --bg-card-2: rgba(20, 20, 22, 0.55);
+    --bg-card: rgba(15, 17, 15, 0.7);
+    --bg-card-2: rgba(20, 22, 20, 0.55);
+    /* Green is primary brand — matches 3mtrading.ca exactly */
+    --green: #7ECF7E;
+    --green-bright: #a8e8a8;
+    --green-mid: #5a9060;
+    --green-core: #4A8050;
+    --green-deep: #3A6B3A;
+    --green-glow: rgba(74, 128, 80, 0.18);
+    --green-border: rgba(74, 128, 80, 0.4);
+    /* Red — used only for urgency banner + alerts */
     --red: #D22D1E;
     --red-bright: #F04030;
-    --red-dim: #A82318;
     --red-deep: #8B1A1A;
-    --red-glow: rgba(210, 45, 30, 0.18);
-    --red-border: rgba(210, 45, 30, 0.35);
+    --red-glow: rgba(210, 45, 30, 0.15);
+    --red-border: rgba(210, 45, 30, 0.3);
     --gold: #E8B547;
-    --green: #7ECF7E;
-    --green-mid: #4A8050;
-    --green-dim: #3A6B3A;
-    --green-border: rgba(58, 107, 58, 0.4);
-    --text: #f5f5f3;
+    --text: #f0f0ee;
     --text-mid: rgba(255, 255, 255, 0.7);
     --text-dim: rgba(255, 255, 255, 0.5);
     --text-faint: rgba(255, 255, 255, 0.3);
-    --border: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   html, body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     overflow-x: hidden;
   }
   body { position: relative; }
+  /* Mouse-following spotlight glow */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(126, 207, 126, 0.10), transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+    opacity: 0;
+    will-change: transform;
+    mix-blend-mode: screen;
+  }
+  body.has-cursor::before { opacity: 1; }
 
   /* =========================================================
      ANIMATED BACKGROUND LAYERS
@@ -52,8 +73,8 @@
 
   .bg-grid {
     background-image:
-      linear-gradient(rgba(210, 45, 30, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(210, 45, 30, 0.04) 1px, transparent 1px);
+      linear-gradient(rgba(74, 128, 80, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74, 128, 80, 0.06) 1px, transparent 1px);
     background-size: 56px 56px;
     mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 90%);
     -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 90%);
@@ -67,10 +88,34 @@
   .bg-orbs {
     z-index: 2;
     background:
-      radial-gradient(ellipse 600px 400px at 20% 20%, rgba(210, 45, 30, 0.18), transparent 60%),
-      radial-gradient(ellipse 500px 350px at 80% 75%, rgba(232, 181, 71, 0.07), transparent 60%),
-      radial-gradient(ellipse 700px 500px at 50% 100%, rgba(58, 107, 58, 0.10), transparent 70%);
+      radial-gradient(ellipse 600px 400px at 20% 20%, rgba(74, 128, 80, 0.22), transparent 60%),
+      radial-gradient(ellipse 500px 350px at 80% 75%, rgba(126, 207, 126, 0.12), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 50% 100%, rgba(232, 181, 71, 0.05), transparent 70%);
     animation: orbDrift 22s ease-in-out infinite alternate;
+  }
+  /* Stock-chart ribbon drawing across the background — trading aesthetic */
+  .bg-chart {
+    z-index: 2;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  }
+  .bg-chart svg { width: 100%; height: 100%; }
+  .bg-chart .ribbon {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 2400;
+    stroke-dashoffset: 2400;
+    animation: ribbonDraw 14s ease-in-out infinite;
+    opacity: 0.35;
+  }
+  @keyframes ribbonDraw {
+    0%   { stroke-dashoffset: 2400; }
+    45%  { stroke-dashoffset: 0; }
+    55%  { stroke-dashoffset: 0; opacity: 0.35; }
+    100% { stroke-dashoffset: -2400; opacity: 0.05; }
   }
   @keyframes orbDrift {
     0%   { transform: translate3d(0, 0, 0) scale(1); }
@@ -136,21 +181,22 @@
     width: 100%;
     outline: none;
     transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    font-family: 'DM Sans', sans-serif;
   }
   input:focus, select:focus, textarea:focus {
-    border-color: var(--red);
-    background: rgba(210, 45, 30, 0.04);
-    box-shadow: 0 0 0 3px rgba(210, 45, 30, 0.15);
+    border-color: var(--green);
+    background: rgba(74, 128, 80, 0.04);
+    box-shadow: 0 0 0 3px rgba(74, 128, 80, 0.18);
   }
   label {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.18em;
     color: var(--text-dim);
     margin-bottom: 0.45rem;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-weight: 600;
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-weight: 700;
   }
 
   .container {
@@ -163,31 +209,78 @@
 
   .brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; }
   .brand {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.5rem;
-    font-weight: 900;
-    letter-spacing: -0.01em;
-    perspective: 400px;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    perspective: 800px;
   }
-  .brand .accent {
-    background: linear-gradient(135deg, var(--red-bright), var(--gold));
+  .brand-logo {
+    position: relative;
+    width: 56px; height: 56px;
+    flex-shrink: 0;
+    transform-style: preserve-3d;
+    animation: logoFloat 6s ease-in-out infinite;
+    filter: drop-shadow(0 8px 20px rgba(74, 128, 80, 0.35));
+  }
+  .brand-logo img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    position: relative; z-index: 2;
+  }
+  @keyframes logoFloat {
+    0%, 100% { transform: rotateY(-8deg) rotateX(6deg) translateY(0); }
+    50%      { transform: rotateY(8deg)  rotateX(-4deg) translateY(-4px); }
+  }
+  /* Orbital ring around logo */
+  .brand-logo::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1px dashed rgba(126, 207, 126, 0.4);
+    animation: ringSpin 12s linear infinite;
+  }
+  .brand-logo::after {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    border: 1px solid rgba(74, 128, 80, 0.15);
+    animation: ringSpin 18s linear infinite reverse;
+  }
+  @keyframes ringSpin { to { transform: rotate(360deg); } }
+
+  .brand-name {
+    font-family: 'Rajdhani', 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .brand-name .accent {
+    background: linear-gradient(135deg, var(--green), var(--green-bright));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    display: inline-block;
-    animation: tinyTilt 5s ease-in-out infinite;
   }
-  @keyframes tinyTilt {
-    0%, 100% { transform: rotateY(0deg); }
-    50%      { transform: rotateY(15deg); }
+  .brand-sub {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.6rem;
+    color: var(--green-core);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-top: 4px;
+    font-weight: 700;
   }
   .brand-meta {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 0.72rem;
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.66rem;
     color: var(--text-faint);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.18em;
     display: flex; align-items: center; gap: 0.5rem;
+    font-weight: 700;
   }
   .brand-meta::before {
     content: "";
@@ -198,20 +291,89 @@
     animation: livePulse 2s ease-in-out infinite;
   }
 
-  .pill {
-    display: inline-block;
-    background: var(--red-glow);
-    border: 1px solid var(--red-border);
-    border-radius: 100px;
-    padding: 0.32rem 0.95rem;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+  /* Stats strip */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 540px) { .stats-strip { gap: 0.6rem; } }
+  .stat {
+    background: rgba(20, 22, 20, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .stat:hover { border-color: var(--green-border); transform: translateY(-2px); }
+  .stat::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px; width: 100%;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    transform: translateX(-100%);
+    animation: statSweep 6s linear infinite;
+  }
+  @keyframes statSweep { 50% { transform: translateX(100%); } 100% { transform: translateX(100%); } }
+  .stat-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
     font-weight: 700;
-    color: #ff8a7a;
+    color: var(--green-bright);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    display: flex; align-items: center; gap: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-top: 0.45rem;
+    font-weight: 700;
+  }
+  .led {
+    width: 9px; height: 9px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--green), 0 0 24px rgba(126, 207, 126, 0.4);
+    animation: livePulse 1.4s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--green-glow);
+    border: 1px solid var(--green-border);
+    border-radius: 100px;
+    padding: 0.35rem 1rem;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    color: var(--green-bright);
     margin-bottom: 1.4rem;
-    box-shadow: 0 0 24px rgba(210, 45, 30, 0.15);
+    box-shadow: 0 0 28px rgba(74, 128, 80, 0.18);
     animation: pillFloat 4s ease-in-out infinite;
+  }
+  .pill::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--green);
+    animation: livePulse 1.5s ease-in-out infinite;
   }
   @keyframes pillFloat {
     0%, 100% { transform: translateY(0); }
@@ -219,15 +381,16 @@
   }
 
   h1 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: clamp(2.2rem, 5.5vw, 3.2rem);
-    line-height: 1.05;
-    font-weight: 900;
-    margin-bottom: 0.95rem;
-    letter-spacing: -0.025em;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(2.4rem, 6.5vw, 4rem);
+    line-height: 0.95;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
   h1 .accent {
-    background: linear-gradient(120deg, var(--red-bright) 0%, #FF6B5C 30%, var(--gold) 60%, var(--red-bright) 100%);
+    background: linear-gradient(120deg, var(--green-bright) 0%, var(--green) 30%, var(--green-core) 60%, var(--green-bright) 100%);
     background-size: 250% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -240,11 +403,12 @@
     50%      { background-position: 100% 50%; }
   }
   h2 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.6rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.55rem;
     font-weight: 700;
     margin-bottom: 0.6rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
   .lede {
     color: var(--text-mid);
@@ -262,7 +426,7 @@
     background: var(--bg-card);
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid var(--red-border);
+    border: 1px solid var(--green-border);
     border-radius: 14px;
     padding: 2.25rem 2.4rem;
     margin-bottom: 1.5rem;
@@ -271,35 +435,47 @@
     box-shadow:
       0 30px 60px -30px rgba(0, 0, 0, 0.6),
       0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-      0 0 40px rgba(210, 45, 30, 0.06);
+      0 0 50px rgba(74, 128, 80, 0.08);
     overflow: hidden;
   }
+  /* Conic gradient halo that slowly rotates around the card */
   .card::before {
     content: "";
     position: absolute;
-    inset: -1px;
-    border-radius: 14px;
-    padding: 1px;
-    background: linear-gradient(135deg, transparent 30%, rgba(210, 45, 30, 0.5) 50%, transparent 70%);
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba(126, 207, 126, 0.5) 40deg,
+      transparent 90deg,
+      transparent 180deg,
+      rgba(74, 128, 80, 0.3) 220deg,
+      transparent 270deg,
+      transparent 360deg
+    );
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.3s;
+    opacity: 0.6;
+    animation: cardHalo 8s linear infinite;
     pointer-events: none;
   }
+  @keyframes cardHalo { to { transform: rotate(360deg); } }
   .card:hover::before { opacity: 1; }
-  .card-green { border-color: var(--green-border); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6), 0 0 50px rgba(126, 207, 126, 0.1); }
+  .card-green { border-color: var(--green-border); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6), 0 0 60px rgba(126, 207, 126, 0.15); }
   .card-quiet { border-color: var(--border); }
+  .card-quiet::before { opacity: 0; }
 
   /* Shimmer accent line across card */
   .card-shine {
     position: absolute;
     top: 0; left: -50%;
     width: 50%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--red-bright), transparent);
+    background: linear-gradient(90deg, transparent, var(--green-bright), transparent);
     animation: shineMove 5s linear infinite;
     pointer-events: none;
+    z-index: 1;
   }
   @keyframes shineMove {
     0%   { left: -50%; }
@@ -316,41 +492,41 @@
   .btn {
     position: relative;
     display: inline-block;
-    background: linear-gradient(135deg, var(--red-dim), var(--red-bright));
+    background: linear-gradient(135deg, var(--green-core), var(--green-mid));
     color: white;
     border: none;
     padding: 1rem 2rem;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 0.05em;
+    font-size: 0.92rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
     cursor: pointer;
     width: 100%;
     overflow: hidden;
     transition: transform 0.12s, box-shadow 0.25s, filter 0.2s;
-    box-shadow: 0 10px 30px -10px rgba(210, 45, 30, 0.6), 0 0 0 1px rgba(255,255,255,0.06) inset;
+    box-shadow: 0 10px 30px -10px rgba(74, 128, 80, 0.7), 0 0 0 1px rgba(255,255,255,0.08) inset;
   }
   .btn::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
     transform: translateX(-100%);
     transition: transform 0.55s ease;
   }
-  .btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 18px 40px -10px rgba(210, 45, 30, 0.7), 0 0 0 1px rgba(255,255,255,0.1) inset; }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.12); box-shadow: 0 18px 40px -10px rgba(74, 128, 80, 0.8), 0 0 0 1px rgba(255,255,255,0.12) inset; }
   .btn:hover::after { transform: translateX(100%); }
   .btn:active { transform: translateY(0); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .btn-green { background: linear-gradient(135deg, var(--green-dim), var(--green-mid)); box-shadow: 0 10px 30px -10px rgba(74, 128, 80, 0.6), 0 0 0 1px rgba(255,255,255,0.06) inset; }
   .btn-ghost {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border);
     color: var(--text-mid);
     box-shadow: none;
   }
-  .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: var(--text-dim); color: var(--text); transform: translateY(-1px); box-shadow: none; }
+  .btn-ghost:hover { background: rgba(126, 207, 126, 0.05); border-color: var(--green-border); color: var(--text); transform: translateY(-1px); box-shadow: none; }
   .btn-ghost::after { display: none; }
 
   /* =========================================================
@@ -365,8 +541,8 @@
     animation: alertIn 0.3s ease-out;
   }
   .alert.show { display: block; }
-  .alert-error { background: var(--red-glow); border: 1px solid var(--red-border); color: #ff8a7a; }
-  .alert-info { background: rgba(58, 107, 58, 0.12); border: 1px solid var(--green-border); color: var(--green); }
+  .alert-error { background: var(--red-glow); border: 1px solid var(--red-border); color: #ff8a7a; font-family: 'DM Sans', sans-serif; }
+  .alert-info  { background: var(--green-glow); border: 1px solid var(--green-border); color: var(--green-bright); font-family: 'DM Sans', sans-serif; }
   @keyframes alertIn {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -378,7 +554,7 @@
   .summary { background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.3rem 1.6rem; margin-bottom: 1.5rem; backdrop-filter: blur(6px); }
   .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px solid var(--border); gap: 1rem; }
   .summary-row:last-child { border-bottom: none; }
-  .summary-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); font-weight: 600; }
+  .summary-label { font-family: 'Space Mono', ui-monospace, monospace; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-dim); font-weight: 700; }
   .summary-value { color: var(--text); font-weight: 500; text-align: right; max-width: 65%; word-break: break-word; }
 
   /* =========================================================
@@ -386,10 +562,10 @@
      ========================================================= */
   .gift-card {
     display: flex; align-items: center; gap: 1.2rem;
-    background: linear-gradient(135deg, rgba(210, 45, 30, 0.06), rgba(232, 181, 71, 0.02));
-    border: 1px solid var(--red-border);
+    background: linear-gradient(135deg, rgba(74, 128, 80, 0.08), rgba(126, 207, 126, 0.02));
+    border: 1px solid var(--green-border);
     border-radius: 10px;
-    padding: 1.25rem 1.4rem;
+    padding: 1.3rem 1.5rem;
     margin-bottom: 1.4rem;
     position: relative;
     overflow: hidden;
@@ -397,27 +573,55 @@
   .gift-card::before {
     content: "";
     position: absolute;
-    top: -50%; right: -20%;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(232, 181, 71, 0.18), transparent 65%);
+    top: -60%; right: -25%;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(126, 207, 126, 0.22), transparent 65%);
     animation: orbDrift 8s ease-in-out infinite alternate;
     pointer-events: none;
   }
+  /* Holographic shimmer overlay sliding across the gift card */
+  .gift-card::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(110deg,
+      transparent 35%,
+      rgba(126, 207, 126, 0.06) 45%,
+      rgba(168, 232, 168, 0.12) 50%,
+      rgba(126, 207, 126, 0.06) 55%,
+      transparent 65%);
+    animation: holoShimmer 7s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes holoShimmer {
+    0%, 30%   { left: -100%; }
+    65%, 100% { left: 100%; }
+  }
   .gift-stage {
     position: relative;
-    width: 70px; height: 70px;
-    perspective: 600px;
+    width: 76px; height: 76px;
+    perspective: 700px;
     flex-shrink: 0;
+  }
+  /* Orbital ring around gift icon */
+  .gift-stage::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px dashed rgba(126, 207, 126, 0.35);
+    animation: ringSpin 10s linear infinite;
   }
   .gift-icon-3d {
     position: relative;
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 2.4rem;
+    font-size: 2.5rem;
     line-height: 1;
     transform-style: preserve-3d;
     animation: giftSpin 8s linear infinite;
-    filter: drop-shadow(0 6px 14px rgba(210, 45, 30, 0.4));
+    filter: drop-shadow(0 8px 18px rgba(74, 128, 80, 0.55));
     z-index: 2;
   }
   @keyframes giftSpin {
@@ -431,7 +635,7 @@
     bottom: -4px; left: 50%;
     transform: translateX(-50%);
     width: 60%; height: 8px;
-    background: radial-gradient(ellipse, rgba(210, 45, 30, 0.5), transparent 70%);
+    background: radial-gradient(ellipse, rgba(126, 207, 126, 0.55), transparent 70%);
     border-radius: 50%;
     animation: shadowPulse 2.5s ease-in-out infinite;
   }
@@ -439,8 +643,8 @@
     0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.6; }
     50%      { transform: translateX(-50%) scaleX(0.75); opacity: 1; }
   }
-  .gift-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; }
-  .gift-sub { font-size: 0.74rem; color: var(--text-dim); font-family: 'JetBrains Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; font-weight: 600; }
+  .gift-name { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+  .gift-sub { font-size: 0.66rem; color: var(--text-dim); font-family: 'Space Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.18em; margin-top: 4px; font-weight: 700; }
 
   /* =========================================================
      PRICE BLOCK
@@ -450,7 +654,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(210, 45, 30, 0.15), transparent 60%);
+    background: radial-gradient(circle at 50% 50%, rgba(126, 207, 126, 0.2), transparent 60%);
     pointer-events: none;
     animation: pulseGlow 3s ease-in-out infinite;
   }
@@ -459,10 +663,10 @@
     50%      { opacity: 1; transform: scale(1.05); }
   }
   .price {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 3.4rem;
-    font-weight: 900;
-    background: linear-gradient(120deg, var(--red-bright), var(--gold), var(--red-bright));
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 3.6rem;
+    font-weight: 700;
+    background: linear-gradient(120deg, var(--green-bright), var(--green), var(--green-bright));
     background-size: 250% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -471,23 +675,24 @@
     animation: gradientSlide 4s ease-in-out infinite;
     position: relative;
     z-index: 2;
+    letter-spacing: -0.02em;
   }
-  .price-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; position: relative; z-index: 2; }
+  .price-sub { font-size: 0.66rem; color: var(--text-dim); margin-top: 0.6rem; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.18em; position: relative; z-index: 2; font-weight: 700; }
 
-  .checkbox-row { display: flex; gap: 0.75rem; align-items: flex-start; margin: 1.3rem 0; cursor: pointer; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; }
-  .checkbox-row:hover { border-color: var(--red-border); background: var(--red-glow); }
-  .checkbox-row input { width: auto; margin-top: 0.2rem; accent-color: var(--red); }
+  .checkbox-row { display: flex; gap: 0.75rem; align-items: flex-start; margin: 1.3rem 0; cursor: pointer; padding: 0.8rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; }
+  .checkbox-row:hover { border-color: var(--green-border); background: var(--green-glow); }
+  .checkbox-row input { width: auto; margin-top: 0.2rem; accent-color: var(--green-core); }
   .checkbox-row span { font-size: 0.88rem; color: var(--text-mid); line-height: 1.55; }
 
   /* =========================================================
      STEP INDICATOR
      ========================================================= */
-  .step-indicator { display: flex; gap: 0.55rem; margin-bottom: 2.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); flex-wrap: wrap; font-weight: 600; }
-  .step-indicator .step { padding: 0.42rem 0.85rem; border: 1px solid var(--border); border-radius: 100px; transition: all 0.25s; position: relative; }
-  .step-indicator .step.active { color: var(--red-bright); border-color: var(--red-border); background: var(--red-glow); box-shadow: 0 0 18px rgba(210, 45, 30, 0.2); }
-  .step-indicator .step.done { color: var(--green); border-color: var(--green-border); background: rgba(58, 107, 58, 0.08); }
+  .step-indicator { display: flex; gap: 0.55rem; margin-bottom: 2.2rem; font-family: 'Space Mono', monospace; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--text-faint); flex-wrap: wrap; font-weight: 700; }
+  .step-indicator .step { padding: 0.5rem 0.95rem; border: 1px solid var(--border); border-radius: 100px; transition: all 0.25s; position: relative; }
+  .step-indicator .step.active { color: var(--green-bright); border-color: var(--green-border); background: var(--green-glow); box-shadow: 0 0 22px rgba(126, 207, 126, 0.25); }
+  .step-indicator .step.done { color: var(--green); border-color: var(--green-border); background: rgba(74, 128, 80, 0.08); }
 
-  .footer-note { color: var(--text-faint); font-size: 0.78rem; text-align: center; margin-top: 2rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; line-height: 1.7; }
+  .footer-note { color: var(--text-faint); font-size: 0.72rem; text-align: center; margin-top: 2rem; font-family: 'Space Mono', monospace; letter-spacing: 0.12em; line-height: 1.8; text-transform: uppercase; }
 
   /* =========================================================
      SCREEN TRANSITIONS
@@ -509,8 +714,8 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .editable-toggle { font-size: 0.74rem; color: var(--red-bright); cursor: pointer; background: rgba(210, 45, 30, 0.08); border: 1px solid var(--red-border); padding: 0.4rem 0.7rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 100px; font-weight: 600; transition: all 0.2s; }
-  .editable-toggle:hover { background: var(--red); color: white; }
+  .editable-toggle { font-size: 0.68rem; color: var(--green-bright); cursor: pointer; background: rgba(74, 128, 80, 0.1); border: 1px solid var(--green-border); padding: 0.45rem 0.85rem; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.16em; border-radius: 100px; font-weight: 700; transition: all 0.2s; }
+  .editable-toggle:hover { background: var(--green-core); color: white; box-shadow: 0 0 16px rgba(126, 207, 126, 0.5); }
 
   .button-row { display: flex; gap: 0.9rem; margin-top: 1.6rem; }
   .button-row .btn { flex: 1; }
@@ -550,13 +755,33 @@
   .floaters span {
     position: absolute;
     font-size: 1.2rem;
-    opacity: 0.06;
+    opacity: 0.08;
     animation: floatY 12s ease-in-out infinite;
     filter: blur(0.5px);
   }
   @keyframes floatY {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50%      { transform: translateY(-30px) rotate(15deg); }
+  }
+
+  /* Rising green ember particles */
+  .embers { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .embers i {
+    position: absolute;
+    bottom: -20px;
+    width: 4px; height: 4px;
+    background: radial-gradient(circle, #a8e8a8, transparent 70%);
+    border-radius: 50%;
+    animation: emberRise linear infinite;
+    opacity: 0;
+    filter: blur(0.5px);
+  }
+  @keyframes emberRise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 0.8; }
+    50%  { transform: translateY(-50vh) translateX(20px); }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(-110vh) translateX(-15px); opacity: 0; }
   }
 
   /* =========================================================
@@ -578,6 +803,20 @@
   <canvas id="bg-canvas" class="bg-layer"></canvas>
   <div class="bg-layer bg-grid"></div>
   <div class="bg-layer bg-orbs"></div>
+  <div class="bg-layer bg-chart" aria-hidden="true">
+    <svg viewBox="0 0 1400 800" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="ribGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#4A8050" stop-opacity="0"/>
+          <stop offset="20%"  stop-color="#7ECF7E" stop-opacity="0.7"/>
+          <stop offset="80%"  stop-color="#a8e8a8" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#4A8050" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="ribbon" stroke="url(#ribGrad)" d="M0 540 L120 520 L220 580 L320 510 L440 560 L560 470 L680 520 L800 430 L920 480 L1040 380 L1160 420 L1280 320 L1400 350"></path>
+      <path class="ribbon" stroke="url(#ribGrad)" style="animation-delay: 3s; opacity: 0.18;" d="M0 600 L140 580 L260 620 L380 560 L500 610 L620 530 L740 580 L860 500 L980 540 L1100 460 L1220 490 L1340 400 L1400 420"></path>
+    </svg>
+  </div>
   <div class="bg-layer bg-scan"></div>
   <div class="bg-layer bg-vignette"></div>
 
@@ -591,14 +830,50 @@
     <span style="top:38%; left:94%; animation-delay: 5s;">🎁</span>
   </div>
 
+  <!-- Rising ember particles (CSS-driven, lightweight) -->
+  <div class="embers" aria-hidden="true">
+    <i style="left:5%;  animation-duration:14s; animation-delay: 0s;"></i>
+    <i style="left:15%; animation-duration:18s; animation-delay: 2s;"></i>
+    <i style="left:28%; animation-duration:16s; animation-delay: 5s;"></i>
+    <i style="left:42%; animation-duration:20s; animation-delay: 1s;"></i>
+    <i style="left:55%; animation-duration:13s; animation-delay: 8s;"></i>
+    <i style="left:68%; animation-duration:17s; animation-delay: 3s;"></i>
+    <i style="left:78%; animation-duration:15s; animation-delay: 6s;"></i>
+    <i style="left:90%; animation-duration:19s; animation-delay: 4s;"></i>
+  </div>
+
   <div class="topbar">
     <span class="dot"></span><strong>VIP MEMBERS ONLY</strong> &middot; Free 3M Gift Claim Portal &middot; LIVE
   </div>
 
   <div class="container">
     <div class="brand-row">
-      <div class="brand">3M<span class="accent">.</span>TRADING</div>
-      <div class="brand-meta">CLAIM PORTAL &middot; ONLINE</div>
+      <a href="#" class="brand" aria-label="3M Trading home">
+        <div class="brand-logo">
+          <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" width="56" height="56" loading="eager" />
+        </div>
+        <div>
+          <div class="brand-name">3M <span class="accent">TRADING</span></div>
+          <div class="brand-sub">Razza Trades &middot; Claim Portal</div>
+        </div>
+      </a>
+      <div class="brand-meta">SYSTEM &middot; LIVE</div>
+    </div>
+
+    <!-- Live claim ticker / stats strip -->
+    <div class="stats-strip" aria-hidden="true">
+      <div class="stat">
+        <div class="stat-num" id="stat-claims">—</div>
+        <div class="stat-label">Eligible VIP claims</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-countries">—</div>
+        <div class="stat-label">Countries shipping</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-status"><span class="led"></span>OPEN</div>
+        <div class="stat-label">Window status</div>
+      </div>
     </div>
 
     <!-- ========== SCREEN 1: VERIFY ========== -->
@@ -768,14 +1043,14 @@
     <!-- ========== SCREEN 4: SUCCESS ========== -->
     <section id="screen-success" class="screen">
       <div class="card card-green text-center">
-        <span class="card-shine" style="background: linear-gradient(90deg, transparent, var(--green), transparent);"></span>
+        <span class="card-shine"></span>
         <div class="success-check" aria-hidden="true">
           <svg viewBox="0 0 100 100">
             <circle class="check-circle" cx="50" cy="50" r="45"></circle>
             <polyline class="check-path" points="28,52 44,68 74,36"></polyline>
           </svg>
         </div>
-        <h1 class="text-center"><span class="accent" style="background: linear-gradient(120deg, var(--green), #B8F0B8); -webkit-background-clip: text; background-clip: text;">You're Locked In</span></h1>
+        <h1 class="text-center">You're <span class="accent">Locked In</span></h1>
         <p class="lede" style="margin: 0.5rem auto 2rem;">
           Your claim is confirmed. We'll process your order and ship to the address on file. You'll get tracking info via email and Discord DM once it goes out.
         </p>
@@ -795,7 +1070,7 @@
           </div>
           <div class="summary-row">
             <span class="summary-label">Claim ID</span>
-            <span class="summary-value" id="success-id" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--gold);">—</span>
+            <span class="summary-value" id="success-id" style="font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--gold);">—</span>
           </div>
         </div>
 
@@ -1074,7 +1349,7 @@ $("btn-clear-claim").addEventListener("click", () => {
 function fireConfetti() {
   const root = $("confetti");
   root.innerHTML = "";
-  const colors = ["#D22D1E", "#F04030", "#E8B547", "#7ECF7E", "#ffffff"];
+  const colors = ["#7ECF7E", "#a8e8a8", "#4A8050", "#E8B547", "#ffffff"];
   for (let i = 0; i < 120; i++) {
     const c = document.createElement("i");
     const col = colors[Math.floor(Math.random() * colors.length)];
@@ -1123,6 +1398,54 @@ function logClaim(status) {
     });
   } catch (e) {}
 }
+
+// =============================================================================
+// STATS STRIP — counters animate up on load
+// =============================================================================
+(function () {
+  const claims = WHITELIST.length;
+  const countries = new Set(WHITELIST.map((r) => (r.country || "").trim().toLowerCase()).filter(Boolean)).size;
+  function rollTo(el, target, dur) {
+    if (!el) return;
+    const start = performance.now();
+    function tick(t) {
+      const p = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  setTimeout(() => {
+    rollTo(document.getElementById("stat-claims"), claims, 1200);
+    rollTo(document.getElementById("stat-countries"), countries, 1400);
+  }, 200);
+})();
+
+// =============================================================================
+// MOUSE SPOTLIGHT — soft green follow-glow
+// =============================================================================
+(function () {
+  const isCoarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  if (isCoarse) return;
+  let raf = null, x = 0, y = 0;
+  document.addEventListener("mousemove", (e) => {
+    x = e.clientX; y = e.clientY;
+    document.body.classList.add("has-cursor");
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      document.body.style.setProperty("--mx", x + "px");
+      document.body.style.setProperty("--my", y + "px");
+      document.body.style.setProperty("background-position", "0 0");
+      // Move ::before via CSS variables
+      raf = null;
+    });
+  });
+  // Inject dynamic positioning into ::before via inline style on a helper element
+  const helper = document.createElement("style");
+  helper.textContent = "body::before { transform: translate(calc(var(--mx, 50vw) - 50%), calc(var(--my, 50vh) - 50%)); }";
+  document.head.appendChild(helper);
+})();
 
 // =============================================================================
 // 3D CARD TILT (mouse-tracking parallax)
@@ -1205,8 +1528,8 @@ function logClaim(status) {
       const py = p.y + oy * p.z;
       ctx.beginPath();
       if (p.hue === 14) {
-        ctx.fillStyle = "rgba(232, 90, 70," + alpha + ")";
-        ctx.shadowBlur = 8; ctx.shadowColor = "rgba(210,45,30,0.7)";
+        ctx.fillStyle = "rgba(168, 232, 168," + alpha + ")";
+        ctx.shadowBlur = 10; ctx.shadowColor = "rgba(126, 207, 126, 0.8)";
       } else {
         ctx.fillStyle = "rgba(255,255,255," + (alpha * 0.55) + ")";
         ctx.shadowBlur = 0;
@@ -1223,8 +1546,8 @@ function logClaim(status) {
         const dx = a.x - b.x, dy = a.y - b.y;
         const d = dx * dx + dy * dy;
         if (d < 10000) {
-          const op = (1 - d / 10000) * 0.08;
-          ctx.strokeStyle = "rgba(210, 45, 30," + op + ")";
+          const op = (1 - d / 10000) * 0.10;
+          ctx.strokeStyle = "rgba(126, 207, 126," + op + ")";
           ctx.lineWidth = 0.6;
           ctx.beginPath();
           ctx.moveTo(a.x + ox * a.z, a.y + oy * a.z);
