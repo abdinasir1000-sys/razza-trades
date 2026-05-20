@@ -823,9 +823,15 @@
 // =============================================================================
 // CONFIG — EDIT THESE BEFORE DEPLOYING
 // =============================================================================
-const WHOP_CLIENT_ID = "PASTE_WHOP_CLIENT_ID_HERE";
+const WHOP_CLIENT_ID = "app_uA0OBcqHmdBC8m";
 const WHOP_REDIRECT_URI = "https://gifts.3mtrading.ca/";
-const WHOP_PRODUCT_ID = "PASTE_WHOP_PRODUCT_ID_HERE"; // used to verify active access
+// Any of these 4 products = active member
+const WHOP_PRODUCT_IDS = [
+  "prod_eUA1e6aB3o0Fg",  // VIP Mentorship
+  "prod_wyFY1Vxi71uyB",  // Elite Member
+  "prod_HcZD3fcfRozcO",  // Early 3M Bot Access
+  "prod_VbFTraKdXaxTG"   // 3M Trading Lifetime
+];
 const GOOGLE_SHEETS_WEBHOOK_URL = "PASTE_APPS_SCRIPT_URL_HERE";
 
 // =============================================================================
@@ -1042,11 +1048,11 @@ async function verifyMembership(token) {
       ? memData
       : (memData.data || memData.memberships || memData.results || []);
 
-    const productConfigured = WHOP_PRODUCT_ID && WHOP_PRODUCT_ID.indexOf("PASTE_") !== 0;
     let hasAccess = false;
-    if (productConfigured) {
+    if (WHOP_PRODUCT_IDS.length > 0) {
       hasAccess = memberships.some(function (m) {
-        return m && (m.product_id === WHOP_PRODUCT_ID || m.product === WHOP_PRODUCT_ID || (m.product && m.product.id === WHOP_PRODUCT_ID));
+        const pid = m && (m.product_id || m.product || (m.product && m.product.id));
+        return WHOP_PRODUCT_IDS.indexOf(pid) !== -1;
       });
     } else {
       hasAccess = memberships.length > 0;
