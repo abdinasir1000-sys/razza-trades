@@ -14,19 +14,18 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "Server misconfigured" });
   }
 
-  const body = new URLSearchParams({
-    grant_type:    "authorization_code",
-    code,
-    redirect_uri,
-    client_id:     clientId,
-    client_secret: clientSecret,
-    code_verifier
-  });
-
-  const whopResp = await fetch("https://api.whop.com/v5/oauth/token", {
+  // Whop's modern token endpoint requires JSON body, NOT form-encoded
+  const whopResp = await fetch("https://api.whop.com/oauth/token", {
     method:  "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body:    body.toString()
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type:    "authorization_code",
+      code,
+      redirect_uri,
+      client_id:     clientId,
+      client_secret: clientSecret,
+      code_verifier
+    })
   });
 
   const data = await whopResp.json();

@@ -226,10 +226,6 @@
   }
   .brand-logo {
     width: 52px; height: 52px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 1px solid var(--green-border);
-    background: rgba(0,0,0,0.3);
     flex-shrink: 0;
   }
   .brand-logo-img {
@@ -716,7 +712,7 @@
           </div>
           <div class="brand-text">
             <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
           </div>
         </div>
         <div class="brand-live">
@@ -762,7 +758,7 @@
           </div>
           <div class="brand-text">
             <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
           </div>
         </div>
         <div class="brand-live">
@@ -790,7 +786,7 @@
           </div>
           <div class="brand-text">
             <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
           </div>
         </div>
         <div class="brand-live">
@@ -814,7 +810,7 @@
           </div>
           <div class="brand-text">
             <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
           </div>
         </div>
         <div class="brand-live">
@@ -922,7 +918,7 @@
           </div>
           <div class="brand-text">
             <div class="brand-name">3M <span class="accent">Trading</span></div>
-            <div class="brand-sub">Razza Trades · Claim Portal</div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
           </div>
         </div>
         <div class="brand-live">
@@ -1083,11 +1079,11 @@ async function startOAuth() {
       client_id: WHOP_CLIENT_ID,
       redirect_uri: WHOP_REDIRECT_URI,
       response_type: "code",
-      scope: "openid",
+      scope: "openid profile email",
       code_challenge: challenge,
       code_challenge_method: "S256"
     });
-    window.location.href = "https://whop.com/oauth?" + params.toString();
+    window.location.href = "https://api.whop.com/oauth/authorize?" + params.toString();
   } catch (e) {
     console.error("OAuth start failed:", e);
     showError("signin-error", "Couldn't start sign-in. Please try again or DM support in the Discord.");
@@ -1158,11 +1154,11 @@ function cleanUrl() {
 async function verifyMembership(token) {
   try {
     // 1. Get user info
-    const meResp = await fetch("https://api.whop.com/v5/me", {
+    const meResp = await fetch("https://api.whop.com/oauth/userinfo", {
       headers: { "Authorization": "Bearer " + token }
     });
     if (!meResp.ok) {
-      console.error("GET /me failed:", meResp.status);
+      console.error("GET /oauth/userinfo failed:", meResp.status);
       sessionStorage.removeItem(STORAGE_TOKEN_KEY);
       showError("signin-error", "Couldn't fetch your Whop profile. Please try again.");
       showScreen("screen-signin");
@@ -1170,10 +1166,10 @@ async function verifyMembership(token) {
     }
     const me = await meResp.json();
     whopUser = {
-      id: me.id || me.user_id || "",
+      id: String(me.sub || me.id || me.user_id || ""),
       email: me.email || "",
-      name: me.name || me.username || "",
-      username: me.username || ""
+      name: me.name || me.preferred_username || "",
+      username: me.preferred_username || me.name || ""
     };
 
     // 2. Check double-claim
