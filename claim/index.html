@@ -1486,10 +1486,7 @@ $("btn-submit").addEventListener("click", async function () {
   if (!submitResult.ok) {
     submitBtn.textContent = originalLabel;
     submitBtn.disabled = false;
-    const errMsg = submitResult.detail
-      ? "Couldn't save your claim: " + submitResult.detail
-      : "We couldn't save your claim. Please try again or DM support in the Discord.";
-    showError("form-error", errMsg);
+    showError("form-error", "We couldn't save your claim. Please try again or DM support in the Discord.");
     return;
   }
 
