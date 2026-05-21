@@ -17,29 +17,25 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: List Vercel projects (debug)
+      - name: Get org ID and deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo "=== Vercel projects ==="
-          curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects?limit=50" \
-            | python3 -c "
-          import sys, json
-          try:
-            data = json.load(sys.stdin)
-            for p in data.get('projects', []):
-              link = (p.get('link') or {})
-              print(f\"name={p['name']}  id={p['id']}  org={p.get('accountId','')}  repo={link.get('repo','')}\")
-          except Exception as e:
-            print('parse error:', e)
-            sys.stdin.seek(0)
-            print(sys.stdin.read()[:500])
-          "
+          PROJECT_ID="prj_cN3FkhM8AWqw7GhVgyhINKUyf66J"
 
-      - name: Deploy
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
+          # Get account/org ID from project
+          ORG_ID=$(curl -sf \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$PROJECT_ID" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin).get('accountId',''))")
+
+          echo "Project ID: $PROJECT_ID"
+          echo "Org ID: $ORG_ID"
+
+          mkdir -p claim/.vercel
+          echo "{\"projectId\":\"$PROJECT_ID\",\"orgId\":\"$ORG_ID\"}" > claim/.vercel/project.json
+
           cd claim
-          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
