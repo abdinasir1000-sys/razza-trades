@@ -1664,6 +1664,20 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
+  // D-shaped handle on +X (right) side — classic coffee mug grip
+  // Points in XY plane: Z=0 keeps it on the side away from front logo face (+Z)
+  const hCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0.46,  0.28, 0),
+    new THREE.Vector3(0.60,  0.22, 0),
+    new THREE.Vector3(0.76,  0.00, 0),
+    new THREE.Vector3(0.60, -0.35, 0),
+    new THREE.Vector3(0.44, -0.44, 0),
+  ]);
+  g.add(new THREE.Mesh(
+    new THREE.TubeGeometry(hCurve, 32, 0.055, 10, false),
+    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.28 })
+  ));
+
   g.scale.setScalar(0.58);
   return g;
 }
@@ -1923,7 +1937,7 @@ function init() {
   keyLight.position.set(3, 4, 4); scene.add(keyLight);
   const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
   fillLight.position.set(-2, 0, 3); scene.add(fillLight);
-  const rimLight = new THREE.DirectionalLight(0x7ECF7E, 0.40);
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.30);
   rimLight.position.set(0, -2, -3); scene.add(rimLight);
 
   controls = new OrbitControls(camera, canvas);
@@ -1934,6 +1948,7 @@ function init() {
   controls.autoRotateSpeed = 2.0;
   controls.minDistance     = 2.0;
   controls.maxDistance     = 7;
+  controls.saveState();
 
   (function loop() {
     requestAnimationFrame(loop);
@@ -1948,6 +1963,7 @@ window.setGiftModel = function(giftName) {
     if (!viewer) return;
     viewer.style.display = 'flex';
     if (!renderer) init();
+    controls.reset();
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
     currentModelType = giftName;
     if      (giftName === '3M Coffee Mug')     currentModel = mkMug();
