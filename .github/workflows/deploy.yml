@@ -10,82 +10,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check token is set
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: List Vercel projects (debug)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "ERROR: VERCEL_TOKEN secret is not set. Add it in GitHub repo Settings → Secrets → Actions."
-            exit 1
-          fi
-          echo "Token is set (length: ${#VERCEL_TOKEN})"
-
-      - name: Find Vercel project
-        id: project
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          echo "Fetching projects from Vercel API..."
-          RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects?limit=50")
-
-          HTTP_STATUS=$(echo "$RESP" | grep "HTTP_STATUS:" | cut -d: -f2)
-          BODY=$(echo "$RESP" | grep -v "HTTP_STATUS:")
-
-          echo "HTTP Status: $HTTP_STATUS"
-
-          if [ "$HTTP_STATUS" != "200" ]; then
-            echo "Vercel API error: $BODY"
-            exit 1
-          fi
-
-          # List all projects for visibility
-          echo "All projects in account:"
-          echo "$BODY" | python3 -c "
+          echo "=== Vercel projects ==="
+          curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects?limit=50" \
+            | python3 -c "
           import sys, json
-          data = json.load(sys.stdin)
-          for p in data.get('projects', []):
-              link = p.get('link', {}) or {}
-              print(f\"  {p['name']} | id={p['id']} | repo={link.get('repo','none')} | account={p.get('accountId','')}\")
+          try:
+            data = json.load(sys.stdin)
+            for p in data.get('projects', []):
+              link = (p.get('link') or {})
+              print(f\"name={p['name']}  id={p['id']}  org={p.get('accountId','')}  repo={link.get('repo','')}\")
+          except Exception as e:
+            print('parse error:', e)
+            sys.stdin.seek(0)
+            print(sys.stdin.read()[:500])
           "
 
-          # Find the right project
-          RESULT=$(echo "$BODY" | python3 -c "
-          import sys, json
-          data = json.load(sys.stdin)
-          for p in data.get('projects', []):
-              link = p.get('link', {}) or {}
-              repo = link.get('repo', '') or ''
-              name = p['name']
-              if 'razza-trades' in repo or name in ('claim', 'razza-trades', 'gifts-3mtrading', 'gift-claim'):
-                  print(f\"{p['id']}:{p.get('accountId', '')}\")
-                  break
-          ")
-
-          if [ -z "$RESULT" ]; then
-            echo "Could not auto-detect project. Check project names above and update workflow."
-            exit 1
-          fi
-
-          PROJECT_ID=$(echo "$RESULT" | cut -d: -f1)
-          ORG_ID=$(echo "$RESULT" | cut -d: -f2)
-          echo "Found: project=$PROJECT_ID org=$ORG_ID"
-          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
-          echo "org_id=$ORG_ID" >> $GITHUB_OUTPUT
-
-      - name: Deploy to Vercel
+      - name: Deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ steps.project.outputs.project_id }}
-          VERCEL_ORG_ID: ${{ steps.project.outputs.org_id }}
         run: |
-          mkdir -p claim/.vercel
-          echo "{\"projectId\":\"$VERCEL_PROJECT_ID\",\"orgId\":\"$VERCEL_ORG_ID\"}" > claim/.vercel/project.json
-          cat claim/.vercel/project.json
-
-          npm install -g vercel@latest
           cd claim
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          vercel build --prod --token="$VERCEL_TOKEN"
-          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
