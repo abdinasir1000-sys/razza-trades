@@ -1616,54 +1616,49 @@ function makeTex(drawFn, w, h) {
 }
 
 /* ================================================================
-   COFFEE MUG — realistic ceramic mug, narrower profile
-   Logo BAKED into LatheGeometry body texture (no floating decal,
-   no z-fighting). LatheGeometry UV: U=0.25 = +Z front face.
-   Handle: CatmullRomCurve3, mid-body y=+0.22 to y=-0.52
+   COFFEE MUG — wider profile so it looks like a real mug, not a bottle
+   Logo baked into body texture at U=0.25 (front face in LatheGeometry UV)
    ================================================================ */
 function mkMug() {
   const g = new THREE.Group();
 
-  // Narrower profile so it looks like a real mug (not a bucket)
-  // y: -0.80 (base) to +0.80 (rim). Radius: 0.28–0.38
+  // Wider profile: height 1.60, radius 0.42–0.50 → ~1:1 height:diameter
   const pts = [
     new THREE.Vector2(0.00, -0.80),
-    new THREE.Vector2(0.28, -0.80),
-    new THREE.Vector2(0.30, -0.76),
-    new THREE.Vector2(0.32, -0.40),
-    new THREE.Vector2(0.34,  0.00),
-    new THREE.Vector2(0.36,  0.50),
-    new THREE.Vector2(0.37,  0.68),
-    new THREE.Vector2(0.38,  0.74),
-    new THREE.Vector2(0.36,  0.80),
+    new THREE.Vector2(0.40, -0.80),
+    new THREE.Vector2(0.42, -0.76),
+    new THREE.Vector2(0.44, -0.40),
+    new THREE.Vector2(0.45,  0.00),
+    new THREE.Vector2(0.46,  0.50),
+    new THREE.Vector2(0.48,  0.68),
+    new THREE.Vector2(0.49,  0.74),
+    new THREE.Vector2(0.47,  0.80),
   ];
 
-  // Body texture: dark mug, "3M TRADING" baked at U=0.25 (the front face).
-  // LatheGeometry UV: U=angle/(2π). angle=π/2 (+Z, faces camera) → U=0.25.
-  // CanvasTexture has flipY=true: canvas y=h/2 → mug V=0.5 → mug center (y≈0).
+  // Logo baked at U=0.25 (front face) center of canvas
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
     const lx = 0.25 * w, ly = h * 0.50;
-    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.14);
-    grd.addColorStop(0, 'rgba(126,207,126,0.30)'); grd.addColorStop(1, 'transparent');
+    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.16);
+    grd.addColorStop(0, 'rgba(126,207,126,0.32)'); grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 18;
-    ctx.font = `bold ${Math.round(w * 0.14)}px Arial`;
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 20;
+    ctx.font = `bold ${Math.round(w * 0.15)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', lx, ly - h * 0.06);
-    ctx.shadowBlur = 6;
-    ctx.font = `bold ${Math.round(w * 0.044)}px Arial`;
+    ctx.fillText('3M', lx, ly - h * 0.065);
+    ctx.shadowBlur = 8;
+    ctx.font = `bold ${Math.round(w * 0.048)}px Arial`;
     ctx.fillStyle = '#4A8050';
-    ctx.fillText('TRADING', lx, ly + h * 0.068);
+    ctx.fillText('TRADING', lx, ly + h * 0.072);
   }, 512, 512);
 
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(pts, 80),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.20 })
+    new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
   ));
 
-  // Inner cavity makes top opening look hollow
-  const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.86, v.y + 0.01));
+  // Inner cavity (back-face so rim looks hollow)
+  const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(iPts, 40),
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
@@ -1671,100 +1666,114 @@ function mkMug() {
 
   // Green rim torus
   const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.37, 0.014, 8, 64),
+    new THREE.TorusGeometry(0.47, 0.016, 8, 64),
     new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.22, emissive: 0x1a3a1a, emissiveIntensity: 0.5 })
   );
   rim.position.y = 0.79;
   g.add(rim);
 
-  // Handle: D-curve mid-body. Upper y=+0.22 (36% down), lower y=-0.52 (83% down).
-  // Max bulge at y=-0.12 — center-of-handle is BELOW mid of mug = looks natural.
+  // Handle: D-curve mid-body. y=+0.22 (36% down) to y=-0.52 (83% down).
   const hc = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.36,  0.22, 0),
-    new THREE.Vector3(0.50,  0.14, 0),
-    new THREE.Vector3(0.64, -0.12, 0),
-    new THREE.Vector3(0.50, -0.40, 0),
-    new THREE.Vector3(0.33, -0.52, 0),
+    new THREE.Vector3(0.47,  0.22, 0),
+    new THREE.Vector3(0.65,  0.14, 0),
+    new THREE.Vector3(0.80, -0.12, 0),
+    new THREE.Vector3(0.65, -0.40, 0),
+    new THREE.Vector3(0.45, -0.52, 0),
   ]);
   g.add(new THREE.Mesh(
-    new THREE.TubeGeometry(hc, 32, 0.044, 10, false),
+    new THREE.TubeGeometry(hc, 32, 0.048, 10, false),
     new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.28 })
   ));
 
-  g.scale.setScalar(0.78);
+  g.scale.setScalar(0.72);
   return g;
 }
 
 /* ================================================================
    PHONE CASE — iPhone 16 Pro style, RoundedBoxGeometry
+   Key fix: NO high-metalness materials (they need an HDRI env to show up;
+   without one they go pitch black). All materials use low metalness.
+   Logo plane uses emissive so it glows regardless of lighting.
    ================================================================ */
 function mkPhoneCase() {
   const g = new THREE.Group();
-  const W = 0.92, H = 2.00, D = 0.14;
+  const W = 0.90, H = 2.00, D = 0.16;
 
-  // Back face logo texture
-  const backTex = makeTex((ctx, w, h) => {
+  // Logo canvas: big "3M TRADING" centred at canvas (w/2, h/2)
+  // Centred so UV flipY doesn't matter — it's always in the middle
+  const logoTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
-    const grd = ctx.createRadialGradient(w/2, h*0.65, 0, w/2, h*0.65, w*0.50);
-    grd.addColorStop(0, 'rgba(126,207,126,0.16)'); grd.addColorStop(1, 'transparent');
+    const cx = w / 2, cy = h / 2;
+    // Subtle green radial glow
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.45);
+    grd.addColorStop(0, 'rgba(126,207,126,0.22)'); grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
-    ctx.font = 'bold 170px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', 256, 640);
-    ctx.shadowBlur = 8; ctx.font = 'bold 54px Arial'; ctx.fillStyle = '#4A8050';
-    ctx.fillText('TRADING', 256, 780);
+    // "3M" — large and bright
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 40;
+    ctx.font = `bold ${Math.round(h * 0.24)}px Arial`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('3M', cx, cy - h * 0.09);
+    // "TRADING"
+    ctx.shadowBlur = 12;
+    ctx.font = `bold ${Math.round(h * 0.072)}px Arial`;
+    ctx.fillStyle = '#5aaa60';
+    ctx.fillText('TRADING', cx, cy + h * 0.10);
   }, 512, 1024);
 
-  // Rounded main body
+  // Body: low metalness so ambient + directional light actually illuminate it
   g.add(new THREE.Mesh(
-    new RoundedBoxGeometry(W, H, D, 4, 0.07),
-    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.40, metalness: 0.2 })
+    new RoundedBoxGeometry(W, H, D, 4, 0.06),
+    new THREE.MeshStandardMaterial({ color: 0x1e1e1e, roughness: 0.55, metalness: 0.0 })
   ));
 
-  // Back logo plane (sits on +z face)
-  const backPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(W - 0.06, H - 0.06),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex, roughness: 0.4 })
+  // Logo plane on the +Z face — emissive so it GLOWS regardless of lighting
+  const logoPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(W - 0.08, H - 0.08),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff, map: logoTex, roughness: 0.4,
+      emissive: 0xffffff, emissiveMap: logoTex, emissiveIntensity: 0.9,
+    })
   );
-  backPlane.position.set(0, 0, D / 2 + 0.008);
-  g.add(backPlane);
+  logoPlane.position.set(0, 0, D / 2 + 0.010);
+  g.add(logoPlane);
 
-  // Camera island — rounded, top-left of back face
-  const islandM = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.18, metalness: 0.88 });
-  const island = new THREE.Mesh(new RoundedBoxGeometry(0.44, 0.46, 0.060, 4, 0.06), islandM);
-  island.position.set(-0.20, 0.72, D / 2 + 0.030);
+  // Camera island — low metalness so it's actually visible as a raised bump
+  const islandM = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.45, metalness: 0.15 });
+  const island = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.44, 0.055, 4, 0.05), islandM);
+  island.position.set(-0.20, 0.72, D / 2 + 0.028);
   g.add(island);
 
-  // 3 lenses in triangle layout
-  const ringM  = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.18, metalness: 0.92 });
-  const glassM = new THREE.MeshStandardMaterial({ color: 0x060612, roughness: 0.03, metalness: 1.0 });
-  [[-0.26, 0.80], [-0.14, 0.63], [-0.26, 0.63]].forEach(([lx, ly]) => {
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.090, 0.090, 0.044, 20), ringM);
-    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.048); g.add(ring);
-    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.060, 0.060, 0.024, 20), glassM);
-    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.064); g.add(lens);
+  // 3 lenses — low metalness so they show as dark grey circles, not invisible black
+  const ringM  = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.25, metalness: 0.20 });
+  const glassM = new THREE.MeshStandardMaterial({ color: 0x0a0a18, roughness: 0.06, metalness: 0.30 });
+  [[-0.26, 0.79], [-0.14, 0.63], [-0.26, 0.63]].forEach(([lx, ly]) => {
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.086, 0.086, 0.040, 20), ringM);
+    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.044); g.add(ring);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.056, 0.022, 20), glassM);
+    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.058); g.add(lens);
   });
-  // LiDAR
-  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.028, 16), ringM);
-  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.10, 0.68, D / 2 + 0.040); g.add(lidar);
+  // LiDAR dot
+  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.024, 16), ringM);
+  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.10, 0.67, D / 2 + 0.036); g.add(lidar);
 
-  // Side buttons
-  const btnM = new THREE.MeshStandardMaterial({ color: 0x252525, roughness: 0.28, metalness: 0.78 });
-  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.16, 0.10), btnM);
-  aBtn.position.set(-W / 2 - 0.017, 0.50, 0); g.add(aBtn);
-  [0.20, -0.10].forEach(by => {
-    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.16, 0.10), btnM);
-    vBtn.position.set(W / 2 + 0.017, by, 0); g.add(vBtn);
+  // Side buttons — visible grey
+  const btnM = new THREE.MeshStandardMaterial({ color: 0x2e2e2e, roughness: 0.40, metalness: 0.10 });
+  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.15, 0.10), btnM);
+  aBtn.position.set(-W / 2 - 0.016, 0.48, 0); g.add(aBtn);
+  [0.18, -0.10].forEach(by => {
+    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.15, 0.10), btnM);
+    vBtn.position.set(W / 2 + 0.016, by, 0); g.add(vBtn);
   });
 
-  // Green accent bottom edge
-  g.add(Object.assign(new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.5, 0.016, D + 0.01),
-    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: 0x1a3a1a, emissiveIntensity: 0.6 })
-  ), { position: new THREE.Vector3(0, -H / 2 + 0.04, 0) }));
+  // Green accent bottom bar — emissive so it's always visible
+  const greenBar = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 0.5, 0.015, D + 0.01),
+    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: GREEN_D, emissiveIntensity: 0.9 })
+  );
+  greenBar.position.set(0, -H / 2 + 0.04, 0);
+  g.add(greenBar);
 
-  // No rotation needed: logo, camera island, lenses are all on +Z face which faces camera
-  g.scale.setScalar(0.74);
+  g.scale.setScalar(0.76);
   return g;
 }
 
