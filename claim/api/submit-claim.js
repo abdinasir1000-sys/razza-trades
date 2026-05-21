@@ -66,11 +66,17 @@ module.exports = async function handler(req, res) {
     const checkResp = await fetch(checkUrl, {
       headers: { "apikey": supabaseKey, "Authorization": `Bearer ${supabaseKey}` }
     });
-    if (checkResp.ok) {
-      const existing = await checkResp.json();
-      if (existing.length > 0) {
-        return res.status(409).json({ ok: false, error: "already_claimed" });
-      }
+    if (!checkResp.ok) {
+      const errTxt = await checkResp.text();
+      console.error("Supabase check failed:", checkResp.status, errTxt);
+      // Table likely doesn't exist — surface the error clearly
+      let msg = errTxt;
+      try { msg = JSON.parse(errTxt).message || errTxt; } catch (_) {}
+      return res.status(500).json({ ok: false, supabase_error: msg.slice(0, 300) });
+    }
+    const existing = await checkResp.json();
+    if (existing.length > 0) {
+      return res.status(409).json({ ok: false, error: "already_claimed" });
     }
 
     const resp = await fetch(`${supabaseUrl}/rest/v1/claims`, {
