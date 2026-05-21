@@ -1440,7 +1440,10 @@ $("btn-submit").addEventListener("click", async function () {
   if (!submitResult.ok) {
     submitBtn.textContent = originalLabel;
     submitBtn.disabled = false;
-    showError("form-error", "We couldn't save your claim. Please try again or DM support in the Discord.");
+    const errMsg = submitResult.detail
+      ? "Couldn't save your claim: " + submitResult.detail
+      : "We couldn't save your claim. Please try again or DM support in the Discord.";
+    showError("form-error", errMsg);
     return;
   }
 
@@ -1465,15 +1468,15 @@ async function submitClaim(payload) {
     });
     if (resp.status === 409) return { ok: false, alreadyClaimed: true };
     if (!resp.ok) {
-      // Log the server's error detail to the browser console for debugging
       const body = await resp.json().catch(() => ({}));
-      console.error("submit-claim HTTP", resp.status, body);
-      return { ok: false };
+      const detail = body.supabase_error || body.error || ("HTTP " + resp.status);
+      console.error("submit-claim failed:", detail);
+      return { ok: false, detail };
     }
     return { ok: true };
   } catch (e) {
     console.error("Claim submit network error:", e);
-    return { ok: false };
+    return { ok: false, detail: e.message };
   }
 }
 
