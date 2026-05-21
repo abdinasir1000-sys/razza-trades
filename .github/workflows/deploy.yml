@@ -1,0 +1,71 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find Vercel project and deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Find the project connected to this GitHub repo
+          PROJECTS=$(curl -sf -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects?limit=50")
+
+          PROJECT_ID=$(echo "$PROJECTS" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for p in data.get('projects', []):
+              link = p.get('link', {})
+              repo = link.get('repo', '') or ''
+              if 'razza-trades' in repo or p['name'] in ('claim', 'razza-trades', 'gifts-3mtrading'):
+                  print(p['id'])
+                  break
+          " 2>/dev/null)
+
+          ORG_ID=$(echo "$PROJECTS" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for p in data.get('projects', []):
+              link = p.get('link', {})
+              repo = link.get('repo', '') or ''
+              if 'razza-trades' in repo or p['name'] in ('claim', 'razza-trades', 'gifts-3mtrading'):
+                  print(p.get('accountId', ''))
+                  break
+          " 2>/dev/null)
+
+          echo "Project ID: $PROJECT_ID"
+          echo "Org ID: $ORG_ID"
+
+          if [ -z "$PROJECT_ID" ]; then
+            echo "Could not find project — listing all projects for debugging:"
+            echo "$PROJECTS" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for p in data.get('projects', []):
+              print(p['name'], p['id'])
+          "
+            exit 1
+          fi
+
+          # Write vercel project config
+          mkdir -p claim/.vercel
+          cat > claim/.vercel/project.json <<EOF
+          {
+            "projectId": "$PROJECT_ID",
+            "orgId": "$ORG_ID"
+          }
+          EOF
+
+          # Install Vercel CLI and deploy
+          npm install -g vercel@latest
+          cd claim
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
