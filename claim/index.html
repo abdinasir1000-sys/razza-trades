@@ -1357,7 +1357,7 @@ function selectGift(gift) {
     if (el.getAttribute("data-gift") === gift) el.classList.add("selected");
     else el.classList.remove("selected");
   });
-  if (typeof window.setGiftModel === "function") window.setGiftModel(gift);
+  try { if (typeof window.setGiftModel === "function") window.setGiftModel(gift); } catch(e) { console.warn("3D viewer error:", e); }
 }
 
 document.querySelectorAll(".gift-option").forEach(function (el) {
@@ -1723,18 +1723,22 @@ function init() {
 }
 
 window.setGiftModel = function(giftName) {
-  const viewer = document.getElementById('model-viewer');
-  if (!viewer) return;
-  viewer.style.display = 'flex';
+  try {
+    const viewer = document.getElementById('model-viewer');
+    if (!viewer) return;
+    viewer.style.display = 'flex';
 
-  if (!renderer) init();
-  if (currentModel) { scene.remove(currentModel); currentModel = null; }
+    if (!renderer) init();
+    if (currentModel) { scene.remove(currentModel); currentModel = null; }
 
-  if (giftName === '3M Coffee Mug') currentModel = mkMug();
-  else if (giftName === '3M Phone Case') currentModel = mkPhoneCase();
-  else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
+    if (giftName === '3M Coffee Mug') currentModel = mkMug();
+    else if (giftName === '3M Phone Case') currentModel = mkPhoneCase();
+    else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
 
-  if (currentModel) scene.add(currentModel);
+    if (currentModel) scene.add(currentModel);
+  } catch(e) {
+    console.warn('3D model viewer failed:', e);
+  }
 };
 </script>
 </body>
