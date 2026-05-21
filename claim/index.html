@@ -1603,6 +1603,7 @@ function fireConfetti() {
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const GREEN   = 0x7ECF7E;
 const GREEN_D = 0x4A8050;
@@ -1616,267 +1617,266 @@ function makeTex(drawFn, w, h) {
 }
 
 /* ================================================================
-   COFFEE MUG
-   - LatheGeometry for a realistic tapered silhouette
-   - Handle on the SIDE via QuadraticBezierCurve3
-   - Logo decal on the front face
-   - Black mug with green 3M logo
+   COFFEE MUG — realistic ceramic profile, handle mid-body
    ================================================================ */
 function mkMug() {
   const g = new THREE.Group();
 
-  // --- body via LatheGeometry (2-D profile swept 360°) ---
+  // Lathe profile: y spans -0.80 (base) to +0.80 (rim)
   const pts = [
-    new THREE.Vector2(0.0,  -0.75),  // centre bottom (for cap)
-    new THREE.Vector2(0.36, -0.75),  // base
-    new THREE.Vector2(0.38, -0.72),  // base edge
-    new THREE.Vector2(0.40, -0.50),  // lower body
-    new THREE.Vector2(0.41,  0.0),   // mid body
-    new THREE.Vector2(0.42,  0.50),  // upper body
-    new THREE.Vector2(0.44,  0.68),  // shoulder
-    new THREE.Vector2(0.45,  0.72),  // rim
-    new THREE.Vector2(0.43,  0.75),  // rim top inner edge
+    new THREE.Vector2(0.00, -0.80),
+    new THREE.Vector2(0.37, -0.80),
+    new THREE.Vector2(0.39, -0.76),
+    new THREE.Vector2(0.41, -0.40),
+    new THREE.Vector2(0.42,  0.00),
+    new THREE.Vector2(0.43,  0.52),
+    new THREE.Vector2(0.45,  0.70),
+    new THREE.Vector2(0.46,  0.76),
+    new THREE.Vector2(0.44,  0.80),
   ];
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x111111, roughness: 0.45, metalness: 0.05
-  });
-  g.add(new THREE.Mesh(new THREE.LatheGeometry(pts, 64), bodyMat));
+  g.add(new THREE.Mesh(
+    new THREE.LatheGeometry(pts, 80),
+    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.18, metalness: 0.0 })
+  ));
 
-  // --- inner cavity so the top doesn't look solid ---
-  const innerPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.88, v.y));
-  const innerMat = new THREE.MeshStandardMaterial({
-    color: 0x080808, roughness: 0.9, side: THREE.BackSide
-  });
-  const innerMesh = new THREE.Mesh(new THREE.LatheGeometry(innerPts, 32), innerMat);
-  innerMesh.position.y = 0.02;
-  g.add(innerMesh);
+  // Inner cavity
+  const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.86, v.y + 0.01));
+  g.add(new THREE.Mesh(
+    new THREE.LatheGeometry(iPts, 40),
+    new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.9, side: THREE.BackSide })
+  ));
 
-  // --- green rim accent torus ---
-  const rimTorus = new THREE.Mesh(
-    new THREE.TorusGeometry(0.44, 0.022, 8, 64),
-    new THREE.MeshStandardMaterial({
-      color: GREEN_D, roughness: 0.25,
-      emissive: 0x2a5a2a, emissiveIntensity: 0.6
-    })
+  // Rim accent
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(0.44, 0.018, 8, 64),
+    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.22, emissive: 0x1a3a1a, emissiveIntensity: 0.5 })
   );
-  rimTorus.position.y = 0.75;
-  g.add(rimTorus);
+  rim.position.y = 0.79;
+  g.add(rim);
 
-  // --- handle: D-shape on the RIGHT side, spanning middle 60% of height ---
-  // Start attaches at upper body (y=+0.32), end at lower body (y=-0.32)
-  const handleCurve = new THREE.QuadraticBezierCurve3(
-    new THREE.Vector3(0.44,  0.32, 0),   // upper attachment
-    new THREE.Vector3(0.88,  0.0,  0),   // bulge to the right
-    new THREE.Vector3(0.40, -0.32, 0)    // lower attachment
-  );
-  const handleMesh = new THREE.Mesh(
-    new THREE.TubeGeometry(handleCurve, 24, 0.055, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.5 })
-  );
-  g.add(handleMesh);
+  // Handle: CatmullRom D-curve on the RIGHT side
+  // Upper attach at y=+0.12 (~43% down from rim), lower at y=-0.52 (~83% down) — clearly MID-BODY
+  const hc = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0.43,  0.12, 0),
+    new THREE.Vector3(0.60,  0.04, 0),
+    new THREE.Vector3(0.80, -0.18, 0),  // max bulge, pulled down
+    new THREE.Vector3(0.60, -0.44, 0),
+    new THREE.Vector3(0.41, -0.52, 0),
+  ]);
+  g.add(new THREE.Mesh(
+    new THREE.TubeGeometry(hc, 32, 0.050, 10, false),
+    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.3 })
+  ));
 
-  // --- logo decal on the FRONT face ---
+  // Logo decal
   const logoTex = makeTex((ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    // subtle green glow halo
     const grd = ctx.createRadialGradient(w/2, h*0.44, 0, w/2, h*0.44, w*0.46);
-    grd.addColorStop(0, 'rgba(126,207,126,0.18)');
-    grd.addColorStop(1, 'transparent');
+    grd.addColorStop(0, 'rgba(126,207,126,0.18)'); grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    // "3M" in bright green
-    ctx.fillStyle = '#7ECF7E';
-    ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
     ctx.font = `bold ${Math.round(w * 0.40)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('3M', w / 2, h * 0.40);
-    // "TRADING" subtitle
-    ctx.shadowBlur = 10;
-    ctx.font = `bold ${Math.round(w * 0.11)}px Arial`;
+    ctx.shadowBlur = 10; ctx.font = `bold ${Math.round(w * 0.11)}px Arial`;
     ctx.fillStyle = '#4A8050';
     ctx.fillText('TRADING', w / 2, h * 0.65);
   }, 512, 384);
-
   const decal = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.60, 0.46),
-    new THREE.MeshStandardMaterial({
-      color: 0xffffff, map: logoTex,
-      transparent: true, roughness: 0.3, side: THREE.DoubleSide
-    })
+    new THREE.PlaneGeometry(0.58, 0.44),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, map: logoTex, transparent: true, roughness: 0.3, side: THREE.DoubleSide })
   );
-  // sit just in front of the mug surface at mid-body
-  decal.position.set(0, 0.04, 0.445);
+  decal.position.set(0, -0.12, 0.446);
   g.add(decal);
 
   return g;
 }
 
 /* ================================================================
-   PHONE CASE — iPhone 16 Pro style
-   - Thin rectangular body: 0.94W x 2.02H x 0.13D
-   - Back face has 3M logo (color: 0xffffff on map material)
-   - Camera island top-left with 3 lenses in triangle layout + LiDAR
-   - Side buttons
-   - Green accent on bottom edge
-   - Group rotated 180deg around Y so logo-side faces camera
+   PHONE CASE — iPhone 16 Pro style, RoundedBoxGeometry
    ================================================================ */
 function mkPhoneCase() {
   const g = new THREE.Group();
-  const W = 0.94, H = 2.02, D = 0.13;
+  const W = 0.92, H = 2.00, D = 0.14;
 
-  // back-face texture: logo in lower 60% (avoid camera island area top-left)
+  // Back face logo texture
   const backTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
     const grd = ctx.createRadialGradient(w/2, h*0.65, 0, w/2, h*0.65, w*0.50);
-    grd.addColorStop(0, 'rgba(126,207,126,0.16)');
-    grd.addColorStop(1, 'transparent');
+    grd.addColorStop(0, 'rgba(126,207,126,0.16)'); grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    // "3M" centred in lower 60%
-    ctx.fillStyle = '#7ECF7E';
-    ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
-    ctx.font = 'bold 170px Arial';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
+    ctx.font = 'bold 170px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('3M', 256, 640);
-    ctx.shadowBlur = 8;
-    ctx.font = 'bold 54px Arial';
-    ctx.fillStyle = '#4A8050';
+    ctx.shadowBlur = 8; ctx.font = 'bold 54px Arial'; ctx.fillStyle = '#4A8050';
     ctx.fillText('TRADING', 256, 780);
   }, 512, 1024);
 
-  const sideM  = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.45, metalness: 0.3 });
-  const greenM = new THREE.MeshStandardMaterial({ color: GREEN_D,  roughness: 0.35, emissive: 0x1a3a1a, emissiveIntensity: 0.5 });
-  // CRITICAL: color must be 0xffffff when using map, otherwise texture is multiplied to black
-  const backM  = new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex, roughness: 0.4 });
-  const frontM = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.7 });
-  // BoxGeometry face order: +x, -x, +y, -y, +z, -z
-  const mats = [sideM, sideM, sideM, greenM, backM, frontM];
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(W, H, D), mats));
+  // Rounded main body
+  g.add(new THREE.Mesh(
+    new RoundedBoxGeometry(W, H, D, 4, 0.07),
+    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.40, metalness: 0.2 })
+  ));
 
-  // camera island — top-left of the +z face
+  // Back logo plane (sits on +z face)
+  const backPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(W - 0.06, H - 0.06),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex, roughness: 0.4 })
+  );
+  backPlane.position.set(0, 0, D / 2 + 0.001);
+  g.add(backPlane);
+
+  // Camera island — rounded, top-left of back face
   const islandM = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.18, metalness: 0.88 });
-  const island  = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.46, 0.052), islandM);
-  island.position.set(-0.22, 0.73, D / 2 + 0.025);
+  const island = new THREE.Mesh(new RoundedBoxGeometry(0.44, 0.46, 0.060, 4, 0.06), islandM);
+  island.position.set(-0.20, 0.72, D / 2 + 0.030);
   g.add(island);
 
-  // lenses in triangle layout
+  // 3 lenses in triangle layout
   const ringM  = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.18, metalness: 0.92 });
-  const glassM = new THREE.MeshStandardMaterial({ color: 0x060612, roughness: 0.03, metalness: 1.0  });
-  const lensPositions = [[-0.27, 0.81], [-0.17, 0.64], [-0.27, 0.64]];
-  lensPositions.forEach(([lx, ly]) => {
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.042, 20), ringM);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(lx, ly, D / 2 + 0.046);
-    g.add(ring);
-    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.024, 20), glassM);
-    lens.rotation.x = Math.PI / 2;
-    lens.position.set(lx, ly, D / 2 + 0.062);
-    g.add(lens);
+  const glassM = new THREE.MeshStandardMaterial({ color: 0x060612, roughness: 0.03, metalness: 1.0 });
+  [[-0.26, 0.80], [-0.14, 0.63], [-0.26, 0.63]].forEach(([lx, ly]) => {
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.090, 0.090, 0.044, 20), ringM);
+    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.048); g.add(ring);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.060, 0.060, 0.024, 20), glassM);
+    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.064); g.add(lens);
   });
-  // LiDAR dot
-  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.028, 16), ringM);
-  lidar.rotation.x = Math.PI / 2;
-  lidar.position.set(-0.11, 0.69, D / 2 + 0.038);
-  g.add(lidar);
+  // LiDAR
+  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.028, 16), ringM);
+  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.10, 0.68, D / 2 + 0.040); g.add(lidar);
 
-  // side buttons
+  // Side buttons
   const btnM = new THREE.MeshStandardMaterial({ color: 0x252525, roughness: 0.28, metalness: 0.78 });
-  // action button left side
-  const aBtnMesh = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.18, 0.10), btnM);
-  aBtnMesh.position.set(-W / 2 - 0.017, 0.52, 0);
-  g.add(aBtnMesh);
-  // volume buttons right side
-  [0.22, -0.08].forEach(by => {
-    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.18, 0.10), btnM);
-    vBtn.position.set(W / 2 + 0.017, by, 0);
-    g.add(vBtn);
+  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.16, 0.10), btnM);
+  aBtn.position.set(-W / 2 - 0.017, 0.50, 0); g.add(aBtn);
+  [0.20, -0.10].forEach(by => {
+    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.16, 0.10), btnM);
+    vBtn.position.set(W / 2 + 0.017, by, 0); g.add(vBtn);
   });
 
-  // rotate 180deg around Y so logo face (+z) faces the camera initially
-  g.rotation.y = Math.PI;
+  // Green accent bottom edge
+  g.add(Object.assign(new THREE.Mesh(
+    new THREE.BoxGeometry(W * 0.5, 0.016, D + 0.01),
+    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: 0x1a3a1a, emissiveIntensity: 0.6 })
+  ), { position: new THREE.Vector3(0, -H / 2 + 0.04, 0) }));
 
+  // Rotate so back face (logo + camera) faces viewer
+  g.rotation.y = Math.PI;
   return g;
 }
 
 /* ================================================================
-   STICKER PACK — looks like a real rectangular booklet/packet
-   - Flat rectangular shape: 1.6W x 1.2H x 0.20D
-   - Cover has designed layout: dark bg, green border, 3M text, sticker previews
-   - Sides show page-stack texture (alternating dark lines)
-   - Tilted slightly for visual interest
+   STICKER PACK — fanned white sticker sheets like Sticker Mule
+   6 flat sheets laid horizontally, slightly fanned + tilted toward camera
+   Top sheet shows actual sticker designs on white background
    ================================================================ */
 function mkStickerPack() {
   const g = new THREE.Group();
-  const W = 1.6, H = 1.2, D = 0.20;
+  // Each sheet: W wide, very thin (T), H tall — laid flat (XZ plane, Y is up)
+  const W = 1.50, SH = 1.10, T = 0.014;
+  const N = 6;
 
-  // cover face canvas
-  const coverTex = makeTex((ctx, w, h) => {
-    // dark background
-    ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
-    // green border (outer)
-    ctx.strokeStyle = '#7ECF7E'; ctx.lineWidth = 14;
-    ctx.strokeRect(10, 10, w - 20, h - 20);
-    // green border (inner)
-    ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 4;
-    ctx.strokeRect(24, 24, w - 48, h - 48);
-    // "3M" headline
-    ctx.fillStyle = '#7ECF7E';
-    ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 24;
-    ctx.font = `bold ${Math.round(w * 0.28)}px Arial`;
+  // Top sheet texture: white paper with individual sticker designs
+  const topTex = makeTex((ctx, w, h) => {
+    // White/cream sheet background
+    ctx.fillStyle = '#F8F6F1'; ctx.fillRect(0, 0, w, h);
+    // Very subtle page border
+    ctx.strokeStyle = '#D8D3CC'; ctx.lineWidth = 3;
+    ctx.strokeRect(4, 4, w-8, h-8);
+
+    // -- Sticker 1: large circle, left-center — black bg, green 3M --
+    const c1x = w*0.28, c1y = h*0.42, c1r = w*0.175;
+    ctx.beginPath(); ctx.arc(c1x, c1y, c1r, 0, Math.PI*2);
+    ctx.fillStyle = '#0d0d0d'; ctx.fill();
+    ctx.strokeStyle = '#7ECF7E'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 8;
+    ctx.font = `bold ${Math.round(c1r*0.58)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', w / 2, h * 0.34);
-    // "TRADING"
-    ctx.shadowBlur = 8;
-    ctx.font = `bold ${Math.round(w * 0.092)}px Arial`;
-    ctx.fillStyle = '#4A8050';
-    ctx.fillText('TRADING', w / 2, h * 0.56);
-    // "STICKER PACK" badge background
-    ctx.fillStyle = 'rgba(74,128,80,0.28)';
+    ctx.fillText('3M', c1x, c1y - c1r*0.14);
+    ctx.shadowBlur = 0; ctx.font = `bold ${Math.round(c1r*0.24)}px Arial`;
+    ctx.fillStyle = '#5a9060'; ctx.fillText('TRADING', c1x, c1y + c1r*0.40);
+
+    // -- Sticker 2: hexagon, top-right — green bg, dark 3M --
+    const hx = w*0.73, hy = h*0.28, hr = w*0.135;
     ctx.beginPath();
-    ctx.roundRect(w / 2 - 130, h * 0.71 - 18, 260, 40, 8);
-    ctx.fill();
-    // "STICKER PACK" text
-    ctx.fillStyle = '#5a9060';
-    ctx.font = `bold ${Math.round(w * 0.053)}px Arial`;
-    ctx.fillText('STICKER PACK', w / 2, h * 0.74);
-    // 4 small circle sticker previews in corners
-    ctx.strokeStyle = 'rgba(74,128,80,0.45)'; ctx.lineWidth = 3;
-    [[0.14, 0.32], [0.86, 0.32], [0.14, 0.62], [0.86, 0.62]].forEach(([rx, ry]) => {
-      ctx.beginPath(); ctx.arc(w * rx, h * ry, 22, 0, Math.PI * 2); ctx.stroke();
-    });
-  }, 680, 500);
-
-  // spine/edges: alternating dark lines simulating page stack
-  const spineTex = makeTex((ctx, w, h) => {
-    for (let i = 0; i < h; i += 5) {
-      ctx.fillStyle = (i % 10 === 0) ? '#181818' : '#111111';
-      ctx.fillRect(0, i, w, 5);
-    }
-    ctx.strokeStyle = '#2a4a2a'; ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, w, h);
-  }, 64, 64);
-
-  // back face
-  const backTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = '#1a2a1a'; ctx.lineWidth = 8;
-    ctx.strokeRect(10, 10, w - 20, h - 20);
-    ctx.fillStyle = '#1a2a1a';
-    ctx.font = `bold ${Math.round(w * 0.058)}px Arial`;
+    for (let i=0;i<6;i++){const a=(Math.PI/3)*i-Math.PI/6; i?ctx.lineTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a)):ctx.moveTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a));}
+    ctx.closePath(); ctx.fillStyle = '#7ECF7E'; ctx.fill();
+    ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#0d0d0d';
+    ctx.font = `bold ${Math.round(hr*0.70)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3MTRADING.CA', w / 2, h / 2);
-  }, 680, 500);
+    ctx.fillText('3M', hx, hy);
 
-  // CRITICAL: color must be 0xffffff on all map materials
-  const coverM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: coverTex, roughness: 0.4 });
-  const spineM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: spineTex, roughness: 0.6 });
-  const backM  = new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex,  roughness: 0.5 });
-  // face order: +x,-x,+y,-y,+z(front/cover),-z(back)
-  const mats = [spineM, spineM, spineM, spineM, coverM, backM];
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(W, H, D), mats));
+    // -- Sticker 3: rectangle, right-center — dark bg, green text --
+    const rx=w*0.70, ry=h*0.60, rw=w*0.34, rht=h*0.17;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(rx-rw/2, ry-rht/2, rw, rht, 10);
+    else ctx.rect(rx-rw/2, ry-rht/2, rw, rht);
+    ctx.fillStyle = '#111111'; ctx.fill();
+    ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowBlur = 0;
+    ctx.font = `bold ${Math.round(rht*0.42)}px Arial`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('RAZA TRADES', rx, ry);
 
-  // slight tilt for visual interest
-  g.rotation.x =  0.15;
-  g.rotation.z = -0.06;
+    // -- Sticker 4: small circle bottom-left --
+    const s4x=w*0.20, s4y=h*0.76, s4r=w*0.088;
+    ctx.beginPath(); ctx.arc(s4x,s4y,s4r,0,Math.PI*2);
+    ctx.fillStyle='#4A8050'; ctx.fill();
+    ctx.fillStyle='#ffffff';
+    ctx.font=`bold ${Math.round(s4r*0.60)}px Arial`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('3M', s4x, s4y);
 
+    // -- Sticker 5: small circle bottom-center --
+    const s5x=w*0.50, s5y=h*0.78, s5r=w*0.088;
+    ctx.beginPath(); ctx.arc(s5x,s5y,s5r,0,Math.PI*2);
+    ctx.fillStyle='#0d0d0d'; ctx.fill();
+    ctx.strokeStyle='#7ECF7E'; ctx.lineWidth=3; ctx.stroke();
+    ctx.fillStyle='#7ECF7E';
+    ctx.font=`bold ${Math.round(s5r*0.44)}px Arial`;
+    ctx.fillText('3M.CA', s5x, s5y);
+
+    // -- Sticker 6: small star/badge top-left --
+    const s6x=w*0.14, s6y=h*0.20, s6r=w*0.090;
+    ctx.beginPath(); ctx.arc(s6x,s6y,s6r,0,Math.PI*2);
+    ctx.fillStyle='#7ECF7E'; ctx.fill();
+    ctx.fillStyle='#0d0d0d';
+    ctx.font=`bold ${Math.round(s6r*0.44)}px Arial`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('NEW', s6x, s6y-s6r*0.18);
+    ctx.font=`bold ${Math.round(s6r*0.34)}px Arial`;
+    ctx.fillText('2025', s6x, s6y+s6r*0.42);
+  }, 768, 576);
+
+  // Plain cream sheet (for lower sheets — just the back)
+  const plainTex = makeTex((ctx,w,h) => {
+    ctx.fillStyle='#EEE9E0'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#C8C3BC'; ctx.lineWidth=2; ctx.strokeRect(2,2,w-4,h-4);
+  }, 128, 96);
+
+  for (let i = 0; i < N; i++) {
+    const isTop = (i === N - 1);
+    // BoxGeometry(W, T, SH): W along X, T (thin) along Y, SH along Z
+    // +Y face (index 2) = the top/printed surface of the sheet
+    const topMat = isTop
+      ? new THREE.MeshStandardMaterial({ color: 0xffffff, map: topTex, roughness: 0.35 })
+      : new THREE.MeshStandardMaterial({ color: 0xffffff, map: plainTex, roughness: 0.55 });
+    const edgeMat = new THREE.MeshStandardMaterial({ color: 0xE0DBD4, roughness: 0.65 });
+    // face order: +x,-x,+y,-y,+z,-z
+    const mats = [edgeMat, edgeMat, topMat, edgeMat, edgeMat, edgeMat];
+    const sheet = new THREE.Mesh(new THREE.BoxGeometry(W, T, SH), mats);
+    // Fan each sheet slightly around Y-axis
+    sheet.rotation.y = (i - (N-1)/2) * 0.055;
+    // Stack upward
+    sheet.position.y = i * (T + 0.003);
+    g.add(sheet);
+  }
+
+  // Tilt stack: negative X rotation tips the top edge toward camera (+Z direction)
+  g.rotation.x = -0.52;
+  g.rotation.y =  0.18;
+  g.scale.setScalar(1.05);
   return g;
 }
 
@@ -1895,19 +1895,16 @@ function init() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-  camera.position.set(0, 0.3, 4.0);
+  camera.position.set(0, 0, 4.2);  // eye-level
 
   scene = new THREE.Scene();
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-  const keyLight  = new THREE.DirectionalLight(0xffffff, 1.4);
-  keyLight.position.set(4, 5, 3);
-  scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(0x7ECF7E, 0.50);
-  fillLight.position.set(-3, 1, 2);
-  scene.add(fillLight);
-  const rimLight  = new THREE.DirectionalLight(0x7ECF7E, 0.35);
-  rimLight.position.set(0, -2, -4);
-  scene.add(rimLight);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+  keyLight.position.set(3, 4, 4); scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  fillLight.position.set(-2, 0, 3); scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x7ECF7E, 0.40);
+  rimLight.position.set(0, -2, -3); scene.add(rimLight);
 
   controls = new OrbitControls(camera, canvas);
   controls.enableDamping   = true;
