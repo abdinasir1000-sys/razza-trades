@@ -1918,7 +1918,7 @@ function mkStickerPack() {
 /* ================================================================
    SCENE / RENDERER / ORBIT CONTROLS
    ================================================================ */
-let renderer, camera, controls, scene, currentModel;
+let renderer, camera, controls, scene, currentModel, currentModelType, animT = 0;
 
 function init() {
   const canvas = document.getElementById('model-canvas');
@@ -1930,7 +1930,7 @@ function init() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-  camera.position.set(0, 0, 4.2);  // eye-level
+  camera.position.set(0, 0, 4.2);
 
   scene = new THREE.Scene();
   scene.add(new THREE.AmbientLight(0xffffff, 1.0));
@@ -1952,6 +1952,12 @@ function init() {
 
   (function loop() {
     requestAnimationFrame(loop);
+    animT += 0.007;
+    // Mug: oscillate the MODEL ±48° so the handle (at -Z back) never swings into view.
+    // Camera stays fixed; only the mug rocks left/right showing logo + sides only.
+    if (currentModel && currentModelType === '3M Coffee Mug') {
+      currentModel.rotation.y = Math.sin(animT * 0.55) * 0.84;
+    }
     controls.update();
     renderer.render(scene, camera);
   })();
@@ -1964,6 +1970,9 @@ window.setGiftModel = function(giftName) {
     viewer.style.display = 'flex';
     if (!renderer) init();
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
+    currentModelType = giftName;
+    // Mug uses model oscillation instead of camera autoRotate (to keep handle hidden)
+    if (controls) controls.autoRotate = (giftName !== '3M Coffee Mug');
     if      (giftName === '3M Coffee Mug')     currentModel = mkMug();
     else if (giftName === '3M Phone Case')     currentModel = mkPhoneCase();
     else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
