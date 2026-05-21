@@ -239,18 +239,27 @@
   .hero-centered .brand { justify-content: center; }
   .hero-centered h1 { text-align: center; }
   .hero-centered .lede { text-align: center; margin-left: auto; margin-right: auto; }
-  .hero-centered .pill { margin-left: auto; margin-right: auto; }
+  /* pill is inline-flex — must switch to flex+fit-content for margin:auto to work */
+  .hero-centered .pill {
+    display: flex;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
   .hero-centered .step-indicator { justify-content: center; }
   .hero-centered .card.signin-card { text-align: center; }
   .brand-logo {
-    width: 52px; height: 52px;
+    width: 70px; height: 70px;
     flex-shrink: 0;
   }
   .brand-logo-img {
     width: 100%; height: 100%;
     object-fit: contain;
     mix-blend-mode: screen;
-    filter: brightness(1.6) drop-shadow(0 0 10px rgba(126,207,126,0.5));
+    filter: brightness(1.6) drop-shadow(0 0 12px rgba(126,207,126,0.55));
+  }
+  @media (max-width: 600px) {
+    .brand-logo { width: 54px; height: 54px; }
   }
   .brand-name {
     font-family: 'Rajdhani', sans-serif;
