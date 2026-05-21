@@ -1617,7 +1617,7 @@ function makeTex(drawFn, w, h) {
 
 /* ================================================================
    COFFEE MUG — wider profile so it looks like a real mug, not a bottle
-   Logo baked into body texture at U=0.25 (front face in LatheGeometry UV)
+   Logo baked into body texture at U=0.50 (phiStart=π puts seam at -Z back, U=0.5=+Z front)
    ================================================================ */
 function mkMug() {
   const g = new THREE.Group();
@@ -1635,32 +1635,33 @@ function mkMug() {
     new THREE.Vector2(0.47,  0.80),
   ];
 
-  // Logo baked at U=0.25 (front face) center of canvas
+  // Logo baked at U=0.50 — phiStart=π puts seam at -Z (back) so U=0.5 = +Z = front-facing camera
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
-    const lx = 0.25 * w, ly = h * 0.50;
-    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.16);
-    grd.addColorStop(0, 'rgba(126,207,126,0.32)'); grd.addColorStop(1, 'transparent');
+    const lx = 0.50 * w, ly = h * 0.50;
+    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.20);
+    grd.addColorStop(0, 'rgba(126,207,126,0.38)'); grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 20;
-    ctx.font = `bold ${Math.round(w * 0.15)}px Arial`;
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 24;
+    ctx.font = `bold ${Math.round(w * 0.16)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', lx, ly - h * 0.065);
-    ctx.shadowBlur = 8;
-    ctx.font = `bold ${Math.round(w * 0.048)}px Arial`;
-    ctx.fillStyle = '#4A8050';
-    ctx.fillText('TRADING', lx, ly + h * 0.072);
+    ctx.fillText('3M', lx, ly - h * 0.07);
+    ctx.shadowBlur = 10;
+    ctx.font = `bold ${Math.round(w * 0.052)}px Arial`;
+    ctx.fillStyle = '#5aaa60';
+    ctx.fillText('TRADING', lx, ly + h * 0.078);
   }, 512, 512);
 
+  // phiStart=Math.PI: seam is at -Z (hidden from camera), U=0.5 is +Z (logo faces camera)
   g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(pts, 80),
+    new THREE.LatheGeometry(pts, 80, Math.PI, Math.PI * 2),
     new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
   ));
 
   // Inner cavity (back-face so rim looks hollow)
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(iPts, 40),
+    new THREE.LatheGeometry(iPts, 40, Math.PI, Math.PI * 2),
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
@@ -1678,7 +1679,7 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.28 })
   ));
 
-  g.scale.setScalar(0.58);
+  g.scale.setScalar(0.70);
   return g;
 }
 
