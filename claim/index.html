@@ -229,14 +229,28 @@
     align-items: center;
     gap: 0.85rem;
   }
+  /* Center-mode for hero sections */
+  .hero-centered .brand-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.6rem;
+  }
+  .hero-centered .brand { justify-content: center; }
+  .hero-centered h1 { text-align: center; }
+  .hero-centered .lede { text-align: center; margin-left: auto; margin-right: auto; }
+  .hero-centered .pill { margin-left: auto; margin-right: auto; }
+  .hero-centered .step-indicator { justify-content: center; }
+  .hero-centered .card.signin-card { text-align: center; }
   .brand-logo {
     width: 52px; height: 52px;
     flex-shrink: 0;
   }
   .brand-logo-img {
     width: 100%; height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     mix-blend-mode: screen;
+    filter: brightness(1.6) drop-shadow(0 0 10px rgba(126,207,126,0.5));
   }
   .brand-name {
     font-family: 'Rajdhani', sans-serif;
@@ -605,6 +619,26 @@
   .footer-note { color: var(--text-faint); font-size: 0.72rem; text-align: center; margin-top: 2rem; font-family: 'Space Mono', monospace; letter-spacing: 0.12em; line-height: 1.8; text-transform: uppercase; }
 
   /* =========================================================
+     RESPONSIVE — phone + PC consistency
+     ========================================================= */
+  @media (max-width: 600px) {
+    .container { padding: 1.75rem 1rem 5rem; }
+    .card { padding: 1.5rem 1.2rem; }
+    h1 { font-size: clamp(2rem, 8vw, 2.8rem); }
+    .stats-strip { gap: 0.5rem; }
+    .stat { padding: 0.75rem 0.7rem; }
+    .stat-num { font-size: 1.3rem; }
+    .stat-label { font-size: 0.52rem; }
+    .brand-row { margin-bottom: 1.4rem; }
+    .pill { font-size: 0.62rem; padding: 0.3rem 0.8rem; }
+  }
+  @media (min-width: 601px) {
+    /* Ensure consistent sizing on desktop — no vw-based font jumps */
+    .stat-num { font-size: 1.6rem; }
+    .container { padding: 3rem 2rem 6rem; }
+  }
+
+  /* =========================================================
      SCREEN TRANSITIONS
      ========================================================= */
   .screen { display: none; }
@@ -803,7 +837,7 @@
   <div class="container">
 
     <!-- ========== SCREEN 1: SIGN IN ========== -->
-    <section id="screen-signin" class="screen active">
+    <section id="screen-signin" class="screen active hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
@@ -824,7 +858,7 @@
           <div class="stat-label">Free Gift</div>
         </div>
         <div class="stat">
-          <div class="stat-num" style="font-size:clamp(0.72rem,3.8vw,1.1rem);letter-spacing:0.01em;white-space:nowrap;">Canada + United States</div>
+          <div class="stat-num" style="font-size:1.0rem;line-height:1.25;white-space:normal;">Canada +<br>United States</div>
           <div class="stat-label">Free Shipping</div>
         </div>
         <div class="stat">
@@ -838,18 +872,18 @@
         Sign in with your Whop account to claim your free gift. Select your item, fill in your details, and we'll handle the rest.
       </p>
 
-      <div class="card" data-tilt>
+      <div class="card signin-card" data-tilt>
         <span class="card-shine"></span>
         <div id="signin-error" class="alert alert-error" role="alert" aria-live="polite"></div>
         <button class="btn" id="btn-signin">Verify with Whop &rarr;</button>
         <p class="footer-note" style="margin-top: 1.5rem;">
-          Sign in with Whop to continue
+          Sign in with your Whop account to continue
         </p>
       </div>
     </section>
 
     <!-- ========== SCREEN 2: CHECKING ========== -->
-    <section id="screen-checking" class="screen">
+    <section id="screen-checking" class="screen hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
@@ -877,7 +911,7 @@
     </section>
 
     <!-- ========== SCREEN 3: ALREADY CLAIMED ========== -->
-    <section id="screen-already" class="screen">
+    <section id="screen-already" class="screen hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
@@ -900,7 +934,7 @@
     </section>
 
     <!-- ========== SCREEN 4: GIFT + SHIPPING FORM ========== -->
-    <section id="screen-form" class="screen">
+    <section id="screen-form" class="screen hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
