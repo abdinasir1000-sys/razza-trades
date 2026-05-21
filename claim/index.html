@@ -1608,7 +1608,6 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 const GREEN   = 0x7ECF7E;
 const GREEN_D = 0x4A8050;
 
-/* ---- shared canvas-texture helper ---- */
 function makeTex(drawFn, w, h) {
   const c = document.createElement('canvas');
   c.width = w || 512; c.height = h || 512;
@@ -1617,78 +1616,82 @@ function makeTex(drawFn, w, h) {
 }
 
 /* ================================================================
-   COFFEE MUG — realistic ceramic profile, handle mid-body
+   COFFEE MUG — realistic ceramic mug, narrower profile
+   Logo BAKED into LatheGeometry body texture (no floating decal,
+   no z-fighting). LatheGeometry UV: U=0.25 = +Z front face.
+   Handle: CatmullRomCurve3, mid-body y=+0.22 to y=-0.52
    ================================================================ */
 function mkMug() {
   const g = new THREE.Group();
 
-  // Lathe profile: y spans -0.80 (base) to +0.80 (rim)
+  // Narrower profile so it looks like a real mug (not a bucket)
+  // y: -0.80 (base) to +0.80 (rim). Radius: 0.28–0.38
   const pts = [
     new THREE.Vector2(0.00, -0.80),
-    new THREE.Vector2(0.37, -0.80),
-    new THREE.Vector2(0.39, -0.76),
-    new THREE.Vector2(0.41, -0.40),
-    new THREE.Vector2(0.42,  0.00),
-    new THREE.Vector2(0.43,  0.52),
-    new THREE.Vector2(0.45,  0.70),
-    new THREE.Vector2(0.46,  0.76),
-    new THREE.Vector2(0.44,  0.80),
+    new THREE.Vector2(0.28, -0.80),
+    new THREE.Vector2(0.30, -0.76),
+    new THREE.Vector2(0.32, -0.40),
+    new THREE.Vector2(0.34,  0.00),
+    new THREE.Vector2(0.36,  0.50),
+    new THREE.Vector2(0.37,  0.68),
+    new THREE.Vector2(0.38,  0.74),
+    new THREE.Vector2(0.36,  0.80),
   ];
+
+  // Body texture: dark mug, "3M TRADING" baked at U=0.25 (the front face).
+  // LatheGeometry UV: U=angle/(2π). angle=π/2 (+Z, faces camera) → U=0.25.
+  // CanvasTexture has flipY=true: canvas y=h/2 → mug V=0.5 → mug center (y≈0).
+  const bodyTex = makeTex((ctx, w, h) => {
+    ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
+    const lx = 0.25 * w, ly = h * 0.50;
+    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.14);
+    grd.addColorStop(0, 'rgba(126,207,126,0.30)'); grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 18;
+    ctx.font = `bold ${Math.round(w * 0.14)}px Arial`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('3M', lx, ly - h * 0.06);
+    ctx.shadowBlur = 6;
+    ctx.font = `bold ${Math.round(w * 0.044)}px Arial`;
+    ctx.fillStyle = '#4A8050';
+    ctx.fillText('TRADING', lx, ly + h * 0.068);
+  }, 512, 512);
+
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(pts, 80),
-    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.18, metalness: 0.0 })
+    new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.20 })
   ));
 
-  // Inner cavity
+  // Inner cavity makes top opening look hollow
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.86, v.y + 0.01));
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(iPts, 40),
-    new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.9, side: THREE.BackSide })
+    new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
-  // Rim accent
+  // Green rim torus
   const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.44, 0.018, 8, 64),
+    new THREE.TorusGeometry(0.37, 0.014, 8, 64),
     new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.22, emissive: 0x1a3a1a, emissiveIntensity: 0.5 })
   );
   rim.position.y = 0.79;
   g.add(rim);
 
-  // Handle: CatmullRom D-curve on the RIGHT side
-  // Upper attach at y=+0.12 (~43% down from rim), lower at y=-0.52 (~83% down) — clearly MID-BODY
+  // Handle: D-curve mid-body. Upper y=+0.22 (36% down), lower y=-0.52 (83% down).
+  // Max bulge at y=-0.12 — center-of-handle is BELOW mid of mug = looks natural.
   const hc = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.43,  0.12, 0),
-    new THREE.Vector3(0.60,  0.04, 0),
-    new THREE.Vector3(0.80, -0.18, 0),  // max bulge, pulled down
-    new THREE.Vector3(0.60, -0.44, 0),
-    new THREE.Vector3(0.41, -0.52, 0),
+    new THREE.Vector3(0.36,  0.22, 0),
+    new THREE.Vector3(0.50,  0.14, 0),
+    new THREE.Vector3(0.64, -0.12, 0),
+    new THREE.Vector3(0.50, -0.40, 0),
+    new THREE.Vector3(0.33, -0.52, 0),
   ]);
   g.add(new THREE.Mesh(
-    new THREE.TubeGeometry(hc, 32, 0.050, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.3 })
+    new THREE.TubeGeometry(hc, 32, 0.044, 10, false),
+    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.28 })
   ));
 
-  // Logo decal
-  const logoTex = makeTex((ctx, w, h) => {
-    ctx.clearRect(0, 0, w, h);
-    const grd = ctx.createRadialGradient(w/2, h*0.44, 0, w/2, h*0.44, w*0.46);
-    grd.addColorStop(0, 'rgba(126,207,126,0.18)'); grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
-    ctx.font = `bold ${Math.round(w * 0.40)}px Arial`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', w / 2, h * 0.40);
-    ctx.shadowBlur = 10; ctx.font = `bold ${Math.round(w * 0.11)}px Arial`;
-    ctx.fillStyle = '#4A8050';
-    ctx.fillText('TRADING', w / 2, h * 0.65);
-  }, 512, 384);
-  const decal = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.58, 0.44),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: logoTex, transparent: true, roughness: 0.3, side: THREE.DoubleSide })
-  );
-  decal.position.set(0, -0.12, 0.446);
-  g.add(decal);
-
+  g.scale.setScalar(0.78);
   return g;
 }
 
@@ -1723,7 +1726,7 @@ function mkPhoneCase() {
     new THREE.PlaneGeometry(W - 0.06, H - 0.06),
     new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex, roughness: 0.4 })
   );
-  backPlane.position.set(0, 0, D / 2 + 0.001);
+  backPlane.position.set(0, 0, D / 2 + 0.008);
   g.add(backPlane);
 
   // Camera island — rounded, top-left of back face
@@ -1760,8 +1763,8 @@ function mkPhoneCase() {
     new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: 0x1a3a1a, emissiveIntensity: 0.6 })
   ), { position: new THREE.Vector3(0, -H / 2 + 0.04, 0) }));
 
-  // Rotate so back face (logo + camera) faces viewer
-  g.rotation.y = Math.PI;
+  // No rotation needed: logo, camera island, lenses are all on +Z face which faces camera
+  g.scale.setScalar(0.74);
   return g;
 }
 
@@ -1873,9 +1876,9 @@ function mkStickerPack() {
     g.add(sheet);
   }
 
-  // Tilt stack: negative X rotation tips the top edge toward camera (+Z direction)
-  g.rotation.x = -0.52;
-  g.rotation.y =  0.18;
+  // Positive rotation.x: +Y face (printed stickers) tilts toward +Z (camera)
+  g.rotation.x = 0.42;
+  g.rotation.y = 0.18;
   g.scale.setScalar(1.05);
   return g;
 }
