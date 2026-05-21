@@ -694,6 +694,42 @@
     .confetti i { animation: none !important; opacity: 0 !important; }
     .card-shine { display: none; }
   }
+
+  /* =========================================================
+     MOBILE — ≤ 480px
+     ========================================================= */
+  @media (max-width: 480px) {
+    .container { padding: 1.5rem 1rem 4rem; }
+
+    .brand-row { flex-wrap: wrap; gap: 0.5rem; }
+    .brand-live { font-size: 0.52rem; }
+
+    .stats-strip { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+    .stat { padding: 0.65rem 0.55rem; }
+    .stat-num { font-size: 1.2rem; }
+    .stat-label { font-size: 0.5rem; letter-spacing: 0.12em; }
+
+    h1 { font-size: clamp(2rem, 9vw, 2.8rem); }
+
+    .card { padding: 1.4rem 1.2rem; }
+    .card-success { padding: 1.4rem 1.2rem; }
+
+    .gift-picker { grid-template-columns: 1fr 1fr; }
+    .gift-opt-label { font-size: 0.7rem; }
+
+    .summary-row { flex-direction: column; gap: 0.2rem; }
+    .summary-value { text-align: left; max-width: 100%; }
+
+    .btn { font-size: 0.85rem; padding: 0.9rem 1.2rem; }
+    .btn-sm { font-size: 0.75rem; padding: 0.55rem 1rem; }
+
+    .step-indicator { gap: 0.35rem; font-size: 0.55rem; }
+    .step-indicator .step { padding: 0.28rem 0.5rem; }
+
+    .pill { font-size: 0.58rem; padding: 0.3rem 0.75rem; }
+
+    .footer-note { font-size: 0.65rem; }
+  }
 </style>
 </head>
 <body>
