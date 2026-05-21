@@ -1186,7 +1186,7 @@ async function verifyMembership(token) {
     // 2. Server-side check: has this Whop user already claimed?
     let checkResp;
     try {
-      checkResp = await fetch("/api/check-claim?access_token=" + encodeURIComponent(token));
+      checkResp = await fetch("/api/check-claim?whop_user_id=" + encodeURIComponent(whopUser.id));
     } catch (e) {
       console.error("check-claim fetch failed:", e);
       sessionStorage.removeItem(STORAGE_TOKEN_KEY);

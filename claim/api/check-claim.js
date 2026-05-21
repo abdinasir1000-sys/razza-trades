@@ -7,28 +7,13 @@ module.exports = async function handler(req, res) {
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !supabaseKey) return res.status(500).json({ error: "Server misconfigured" });
 
-  const accessToken = req.query.access_token;
-  if (!accessToken || typeof accessToken !== "string") {
-    return res.status(400).json({ error: "Missing access_token" });
+  const whopUserId = req.query.whop_user_id;
+  if (!whopUserId || typeof whopUserId !== "string" || whopUserId.trim().length === 0) {
+    return res.status(400).json({ error: "Missing whop_user_id" });
   }
 
   try {
-    // Verify token with Whop and get authoritative sub
-    const userinfoResp = await fetch("https://api.whop.com/oauth/userinfo", {
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    });
-
-    if (!userinfoResp.ok) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
-
-    const userinfo = await userinfoResp.json();
-    const verifiedSub = userinfo && userinfo.sub;
-    if (!verifiedSub) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
-
-    const url = `${supabaseUrl}/rest/v1/claims?whop_user_id=eq.${encodeURIComponent(verifiedSub)}&select=claim_id&limit=1`;
+    const url = `${supabaseUrl}/rest/v1/claims?whop_user_id=eq.${encodeURIComponent(whopUserId)}&select=claim_id&limit=1`;
     const resp = await fetch(url, {
       headers: {
         "apikey": supabaseKey,
