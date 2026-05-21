@@ -1953,6 +1953,14 @@ function init() {
 
   (function loop() {
     requestAnimationFrame(loop);
+    // Sticker pack: rock left↔right so the printed face stays visible
+    // Mug/phone case: normal autoRotate spin
+    if (currentModelType === '3M Sticker Packet' && currentModel) {
+      controls.autoRotate = false;
+      currentModel.rotation.y = 0.18 + Math.sin(Date.now() * 0.0008) * 0.72;
+    } else {
+      controls.autoRotate = true;
+    }
     controls.update();
     renderer.render(scene, camera);
   })();
