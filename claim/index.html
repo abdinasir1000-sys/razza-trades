@@ -1022,6 +1022,11 @@
           <input type="tel" id="f-phone" autocomplete="tel" />
         </div>
 
+        <div class="field" id="field-phone-model" style="display:none;">
+          <label for="f-phone-model">Phone model <span style="text-transform:none;font-weight:400;">(e.g. iPhone 15 Pro, Samsung Galaxy S24)</span></label>
+          <input type="text" id="f-phone-model" placeholder="Enter your exact phone model" autocomplete="off" />
+        </div>
+
         <label class="checkbox-row">
           <input type="checkbox" id="f-ackship" />
           <span>I understand I may be responsible for covering the cost of shipping.</span>
@@ -1354,6 +1359,8 @@ function selectGift(gift) {
     if (el.getAttribute("data-gift") === gift) el.classList.add("selected");
     else el.classList.remove("selected");
   });
+  var pmField = $("field-phone-model");
+  if (pmField) pmField.style.display = (gift === "3M Phone Case") ? "block" : "none";
   try { if (typeof window.setGiftModel === "function") window.setGiftModel(gift); } catch(e) { console.warn("3D viewer error:", e); }
 }
 
@@ -1394,6 +1401,8 @@ $("btn-submit").addEventListener("click", async function () {
   if (!country)  { showError("form-error", "Please enter your country."); return; }
   if (!zip)      { showError("form-error", "Please enter your zip / postal code."); return; }
   if (!phone)    { showError("form-error", "Please enter a phone number for delivery."); return; }
+  const phoneModel = ($("f-phone-model") ? $("f-phone-model").value.trim() : "");
+  if (selectedGift === "3M Phone Case" && !phoneModel) { showError("form-error", "Please enter your phone model so we send the right case."); return; }
   if (!ackship)  { showError("form-error", "Please check the box acknowledging shipping costs before submitting."); return; }
 
   // Disable submit button immediately to block rapid double-submits.
@@ -1409,7 +1418,7 @@ $("btn-submit").addEventListener("click", async function () {
     email: email,
     name: name,
     discord: discord,
-    gift: selectedGift,
+    gift: (selectedGift === "3M Phone Case" && phoneModel) ? selectedGift + " (" + phoneModel + ")" : selectedGift,
     address1: address1,
     address2: address2,
     city: city,
@@ -1628,43 +1637,65 @@ function stickerTex(label, bg, col) {
 function mkMug() {
   const g = new THREE.Group();
   const tex = logoTex();
-  const bodyM = new THREE.MeshStandardMaterial({color:BLACK,roughness:0.45,metalness:0.12,map:tex});
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.88,0.74,1.6,48), bodyM));
-  g.add(Object.assign(new THREE.Mesh(new THREE.CircleGeometry(0.74,32),
-    new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.6})),
-    {rotation:{x:-Math.PI/2,y:0,z:0},position:{x:0,y:-0.8,z:0}}));
+  // color must be 0xffffff so the canvas texture colours show through
+  const bodyM = new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.45,metalness:0.08,map:tex});
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.88,0.74,1.6,64), bodyM));
+  const capM = new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.6});
+  const cap = new THREE.Mesh(new THREE.CircleGeometry(0.74,32), capM);
+  cap.rotation.x=-Math.PI/2; cap.position.y=-0.8; g.add(cap);
   const rimM = new THREE.MeshStandardMaterial({color:0x1c1c1c,roughness:0.3,metalness:0.4});
   const rim = new THREE.Mesh(new THREE.TorusGeometry(0.88,0.045,8,48), rimM);
   rim.position.y=0.8; g.add(rim);
   const stripe = new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,0.09,48),
-    new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x2a5a2a,emissiveIntensity:0.35}));
+    new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x2a5a2a,emissiveIntensity:0.4}));
   stripe.position.y=0.74; g.add(stripe);
   const curve = new THREE.QuadraticBezierCurve3(
-    new THREE.Vector3(0.88,0.42,0), new THREE.Vector3(1.58,0,0), new THREE.Vector3(0.74,-0.52,0));
-  const handle = new THREE.Mesh(new THREE.TubeGeometry(curve,24,0.08,8,false),
-    new THREE.MeshStandardMaterial({color:0x0d0d0d,roughness:0.5,metalness:0.1}));
-  g.add(handle);
+    new THREE.Vector3(0.88,0.42,0), new THREE.Vector3(1.62,0,0), new THREE.Vector3(0.74,-0.52,0));
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(curve,24,0.08,8,false),
+    new THREE.MeshStandardMaterial({color:0x0d0d0d,roughness:0.5,metalness:0.1})));
   return g;
 }
 
 function mkPhoneCase() {
   const g = new THREE.Group();
-  const tex = logoTex();
-  const mats = [
-    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
-    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
-    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
-    new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x1a3a1a,emissiveIntensity:0.4}),
-    new THREE.MeshStandardMaterial({color:BLACK,roughness:0.45,metalness:0.1,map:tex}),
-    new THREE.MeshStandardMaterial({color:0x181818,roughness:0.6}),
-  ];
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.1,2.1,0.13), mats));
-  const camBump = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.05,32),
-    new THREE.MeshStandardMaterial({color:0x222,roughness:0.2,metalness:0.6}));
-  camBump.rotation.x=Math.PI/2; camBump.position.set(-0.26,0.72,0.09); g.add(camBump);
-  const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.03,32),
-    new THREE.MeshStandardMaterial({color:0x111133,roughness:0.1,metalness:0.8}));
-  lens.rotation.x=Math.PI/2; lens.position.set(-0.26,0.72,0.115); g.add(lens);
+  const caseTex = logoTex();
+  const sideM  = new THREE.MeshStandardMaterial({color:0x111111,roughness:0.5,metalness:0.3});
+  const logoM  = new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.4,map:caseTex});
+  const botM   = new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x1a3a1a,emissiveIntensity:0.5});
+  // BoxGeometry face order: +x,-x,+y,-y,+z,-z  (4=front, 5=back)
+  // Apply logo on BOTH front (+z=4) and back (-z=5) so it shows as you rotate
+  const caseMats = [sideM,sideM,sideM,botM,logoM,logoM];
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.1,2.1,0.14), caseMats));
+
+  // iPhone 16 Pro camera island — square bump top-left
+  const islandM = new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.3,metalness:0.7});
+  const island = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.62,0.06), islandM);
+  island.position.set(-0.22,0.68,0.1); g.add(island);
+
+  // Three camera lenses in a triangle pattern
+  const lensBodyM = new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.15,metalness:0.9});
+  const lensGlassM = new THREE.MeshStandardMaterial({color:0x111133,roughness:0.05,metalness:0.95});
+  const lensPositions = [{x:-0.28,y:0.78},{x:-0.16,y:0.60},{x:-0.28,y:0.60}];
+  lensPositions.forEach(p => {
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.06,24), lensBodyM);
+    ring.rotation.x=Math.PI/2; ring.position.set(p.x,p.y,0.13); g.add(ring);
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,24), lensGlassM);
+    glass.rotation.x=Math.PI/2; glass.position.set(p.x,p.y,0.155); g.add(glass);
+  });
+
+  // LiDAR scanner (small circle)
+  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.05,16), lensBodyM);
+  lidar.rotation.x=Math.PI/2; lidar.position.set(-0.10,0.68,0.13); g.add(lidar);
+
+  // Side buttons
+  const btnM = new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.8});
+  [0.55,0.2,-0.15].forEach(y => {
+    const btn = new THREE.Mesh(new THREE.BoxGeometry(0.04,0.22,0.06), btnM);
+    btn.position.set(0.57,y,0); g.add(btn);
+  });
+  const silentBtn = new THREE.Mesh(new THREE.BoxGeometry(0.04,0.18,0.06), btnM);
+  silentBtn.position.set(-0.57,0.55,0); g.add(silentBtn);
+
   return g;
 }
 
@@ -1677,14 +1708,10 @@ function mkStickerPack() {
   ];
   defs.forEach(d => {
     const tex = stickerTex(d.label,d.bg,d.col);
-    const mats = [
-      new THREE.MeshStandardMaterial({color:0x111}),
-      new THREE.MeshStandardMaterial({color:0x111}),
-      new THREE.MeshStandardMaterial({color:0x111}),
-      new THREE.MeshStandardMaterial({color:0x111}),
-      new THREE.MeshStandardMaterial({map:tex,roughness:0.5}),
-      new THREE.MeshStandardMaterial({color:0x0d0d0d}),
-    ];
+    const faceM = new THREE.MeshStandardMaterial({map:tex,roughness:0.5});
+    const edgeM = new THREE.MeshStandardMaterial({color:0x111111});
+    // Apply the same sticker texture to BOTH front (+z=4) and back (-z=5)
+    const mats = [edgeM,edgeM,edgeM,edgeM,faceM,faceM];
     const m = new THREE.Mesh(new THREE.BoxGeometry(1.5,1.5,0.03), mats);
     m.rotation.z=d.rz; m.position.z=d.z; g.add(m);
   });
