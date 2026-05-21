@@ -1635,33 +1635,36 @@ function mkMug() {
     new THREE.Vector2(0.47,  0.80),
   ];
 
-  // Logo baked at U=0.50 — phiStart=π puts seam at -Z (back) so U=0.5 = +Z = front-facing camera
+  // phiStart=π/2: seam sits at +X (behind handle, partially hidden).
+  // U=0.75 = +Z (front, camera start), U=0.25 = -Z (back) — logos on both sides.
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
-    const lx = 0.50 * w, ly = h * 0.50;
-    const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.20);
-    grd.addColorStop(0, 'rgba(126,207,126,0.38)'); grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 24;
-    ctx.font = `bold ${Math.round(w * 0.16)}px Arial`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', lx, ly - h * 0.07);
-    ctx.shadowBlur = 10;
-    ctx.font = `bold ${Math.round(w * 0.052)}px Arial`;
-    ctx.fillStyle = '#5aaa60';
-    ctx.fillText('TRADING', lx, ly + h * 0.078);
+    // Draw logo at both front (U=0.75, x=384) and back (U=0.25, x=128)
+    [0.75 * w, 0.25 * w].forEach(lx => {
+      const ly = h * 0.50;
+      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.19);
+      grd.addColorStop(0, 'rgba(126,207,126,0.36)'); grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 22;
+      ctx.font = `bold ${Math.round(w * 0.15)}px Arial`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('3M', lx, ly - h * 0.07);
+      ctx.shadowBlur = 8;
+      ctx.font = `bold ${Math.round(w * 0.050)}px Arial`;
+      ctx.fillStyle = '#5aaa60';
+      ctx.fillText('TRADING', lx, ly + h * 0.075);
+    });
   }, 512, 512);
 
-  // phiStart=Math.PI: seam is at -Z (hidden from camera), U=0.5 is +Z (logo faces camera)
   g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(pts, 80, Math.PI, Math.PI * 2),
+    new THREE.LatheGeometry(pts, 80, Math.PI / 2, Math.PI * 2),
     new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
   ));
 
-  // Inner cavity (back-face so rim looks hollow)
+  // Inner cavity
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(iPts, 40, Math.PI, Math.PI * 2),
+    new THREE.LatheGeometry(iPts, 40, Math.PI / 2, Math.PI * 2),
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
