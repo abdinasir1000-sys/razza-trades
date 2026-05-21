@@ -1,15 +1,34 @@
 module.exports = async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !supabaseKey) return res.status(500).json({ error: "Server misconfigured" });
 
-  const whopUserId = req.query.whop_user_id;
-  if (!whopUserId) return res.status(400).json({ error: "Missing whop_user_id" });
+  const accessToken = req.query.access_token;
+  if (!accessToken || typeof accessToken !== "string") {
+    return res.status(400).json({ error: "Missing access_token" });
+  }
 
   try {
-    const url = `${supabaseUrl}/rest/v1/claims?whop_user_id=eq.${encodeURIComponent(whopUserId)}&select=claim_id,gift,created_at&limit=1`;
+    // Verify token with Whop and get authoritative sub
+    const userinfoResp = await fetch("https://api.whop.com/oauth/userinfo", {
+      headers: { "Authorization": `Bearer ${accessToken}` }
+    });
+
+    if (!userinfoResp.ok) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const userinfo = await userinfoResp.json();
+    const verifiedSub = userinfo && userinfo.sub;
+    if (!verifiedSub) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const url = `${supabaseUrl}/rest/v1/claims?whop_user_id=eq.${encodeURIComponent(verifiedSub)}&select=claim_id&limit=1`;
     const resp = await fetch(url, {
       headers: {
         "apikey": supabaseKey,
@@ -23,10 +42,7 @@ module.exports = async function handler(req, res) {
     }
 
     const rows = await resp.json();
-    if (rows.length > 0) {
-      return res.json({ claimed: true, claim: rows[0] });
-    }
-    return res.json({ claimed: false });
+    return res.json({ claimed: rows.length > 0 });
   } catch (err) {
     console.error("check-claim error:", err);
     return res.status(500).json({ error: "Server error" });

@@ -4,6 +4,8 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  res.setHeader('Cache-Control', 'no-store');
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !supabaseKey) return res.status(500).json({ error: "Server misconfigured" });
@@ -28,7 +30,12 @@ module.exports = async function handler(req, res) {
       "address1","address2","city","state","zip","country","phone",
       "whop_user_id","created_at"
     ];
-    const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const escape = (v) => {
+      let s = String(v ?? "");
+      // CSV injection defense: neutralize formula-trigger characters
+      if (/^[=+\-@]/.test(s)) s = "'" + s;
+      return `"${s.replace(/"/g, '""')}"`;
+    };
     const csv = [
       cols.join(","),
       ...rows.map(r => cols.map(c => escape(r[c])).join(","))
