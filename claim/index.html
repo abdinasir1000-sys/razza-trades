@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"}}
+</script>
 <style>
   :root {
     --bg: #050505;
@@ -686,6 +689,49 @@
   .mb-0 { margin-bottom: 0; }
   .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
 
+  /* Gift picker SVG icons */
+  .gift-svg {
+    width: 48px; height: 48px;
+    display: block;
+    margin: 0 auto 0.5rem;
+    filter: drop-shadow(0 4px 10px rgba(126, 207, 126, 0.3));
+    transition: filter 0.2s;
+  }
+  .gift-option.selected .gift-svg {
+    filter: drop-shadow(0 0 14px rgba(126, 207, 126, 0.7));
+  }
+
+  /* 3D model viewer */
+  #model-viewer {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.4rem 0 0.6rem;
+  }
+  #model-canvas {
+    width: 280px; height: 280px;
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(74,128,80,0.14), transparent 70%),
+      rgba(8,10,8,0.7);
+    cursor: grab;
+    display: block;
+    border: 1px solid var(--green-border);
+    box-shadow: 0 0 40px rgba(74,128,80,0.12);
+  }
+  #model-canvas:active { cursor: grabbing; }
+  @media (max-width: 480px) {
+    #model-canvas { width: 220px; height: 220px; }
+  }
+  .model-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+  }
+
   /* Reduced motion respect — kill decorative motion, keep essential feedback */
   @media (prefers-reduced-motion: reduce) {
     .bg-chart .ribbon { animation: none !important; opacity: 0.2; }
@@ -888,18 +934,42 @@
           <label>Select your gift</label>
           <div class="gift-picker" id="gift-picker">
             <div class="gift-option" data-gift="3M Coffee Mug">
-              <span class="gift-emoji">☕</span>
+              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="14" width="26" height="24" rx="3" fill="#111"/>
+                <rect x="6" y="12" width="26" height="4" rx="2" fill="#1a1a1a"/>
+                <rect x="6" y="12" width="26" height="3" rx="1.5" fill="#4A8050"/>
+                <path d="M32 20 Q41 20 41 26 Q41 32 32 32" stroke="#4A8050" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <text x="19" y="30" font-size="11" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
+              </svg>
               <div class="gift-title">3M Coffee Mug</div>
             </div>
             <div class="gift-option" data-gift="3M Sticker Packet">
-              <span class="gift-emoji">🎨</span>
+              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="17" width="30" height="20" rx="3" fill="#0d0d0d" stroke="#2a4a2a" stroke-width="1.5" transform="rotate(-6 24 27)"/>
+                <rect x="9" y="17" width="30" height="20" rx="3" fill="#0f150f" stroke="#3a6a3a" stroke-width="1.5" transform="rotate(3 24 27)"/>
+                <rect x="9" y="16" width="30" height="20" rx="3" fill="#111" stroke="#7ECF7E" stroke-width="1.5"/>
+                <text x="24" y="27" font-size="10" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
+                <text x="24" y="33" font-size="5.5" font-weight="bold" fill="#4A8050" text-anchor="middle" font-family="Arial,sans-serif">TRADING</text>
+              </svg>
               <div class="gift-title">3M Sticker Packet</div>
             </div>
             <div class="gift-option" data-gift="3M Phone Case">
-              <span class="gift-emoji">📱</span>
+              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="13" y="4" width="22" height="40" rx="5" fill="#111" stroke="#4A8050" stroke-width="1.5"/>
+                <circle cx="24" cy="12" r="3.5" fill="#0d0d0d" stroke="#7ECF7E" stroke-width="1"/>
+                <circle cx="24" cy="12" r="1.8" fill="#111133"/>
+                <rect x="13" y="38" width="22" height="6" rx="3" fill="#4A8050"/>
+                <text x="24" y="32" font-size="10" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
+              </svg>
               <div class="gift-title">3M Phone Case</div>
             </div>
           </div>
+        </div>
+
+        <!-- 3D model preview -->
+        <div id="model-viewer">
+          <canvas id="model-canvas"></canvas>
+          <span class="model-hint">Drag to rotate</span>
         </div>
 
         <h2 style="margin-top: 1.5rem; margin-bottom: 1.1rem; font-size: 1.2rem;">Recipient &amp; contact</h2>
@@ -1287,6 +1357,7 @@ function selectGift(gift) {
     if (el.getAttribute("data-gift") === gift) el.classList.add("selected");
     else el.classList.remove("selected");
   });
+  if (typeof window.setGiftModel === "function") window.setGiftModel(gift);
 }
 
 document.querySelectorAll(".gift-option").forEach(function (el) {
@@ -1521,6 +1592,150 @@ function fireConfetti() {
 
 })();
 
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const GREEN = 0x7ECF7E, GREEN_D = 0x4A8050, BLACK = 0x0d0d0d;
+
+function logoTex(label) {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0,0,512,512);
+  const g = ctx.createRadialGradient(256,256,0,256,256,220);
+  g.addColorStop(0,'rgba(126,207,126,0.10)'); g.addColorStop(1,'transparent');
+  ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+  ctx.shadowColor='#7ECF7E'; ctx.shadowBlur=28;
+  ctx.fillStyle='#7ECF7E'; ctx.font='bold 190px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('3M',256,200);
+  ctx.shadowBlur=10; ctx.font='bold 54px Arial'; ctx.fillStyle='#4A8050';
+  ctx.fillText('TRADING',256,330);
+  return new THREE.CanvasTexture(c);
+}
+
+function stickerTex(label, bg, col) {
+  const c = document.createElement('canvas'); c.width=256; c.height=256;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle=bg; ctx.beginPath(); ctx.roundRect(8,8,240,240,18); ctx.fill();
+  ctx.strokeStyle=col; ctx.lineWidth=5; ctx.beginPath(); ctx.roundRect(8,8,240,240,18); ctx.stroke();
+  ctx.fillStyle=col; ctx.font='bold 80px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('3M',128,105);
+  ctx.font='bold 34px Arial'; ctx.fillStyle=col; ctx.globalAlpha=0.8;
+  ctx.fillText(label,128,178); ctx.globalAlpha=1;
+  return new THREE.CanvasTexture(c);
+}
+
+function mkMug() {
+  const g = new THREE.Group();
+  const tex = logoTex();
+  const bodyM = new THREE.MeshStandardMaterial({color:BLACK,roughness:0.45,metalness:0.12,map:tex});
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.88,0.74,1.6,48), bodyM));
+  g.add(Object.assign(new THREE.Mesh(new THREE.CircleGeometry(0.74,32),
+    new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.6})),
+    {rotation:{x:-Math.PI/2,y:0,z:0},position:{x:0,y:-0.8,z:0}}));
+  const rimM = new THREE.MeshStandardMaterial({color:0x1c1c1c,roughness:0.3,metalness:0.4});
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.88,0.045,8,48), rimM);
+  rim.position.y=0.8; g.add(rim);
+  const stripe = new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,0.09,48),
+    new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x2a5a2a,emissiveIntensity:0.35}));
+  stripe.position.y=0.74; g.add(stripe);
+  const curve = new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(0.88,0.42,0), new THREE.Vector3(1.58,0,0), new THREE.Vector3(0.74,-0.52,0));
+  const handle = new THREE.Mesh(new THREE.TubeGeometry(curve,24,0.08,8,false),
+    new THREE.MeshStandardMaterial({color:0x0d0d0d,roughness:0.5,metalness:0.1}));
+  g.add(handle);
+  return g;
+}
+
+function mkPhoneCase() {
+  const g = new THREE.Group();
+  const tex = logoTex();
+  const mats = [
+    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
+    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
+    new THREE.MeshStandardMaterial({color:0x111,roughness:0.4}),
+    new THREE.MeshStandardMaterial({color:GREEN_D,roughness:0.4,emissive:0x1a3a1a,emissiveIntensity:0.4}),
+    new THREE.MeshStandardMaterial({color:BLACK,roughness:0.45,metalness:0.1,map:tex}),
+    new THREE.MeshStandardMaterial({color:0x181818,roughness:0.6}),
+  ];
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.1,2.1,0.13), mats));
+  const camBump = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.05,32),
+    new THREE.MeshStandardMaterial({color:0x222,roughness:0.2,metalness:0.6}));
+  camBump.rotation.x=Math.PI/2; camBump.position.set(-0.26,0.72,0.09); g.add(camBump);
+  const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.03,32),
+    new THREE.MeshStandardMaterial({color:0x111133,roughness:0.1,metalness:0.8}));
+  lens.rotation.x=Math.PI/2; lens.position.set(-0.26,0.72,0.115); g.add(lens);
+  return g;
+}
+
+function mkStickerPack() {
+  const g = new THREE.Group();
+  const defs = [
+    {label:'CHARTS',bg:'#0d0d0d',col:'#4A8050',rz:-0.14,z:-0.04},
+    {label:'TRADES',bg:'#0f140f',col:'#5a9060',rz:0.07,z:-0.02},
+    {label:'TRADING',bg:'#111',col:'#7ECF7E',rz:0,z:0},
+  ];
+  defs.forEach(d => {
+    const tex = stickerTex(d.label,d.bg,d.col);
+    const mats = [
+      new THREE.MeshStandardMaterial({color:0x111}),
+      new THREE.MeshStandardMaterial({color:0x111}),
+      new THREE.MeshStandardMaterial({color:0x111}),
+      new THREE.MeshStandardMaterial({color:0x111}),
+      new THREE.MeshStandardMaterial({map:tex,roughness:0.5}),
+      new THREE.MeshStandardMaterial({color:0x0d0d0d}),
+    ];
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1.5,1.5,0.03), mats);
+    m.rotation.z=d.rz; m.position.z=d.z; g.add(m);
+  });
+  return g;
+}
+
+let renderer, camera, controls, scene, currentModel;
+let running = false;
+
+function init() {
+  const canvas = document.getElementById('model-canvas');
+  renderer = new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  camera = new THREE.PerspectiveCamera(42,1,0.1,100);
+  camera.position.set(0,0.2,4.2);
+
+  scene = new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0xffffff,0.45));
+  const key = new THREE.DirectionalLight(0xffffff,1.3); key.position.set(3,5,3); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x7ECF7E,0.5); fill.position.set(-3,0,2); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0x4A8050,0.7); rim.position.set(0,-2,-3); scene.add(rim);
+
+  controls = new OrbitControls(camera, canvas);
+  controls.enableDamping=true; controls.dampingFactor=0.08;
+  controls.enablePan=false; controls.autoRotate=true; controls.autoRotateSpeed=2.2;
+  controls.minDistance=2.2; controls.maxDistance=7;
+
+  running = true;
+  (function loop(){ if(!running) return; requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera); })();
+}
+
+window.setGiftModel = function(giftName) {
+  const viewer = document.getElementById('model-viewer');
+  if (!viewer) return;
+  viewer.style.display = 'flex';
+
+  if (!renderer) init();
+  if (currentModel) { scene.remove(currentModel); currentModel = null; }
+
+  if (giftName === '3M Coffee Mug') currentModel = mkMug();
+  else if (giftName === '3M Phone Case') currentModel = mkPhoneCase();
+  else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
+
+  if (currentModel) scene.add(currentModel);
+};
 </script>
 </body>
 </html>
