@@ -6,8 +6,9 @@ module.exports = async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !supabaseKey) {
-    console.error("check-claim: missing env vars", { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey });
-    return res.status(500).json({ error: "Server misconfigured", detail: "missing_env" });
+    console.error("check-claim: missing env vars");
+    // Fail open — submit-claim enforces duplicates server-side
+    return res.json({ claimed: false });
   }
 
   const whopUserId = req.query.whop_user_id;
@@ -27,13 +28,15 @@ module.exports = async function handler(req, res) {
     if (!resp.ok) {
       const txt = await resp.text();
       console.error("Supabase check failed:", resp.status, txt);
-      return res.status(500).json({ error: "Check failed", detail: resp.status, body: txt.slice(0, 200) });
+      // Fail open — let user reach the form; submit-claim will catch duplicates
+      return res.json({ claimed: false });
     }
 
     const rows = await resp.json();
     return res.json({ claimed: rows.length > 0 });
   } catch (err) {
     console.error("check-claim error:", err);
-    return res.status(500).json({ error: "Server error", detail: err.message });
+    // Fail open
+    return res.json({ claimed: false });
   }
 };
