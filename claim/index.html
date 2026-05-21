@@ -1664,21 +1664,6 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
-  // Handle: BEHIND the mug (in -Z direction) so logo faces camera and handle is opposite.
-  // Camera at +Z sees the logo; handle becomes visible when camera swings to -Z side.
-  // Mug surface at -Z: radius ≈ 0.47. So z-attach ≈ -0.47.
-  const hc = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0,  0.22, -0.47),
-    new THREE.Vector3(0,  0.12, -0.67),
-    new THREE.Vector3(0, -0.10, -0.82),
-    new THREE.Vector3(0, -0.38, -0.67),
-    new THREE.Vector3(0, -0.52, -0.45),
-  ]);
-  g.add(new THREE.Mesh(
-    new THREE.TubeGeometry(hc, 32, 0.048, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.28 })
-  ));
-
   g.scale.setScalar(0.58);
   return g;
 }
@@ -1918,7 +1903,7 @@ function mkStickerPack() {
 /* ================================================================
    SCENE / RENDERER / ORBIT CONTROLS
    ================================================================ */
-let renderer, camera, controls, scene, currentModel, currentModelType, animT = 0;
+let renderer, camera, controls, scene, currentModel, currentModelType;
 
 function init() {
   const canvas = document.getElementById('model-canvas');
@@ -1952,12 +1937,6 @@ function init() {
 
   (function loop() {
     requestAnimationFrame(loop);
-    animT += 0.007;
-    // Mug: oscillate the MODEL ±48° so the handle (at -Z back) never swings into view.
-    // Camera stays fixed; only the mug rocks left/right showing logo + sides only.
-    if (currentModel && currentModelType === '3M Coffee Mug') {
-      currentModel.rotation.y = Math.sin(animT * 0.55) * 0.84;
-    }
     controls.update();
     renderer.render(scene, camera);
   })();
@@ -1971,8 +1950,6 @@ window.setGiftModel = function(giftName) {
     if (!renderer) init();
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
     currentModelType = giftName;
-    // Mug uses model oscillation instead of camera autoRotate (to keep handle hidden)
-    if (controls) controls.autoRotate = (giftName !== '3M Coffee Mug');
     if      (giftName === '3M Coffee Mug')     currentModel = mkMug();
     else if (giftName === '3M Phone Case')     currentModel = mkPhoneCase();
     else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
