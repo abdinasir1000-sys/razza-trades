@@ -1664,28 +1664,22 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
-  // Green rim torus
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.47, 0.016, 8, 64),
-    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.22, emissive: 0x1a3a1a, emissiveIntensity: 0.5 })
-  );
-  rim.position.y = 0.79;
-  g.add(rim);
-
-  // Handle: D-curve mid-body. y=+0.22 (36% down) to y=-0.52 (83% down).
+  // Handle: BEHIND the mug (in -Z direction) so logo faces camera and handle is opposite.
+  // Camera at +Z sees the logo; handle becomes visible when camera swings to -Z side.
+  // Mug surface at -Z: radius ≈ 0.47. So z-attach ≈ -0.47.
   const hc = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.47,  0.22, 0),
-    new THREE.Vector3(0.65,  0.14, 0),
-    new THREE.Vector3(0.80, -0.12, 0),
-    new THREE.Vector3(0.65, -0.40, 0),
-    new THREE.Vector3(0.45, -0.52, 0),
+    new THREE.Vector3(0,  0.22, -0.47),
+    new THREE.Vector3(0,  0.12, -0.67),
+    new THREE.Vector3(0, -0.10, -0.82),
+    new THREE.Vector3(0, -0.38, -0.67),
+    new THREE.Vector3(0, -0.52, -0.45),
   ]);
   g.add(new THREE.Mesh(
     new THREE.TubeGeometry(hc, 32, 0.048, 10, false),
     new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.28 })
   ));
 
-  g.scale.setScalar(0.72);
+  g.scale.setScalar(0.58);
   return g;
 }
 
@@ -1737,40 +1731,69 @@ function mkPhoneCase() {
   logoPlane.position.set(0, 0, D / 2 + 0.010);
   g.add(logoPlane);
 
-  // Camera island — low metalness so it's actually visible as a raised bump
-  const islandM = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.45, metalness: 0.15 });
-  const island = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.44, 0.055, 4, 0.05), islandM);
-  island.position.set(-0.20, 0.72, D / 2 + 0.028);
+  // === iPhone 16 Pro camera module: large square island, top-left of back ===
+  const islandM = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.38, metalness: 0.12 });
+  // Island is ~58% of phone width — matches real iPhone 16 Pro camera hump proportions
+  const island = new THREE.Mesh(new RoundedBoxGeometry(0.54, 0.54, 0.065, 4, 0.08), islandM);
+  island.position.set(-0.17, 0.74, D / 2 + 0.033);
   g.add(island);
 
-  // 3 lenses — low metalness so they show as dark grey circles, not invisible black
-  const ringM  = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.25, metalness: 0.20 });
-  const glassM = new THREE.MeshStandardMaterial({ color: 0x0a0a18, roughness: 0.06, metalness: 0.30 });
-  [[-0.26, 0.79], [-0.14, 0.63], [-0.26, 0.63]].forEach(([lx, ly]) => {
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.086, 0.086, 0.040, 20), ringM);
-    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.044); g.add(ring);
-    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.056, 0.022, 20), glassM);
-    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.058); g.add(lens);
-  });
-  // LiDAR dot
-  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.024, 16), ringM);
-  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.10, 0.67, D / 2 + 0.036); g.add(lidar);
+  const ringM  = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.28, metalness: 0.18 });
+  const glassM = new THREE.MeshStandardMaterial({ color: 0x080814, roughness: 0.06, metalness: 0.25,
+    emissive: 0x050510, emissiveIntensity: 0.4 });
 
-  // Side buttons — visible grey
-  const btnM = new THREE.MeshStandardMaterial({ color: 0x2e2e2e, roughness: 0.40, metalness: 0.10 });
-  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.15, 0.10), btnM);
-  aBtn.position.set(-W / 2 - 0.016, 0.48, 0); g.add(aBtn);
-  [0.18, -0.10].forEach(by => {
-    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.15, 0.10), btnM);
+  // 3 lenses in triangle: top-left, top-right, bottom-center — iPhone 16 Pro layout
+  [[-0.28, 0.87], [-0.07, 0.87], [-0.17, 0.68]].forEach(([lx, ly]) => {
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.046, 24), ringM);
+    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.052); g.add(ring);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.026, 24), glassM);
+    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.067); g.add(lens);
+  });
+
+  // Flash — bright oval between top-right lens and center
+  const flashM = new THREE.MeshStandardMaterial({ color: 0xf0e8c0, roughness: 0.20, metalness: 0.10,
+    emissive: 0xd4c070, emissiveIntensity: 0.5 });
+  const flash = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.022, 16), flashM);
+  flash.rotation.x = Math.PI / 2; flash.position.set(-0.07, 0.68, D / 2 + 0.044); g.add(flash);
+
+  // LiDAR — small dark disc on the island
+  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.022, 16), ringM);
+  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.28, 0.68, D / 2 + 0.040); g.add(lidar);
+
+  // Side buttons — action button left, volume + power right
+  const btnM = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.42, metalness: 0.08 });
+  // Action button (left side)
+  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.14, 0.10), btnM);
+  aBtn.position.set(-W / 2 - 0.016, 0.50, 0); g.add(aBtn);
+  // Volume up, volume down (right side)
+  [0.40, 0.18].forEach(by => {
+    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.16, 0.10), btnM);
     vBtn.position.set(W / 2 + 0.016, by, 0); g.add(vBtn);
   });
+  // Power button (right side, taller)
+  const pBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.22, 0.10), btnM);
+  pBtn.position.set(W / 2 + 0.016, -0.15, 0); g.add(pBtn);
 
-  // Green accent bottom bar — emissive so it's always visible
+  // USB-C port hint at bottom center
+  const portM = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.7 });
+  const port = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.038, D + 0.01), portM);
+  port.position.set(0, -H / 2 + 0.030, 0); g.add(port);
+
+  // Speaker grille dots either side of USB-C
+  [-0.22, 0.22].forEach(sx => {
+    for (let i = 0; i < 4; i++) {
+      const dot = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, D + 0.01, 8), portM);
+      dot.rotation.x = Math.PI / 2;
+      dot.position.set(sx + i * 0.022, -H / 2 + 0.030, 0); g.add(dot);
+    }
+  });
+
+  // Green accent bottom bar
   const greenBar = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.5, 0.015, D + 0.01),
+    new THREE.BoxGeometry(W * 0.45, 0.014, D + 0.01),
     new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: GREEN_D, emissiveIntensity: 0.9 })
   );
-  greenBar.position.set(0, -H / 2 + 0.04, 0);
+  greenBar.position.set(0, -H / 2 + 0.060, 0);
   g.add(greenBar);
 
   g.scale.setScalar(0.76);
