@@ -1911,9 +1911,9 @@ function mkStickerPack() {
     g.add(sheet);
   }
 
-  // Positive rotation.x: +Y face (printed stickers) tilts toward +Z (camera)
-  g.rotation.x = 0.42;
-  g.rotation.y = 0.18;
+  // rotation.x = π/2: stands pack upright, printed +Y face points directly toward +Z camera
+  g.rotation.x = Math.PI / 2;
+  g.rotation.y = 0;
   g.scale.setScalar(1.05);
   return g;
 }
@@ -1960,7 +1960,8 @@ function init() {
     // Mug/phone case: normal autoRotate spin
     if (currentModelType === '3M Sticker Packet' && currentModel) {
       controls.autoRotate = false;
-      currentModel.rotation.y = 0.18 + Math.sin(Date.now() * 0.0008) * 0.72;
+      // Gentle rock ±28° — front sticker face stays in view throughout
+      currentModel.rotation.y = Math.sin(Date.now() * 0.0007) * 0.50;
     } else {
       controls.autoRotate = true;
     }
