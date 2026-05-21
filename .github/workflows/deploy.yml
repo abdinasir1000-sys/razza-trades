@@ -17,25 +17,25 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Get org ID and deploy
+      - name: Verify token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          PROJECT_ID="prj_cN3FkhM8AWqw7GhVgyhINKUyf66J"
-
-          # Get account/org ID from project
-          ORG_ID=$(curl -sf \
+          set -x
+          RESP=$(curl -s -o /tmp/whoami.json -w "%{http_code}" \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects/$PROJECT_ID" \
-            | python3 -c "import sys,json; print(json.load(sys.stdin).get('accountId',''))")
+            "https://api.vercel.com/v2/user")
+          echo "HTTP status: $RESP"
+          cat /tmp/whoami.json
 
-          echo "Project ID: $PROJECT_ID"
-          echo "Org ID: $ORG_ID"
-
+      - name: Deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -x
           mkdir -p claim/.vercel
-          echo "{\"projectId\":\"$PROJECT_ID\",\"orgId\":\"$ORG_ID\"}" > claim/.vercel/project.json
-
+          echo '{"projectId":"prj_cN3FkhM8AWqw7GhVgyhINKUyf66J","orgId":""}' > claim/.vercel/project.json
           cd claim
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          vercel build --prod --token="$VERCEL_TOKEN"
-          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN" 2>&1 || true
+          vercel build --prod --token="$VERCEL_TOKEN" 2>&1
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" 2>&1
