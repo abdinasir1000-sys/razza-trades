@@ -1620,6 +1620,7 @@ function makeTex(drawFn, w, h) {
    - LatheGeometry for a realistic tapered silhouette
    - Handle on the SIDE via QuadraticBezierCurve3
    - Logo decal on the front face
+   - Black mug with green 3M logo
    ================================================================ */
 function mkMug() {
   const g = new THREE.Group();
@@ -1662,7 +1663,7 @@ function mkMug() {
   g.add(rimTorus);
 
   // --- handle: D-shape on the RIGHT side, spanning middle 60% of height ---
-  // start attaches at upper body (~y=+0.32), end at lower body (~y=-0.32)
+  // Start attaches at upper body (y=+0.32), end at lower body (y=-0.32)
   const handleCurve = new THREE.QuadraticBezierCurve3(
     new THREE.Vector3(0.44,  0.32, 0),   // upper attachment
     new THREE.Vector3(0.88,  0.0,  0),   // bulge to the right
@@ -1676,7 +1677,6 @@ function mkMug() {
 
   // --- logo decal on the FRONT face ---
   const logoTex = makeTex((ctx, w, h) => {
-    // transparent background so it sits cleanly on the mug
     ctx.clearRect(0, 0, w, h);
     // subtle green glow halo
     const grd = ctx.createRadialGradient(w/2, h*0.44, 0, w/2, h*0.44, w*0.46);
@@ -1712,22 +1712,25 @@ function mkMug() {
 
 /* ================================================================
    PHONE CASE — iPhone 16 Pro style
-   - Back face (logo side) rotated to face camera on load
-   - Camera island top-left with 3 lenses + LiDAR
-   - Logo in the lower 60% of the back face
+   - Thin rectangular body: 0.94W x 2.02H x 0.13D
+   - Back face has 3M logo (color: 0xffffff on map material)
+   - Camera island top-left with 3 lenses in triangle layout + LiDAR
+   - Side buttons
+   - Green accent on bottom edge
+   - Group rotated 180deg around Y so logo-side faces camera
    ================================================================ */
 function mkPhoneCase() {
   const g = new THREE.Group();
   const W = 0.94, H = 2.02, D = 0.13;
 
-  // back-face texture: logo in lower 60% (canvas coords y=400..1024 = lower area)
+  // back-face texture: logo in lower 60% (avoid camera island area top-left)
   const backTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
     const grd = ctx.createRadialGradient(w/2, h*0.65, 0, w/2, h*0.65, w*0.50);
     grd.addColorStop(0, 'rgba(126,207,126,0.16)');
     grd.addColorStop(1, 'transparent');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    // "3M" — centred in lower 60%
+    // "3M" centred in lower 60%
     ctx.fillStyle = '#7ECF7E';
     ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 30;
     ctx.font = 'bold 170px Arial';
@@ -1741,10 +1744,10 @@ function mkPhoneCase() {
 
   const sideM  = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.45, metalness: 0.3 });
   const greenM = new THREE.MeshStandardMaterial({ color: GREEN_D,  roughness: 0.35, emissive: 0x1a3a1a, emissiveIntensity: 0.5 });
+  // CRITICAL: color must be 0xffffff when using map, otherwise texture is multiplied to black
   const backM  = new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex, roughness: 0.4 });
   const frontM = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.7 });
   // BoxGeometry face order: +x, -x, +y, -y, +z, -z
-  // We want back-face (+z direction) to show logo and face the camera
   const mats = [sideM, sideM, sideM, greenM, backM, frontM];
   g.add(new THREE.Mesh(new THREE.BoxGeometry(W, H, D), mats));
 
@@ -1787,14 +1790,18 @@ function mkPhoneCase() {
     g.add(vBtn);
   });
 
-  // rotate so logo face (+z) faces the camera initially
+  // rotate 180deg around Y so logo face (+z) faces the camera initially
   g.rotation.y = Math.PI;
 
   return g;
 }
 
 /* ================================================================
-   STICKER PACK — looks like a real booklet/packet
+   STICKER PACK — looks like a real rectangular booklet/packet
+   - Flat rectangular shape: 1.6W x 1.2H x 0.20D
+   - Cover has designed layout: dark bg, green border, 3M text, sticker previews
+   - Sides show page-stack texture (alternating dark lines)
+   - Tilted slightly for visual interest
    ================================================================ */
 function mkStickerPack() {
   const g = new THREE.Group();
@@ -1804,9 +1811,10 @@ function mkStickerPack() {
   const coverTex = makeTex((ctx, w, h) => {
     // dark background
     ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
-    // green border
+    // green border (outer)
     ctx.strokeStyle = '#7ECF7E'; ctx.lineWidth = 14;
     ctx.strokeRect(10, 10, w - 20, h - 20);
+    // green border (inner)
     ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 4;
     ctx.strokeRect(24, 24, w - 48, h - 48);
     // "3M" headline
@@ -1820,15 +1828,16 @@ function mkStickerPack() {
     ctx.font = `bold ${Math.round(w * 0.092)}px Arial`;
     ctx.fillStyle = '#4A8050';
     ctx.fillText('TRADING', w / 2, h * 0.56);
-    // "STICKER PACK" badge
+    // "STICKER PACK" badge background
     ctx.fillStyle = 'rgba(74,128,80,0.28)';
     ctx.beginPath();
     ctx.roundRect(w / 2 - 130, h * 0.71 - 18, 260, 40, 8);
     ctx.fill();
+    // "STICKER PACK" text
     ctx.fillStyle = '#5a9060';
     ctx.font = `bold ${Math.round(w * 0.053)}px Arial`;
     ctx.fillText('STICKER PACK', w / 2, h * 0.74);
-    // 4 small circle sticker previews
+    // 4 small circle sticker previews in corners
     ctx.strokeStyle = 'rgba(74,128,80,0.45)'; ctx.lineWidth = 3;
     [[0.14, 0.32], [0.86, 0.32], [0.14, 0.62], [0.86, 0.62]].forEach(([rx, ry]) => {
       ctx.beginPath(); ctx.arc(w * rx, h * ry, 22, 0, Math.PI * 2); ctx.stroke();
@@ -1856,6 +1865,7 @@ function mkStickerPack() {
     ctx.fillText('3MTRADING.CA', w / 2, h / 2);
   }, 680, 500);
 
+  // CRITICAL: color must be 0xffffff on all map materials
   const coverM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: coverTex, roughness: 0.4 });
   const spineM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: spineTex, roughness: 0.6 });
   const backM  = new THREE.MeshStandardMaterial({ color: 0xffffff, map: backTex,  roughness: 0.5 });
@@ -1900,13 +1910,13 @@ function init() {
   scene.add(rimLight);
 
   controls = new OrbitControls(camera, canvas);
-  controls.enableDamping  = true;
-  controls.dampingFactor  = 0.08;
-  controls.enablePan      = false;
-  controls.autoRotate     = true;
+  controls.enableDamping   = true;
+  controls.dampingFactor   = 0.08;
+  controls.enablePan       = false;
+  controls.autoRotate      = true;
   controls.autoRotateSpeed = 2.0;
-  controls.minDistance    = 2.0;
-  controls.maxDistance    = 7;
+  controls.minDistance     = 2.0;
+  controls.maxDistance     = 7;
 
   (function loop() {
     requestAnimationFrame(loop);
