@@ -90,7 +90,10 @@ module.exports = async function handler(req, res) {
       if (resp.status === 409) {
         return res.status(409).json({ ok: false, error: "already_claimed" });
       }
-      return res.status(500).json({ ok: false });
+      // Return supabase error detail so the browser console shows exactly what failed
+      let detail = txt;
+      try { detail = JSON.parse(txt).message || txt; } catch (_) {}
+      return res.status(500).json({ ok: false, supabase_error: detail.slice(0, 300) });
     }
 
     return res.json({ ok: true });

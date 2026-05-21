@@ -1464,10 +1464,15 @@ async function submitClaim(payload) {
       body: JSON.stringify(payload)
     });
     if (resp.status === 409) return { ok: false, alreadyClaimed: true };
-    if (!resp.ok) return { ok: false };
+    if (!resp.ok) {
+      // Log the server's error detail to the browser console for debugging
+      const body = await resp.json().catch(() => ({}));
+      console.error("submit-claim HTTP", resp.status, body);
+      return { ok: false };
+    }
     return { ok: true };
   } catch (e) {
-    console.warn("Claim submit failed:", e);
+    console.error("Claim submit network error:", e);
     return { ok: false };
   }
 }
