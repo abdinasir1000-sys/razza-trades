@@ -931,7 +931,7 @@
         <div id="form-error" class="alert alert-error" role="alert" aria-live="polite"></div>
 
         <div class="field">
-          <label>Select your gift</label>
+          <h2 style="margin-bottom:1.1rem;font-size:1.2rem;">Select Your Gift</h2>
           <div class="gift-picker" id="gift-picker">
             <div class="gift-option" data-gift="3M Coffee Mug">
               <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -968,7 +968,7 @@
 
         <!-- 3D model preview -->
         <div id="model-viewer">
-          <canvas id="model-canvas"></canvas>
+          <canvas id="model-canvas" width="280" height="280"></canvas>
           <span class="model-hint">Drag to rotate</span>
         </div>
 
@@ -1345,10 +1345,7 @@ function hydrateForm() {
   if (whopUser && whopUser.name && !$("f-name").value) {
     $("f-name").value = whopUser.name;
   }
-  // Default selection: first gift
-  if (!selectedGift) {
-    selectGift("3M Coffee Mug");
-  }
+  selectedGift = null;
 }
 
 function selectGift(gift) {
@@ -1699,12 +1696,14 @@ let running = false;
 
 function init() {
   const canvas = document.getElementById('model-canvas');
+  const W = canvas.width || 280;
+  const H = canvas.height || 280;
   renderer = new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+  renderer.setSize(W, H, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  camera = new THREE.PerspectiveCamera(42,1,0.1,100);
+  camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
   camera.position.set(0,0.2,4.2);
 
   scene = new THREE.Scene();
