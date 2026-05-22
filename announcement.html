@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>3M Gift Claim — Announcement Image</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #050505; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Rajdhani', sans-serif; }
+
+  /* Fixed 1200×630 canvas */
+  .canvas {
+    width: 1200px; height: 630px; position: relative; overflow: hidden;
+    background: #050505;
+    flex-shrink: 0;
+  }
+
+  /* Background layers */
+  .bg-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 110%, rgba(74,222,128,0.13) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 15% 50%, rgba(74,222,128,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 85% 50%, rgba(74,222,128,0.06) 0%, transparent 60%);
+  }
+  .bg-grid {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.06;
+    background-image: linear-gradient(rgba(74,222,128,0.5) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(74,222,128,0.5) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .bg-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%);
+  }
+
+  /* Header */
+  .header {
+    position: absolute; top: 40px; left: 0; right: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .logo-row { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 52px; height: 52px; }
+  .logo img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.8) drop-shadow(0 0 16px rgba(74,222,128,0.8)); }
+  .brand-name { font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #e8f5e8; }
+  .brand-name span { color: #4ade80; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.35);
+    border-radius: 100px; padding: 6px 20px;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: #4ade80;
+  }
+  .pill-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 8px #4ade80; }
+
+  /* Headline */
+  .headline {
+    position: absolute; top: 178px; left: 0; right: 0; text-align: center;
+  }
+  .headline h1 {
+    font-size: 4.2rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    line-height: 1; color: #fff;
+  }
+  .headline h1 span { color: #4ade80; }
+  .headline p {
+    margin-top: 12px; font-family: 'Space Mono', monospace; font-size: 0.78rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: #6a8a6a;
+  }
+
+  /* Products */
+  .products {
+    position: absolute; top: 320px; left: 60px; right: 60px;
+    display: flex; gap: 28px; justify-content: center;
+  }
+  .product-card {
+    flex: 1; max-width: 330px;
+    background: rgba(13,18,13,0.9); border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 16px; padding: 28px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    position: relative; overflow: hidden;
+  }
+  .product-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(74,222,128,0.07), transparent 70%);
+    pointer-events: none;
+  }
+  .product-card::after {
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(74,222,128,0.4), transparent);
+  }
+  .product-icon { font-size: 2.8rem; line-height: 1; }
+  .product-name {
+    font-size: 1.15rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #e8f5e8; text-align: center;
+  }
+  .product-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #4ade80;
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.15);
+    border-radius: 4px; padding: 3px 10px;
+  }
+
+  /* Footer */
+  .footer {
+    position: absolute; bottom: 32px; left: 0; right: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .url {
+    font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700;
+    letter-spacing: 0.1em; color: #4ade80;
+    text-shadow: 0 0 20px rgba(74,222,128,0.5);
+  }
+  .footer-note {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #3a5a3a;
+  }
+
+  /* Corner marks */
+  .corner { position: absolute; width: 20px; height: 20px; }
+  .corner.tl { top: 16px; left: 16px; border-top: 1px solid rgba(74,222,128,0.3); border-left: 1px solid rgba(74,222,128,0.3); }
+  .corner.tr { top: 16px; right: 16px; border-top: 1px solid rgba(74,222,128,0.3); border-right: 1px solid rgba(74,222,128,0.3); }
+  .corner.bl { bottom: 16px; left: 16px; border-bottom: 1px solid rgba(74,222,128,0.3); border-left: 1px solid rgba(74,222,128,0.3); }
+  .corner.br { bottom: 16px; right: 16px; border-bottom: 1px solid rgba(74,222,128,0.3); border-right: 1px solid rgba(74,222,128,0.3); }
+
+  /* Screenshot instructions */
+  .instructions {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #111; border: 1px solid #333; border-radius: 8px;
+    padding: 10px 20px; color: #888; font-family: monospace; font-size: 0.75rem;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-vignette"></div>
+
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo">
+        <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" />
+      </div>
+      <div class="brand-name">3M <span>Trading</span></div>
+    </div>
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Member Exclusive · Free Gift
+    </div>
+  </div>
+
+  <div class="headline">
+    <h1>Claim Your <span>Free</span> Gift</h1>
+    <p>Verified members only · One per account · Free shipping in Canada &amp; US</p>
+  </div>
+
+  <div class="products">
+    <div class="product-card">
+      <div class="product-icon">☕</div>
+      <div class="product-name">3M Trading Mug</div>
+      <div class="product-tag">Ceramic · Branded</div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon">📱</div>
+      <div class="product-name">3M Phone Case</div>
+      <div class="product-tag">iPhone Compatible</div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon">✨</div>
+      <div class="product-name">3M Sticker Pack</div>
+      <div class="product-tag">Premium Finish</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="url">gifts.3mtrading.ca</div>
+    <div class="footer-note">Sign in with Whop · Pick your gift · Done</div>
+  </div>
+</div>
+
+<div class="instructions">Open in browser → zoom to fit → screenshot just the dark card (1200×630)</div>
+</body>
+</html>
