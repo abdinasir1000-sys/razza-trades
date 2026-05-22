@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3M Trading — Claims Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #080b08;
+    --bg-card: #0d120d;
+    --green: #4ade80;
+    --green-core: #7ecf7e;
+    --green-dim: #2d6e2d;
+    --green-border: rgba(126,207,126,0.18);
+    --green-glow: rgba(126,207,126,0.08);
+    --text: #e8f5e8;
+    --text-mid: #a8c8a8;
+    --text-dim: #6a8a6a;
+    --text-faint: #3a5a3a;
+    --border: rgba(126,207,126,0.12);
+    --red: #f87171;
+    --amber: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem;
+  }
+  .login-card {
+    background: var(--bg-card); border: 1px solid var(--green-border);
+    border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+    box-shadow: 0 0 40px var(--green-glow);
+    text-align: center;
+  }
+  .login-logo { width: 64px; height: 64px; margin: 0 auto 1.2rem; }
+  .login-logo img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.6) drop-shadow(0 0 12px rgba(126,207,126,0.5)); }
+  .login-card h1 { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .login-card p { color: var(--text-dim); font-size: 0.8rem; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 2rem; }
+  .login-card input[type="password"] {
+    width: 100%; background: #0a0f0a; border: 1px solid var(--green-border);
+    border-radius: 8px; padding: 0.75rem 1rem; color: var(--text);
+    font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    outline: none; margin-bottom: 1rem; letter-spacing: 0.1em;
+  }
+  .login-card input[type="password"]:focus { border-color: var(--green-core); }
+  .login-btn {
+    width: 100%; background: linear-gradient(135deg, #2d6e2d, #4ade80 60%, #2d6e2d);
+    border: none; border-radius: 100px; padding: 0.75rem 1.5rem;
+    color: #050505; font-family: 'Space Mono', monospace; font-size: 0.8rem;
+    font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-error { color: var(--red); font-size: 0.75rem; font-family: 'Space Mono', monospace; margin-top: 0.75rem; display: none; }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; min-height: 100vh; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,8,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 60px;
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
+  .topbar-logo { width: 36px; height: 36px; }
+  .topbar-logo img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.6) drop-shadow(0 0 8px rgba(126,207,126,0.5)); }
+  .topbar h1 { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .topbar-actions { display: flex; align-items: center; gap: 1rem; }
+  .btn-csv {
+    background: transparent; border: 1px solid var(--green-border);
+    border-radius: 8px; padding: 0.4rem 0.9rem;
+    color: var(--green-core); font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; text-decoration: none; transition: background 0.2s;
+  }
+  .btn-csv:hover { background: var(--green-glow); }
+  .btn-logout {
+    background: transparent; border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 8px; padding: 0.4rem 0.9rem;
+    color: var(--red); font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-logout:hover { background: rgba(248,113,113,0.06); }
+
+  .main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+  /* ── STAT CARDS ── */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--green-border);
+    border-radius: 12px; padding: 1.2rem 1.4rem;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top left, rgba(126,207,126,0.06), transparent 70%); pointer-events: none; }
+  .stat-num { font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; color: var(--green); }
+  .stat-pct { font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text-dim); margin-left: 0.3rem; }
+  .stat-label { font-family: 'Space Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); margin-top: 0.4rem; }
+
+  /* ── FILTER TABS ── */
+  .filter-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .filter-tab {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.35rem 0.9rem;
+    color: var(--text-dim); font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .filter-tab:hover { border-color: var(--green-border); color: var(--text-mid); }
+  .filter-tab.active { background: var(--green-glow); border-color: var(--green-core); color: var(--green-core); }
+  .search-input {
+    margin-left: auto; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.35rem 0.75rem; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.8rem; outline: none; width: 200px;
+  }
+  .search-input:focus { border-color: var(--green-border); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--bg-card); border: 1px solid var(--green-border);
+    border-radius: 12px; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 0.8rem 1rem; text-align: left;
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim);
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+    cursor: pointer; user-select: none;
+  }
+  thead th:hover { color: var(--green-core); }
+  thead th .sort-arrow { opacity: 0.4; margin-left: 0.3rem; }
+  thead th.sorted .sort-arrow { opacity: 1; color: var(--green-core); }
+  tbody tr {
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--green-glow); }
+  tbody td { padding: 0.85rem 1rem; font-size: 0.82rem; color: var(--text-mid); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  tbody td.name-cell { color: var(--text); font-weight: 600; }
+  .gift-badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    background: rgba(126,207,126,0.08); border: 1px solid var(--green-border);
+    border-radius: 4px; font-size: 0.7rem; color: var(--green-core);
+    font-family: 'Space Mono', monospace; letter-spacing: 0.06em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;
+  }
+  .country-badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 4px; font-size: 0.68rem;
+    font-family: 'Space Mono', monospace; letter-spacing: 0.06em;
+  }
+  .country-badge.ca { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); color: #4ade80; }
+  .country-badge.us { background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.2); color: #60a5fa; }
+  .country-badge.int { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: var(--amber); }
+  .empty-state { padding: 3rem; text-align: center; color: var(--text-faint); font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── DETAIL PANEL ── */
+  .panel-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  }
+  .panel-overlay.open { display: block; }
+  .panel {
+    position: fixed; top: 0; right: -480px; width: 100%; max-width: 480px;
+    height: 100%; background: #0b100b; border-left: 1px solid var(--green-border);
+    overflow-y: auto; transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 201; padding: 1.5rem;
+  }
+  .panel.open { right: 0; }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .panel-header h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .panel-close { background: none; border: 1px solid var(--border); border-radius: 6px; width: 32px; height: 32px; color: var(--text-dim); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+  .panel-close:hover { border-color: var(--green-border); color: var(--text); }
+  .panel-section { margin-bottom: 1.5rem; }
+  .panel-section-title { font-family: 'Space Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--text-faint); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .panel-field { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.85rem; }
+  .panel-field label { font-family: 'Space Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); }
+  .panel-field value { font-size: 0.88rem; color: var(--text); word-break: break-all; }
+
+  /* ── LOADING ── */
+  .spinner { display: flex; align-items: center; justify-content: center; padding: 4rem; }
+  .spin { width: 32px; height: 32px; border: 2px solid var(--green-border); border-top-color: var(--green-core); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 700px) {
+    .main { padding: 1rem; }
+    .topbar { padding: 0 1rem; }
+    thead th:nth-child(n+5) { display: none; }
+    tbody td:nth-child(n+5) { display: none; }
+    .search-input { width: 130px; }
+    .panel { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" />
+    </div>
+    <h1>3M Trading</h1>
+    <p>Claims Admin Portal</p>
+    <input type="password" id="api-key-input" placeholder="Enter admin key" autocomplete="off" />
+    <button class="login-btn" onclick="doLogin()">Access Dashboard &rarr;</button>
+    <div class="login-error" id="login-error">Invalid key — try again.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">
+        <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" />
+      </div>
+      <h1>Claims Dashboard</h1>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn-csv" id="csv-link" href="#">Download CSV</a>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stat-row" id="stat-row">
+      <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total Responses</div></div>
+      <div class="stat-card"><div><span class="stat-num" id="stat-ca-n">—</span><span class="stat-pct" id="stat-ca-p"></span></div><div class="stat-label">Canada</div></div>
+      <div class="stat-card"><div><span class="stat-num" id="stat-us-n">—</span><span class="stat-pct" id="stat-us-p"></span></div><div class="stat-label">United States</div></div>
+      <div class="stat-card"><div><span class="stat-num" id="stat-int-n">—</span><span class="stat-pct" id="stat-int-p"></span></div><div class="stat-label">International</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="ca">Canada</button>
+      <button class="filter-tab" data-filter="us">United States</button>
+      <button class="filter-tab" data-filter="int">International</button>
+      <input class="search-input" id="search-input" type="text" placeholder="Search name or email…" oninput="renderTable()" />
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="spinner" id="spinner"><div class="spin"></div></div>
+      <table id="claims-table" style="display:none">
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')">Name <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('email')">Email <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('gift')">Gift <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('country')">Country <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('created_at')">Submitted <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">No responses found.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+<div class="panel" id="detail-panel">
+  <div class="panel-header">
+    <h2 id="panel-name">—</h2>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div id="panel-body"></div>
+</div>
+
+<script>
+  let allClaims = [];
+  let activeFilter = 'all';
+  let sortCol = 'created_at';
+  let sortDir = -1;
+  let apiKey = '';
+
+  // ── AUTH ──
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = sessionStorage.getItem('3m_admin_key');
+    if (saved) { apiKey = saved; showDashboard(); loadClaims(); }
+    document.getElementById('api-key-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    document.querySelectorAll('.filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        renderTable();
+      });
+    });
+  });
+
+  function doLogin() {
+    const key = document.getElementById('api-key-input').value.trim();
+    if (!key) return;
+    apiKey = key;
+    loadClaims(true);
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem('3m_admin_key');
+    apiKey = '';
+    allClaims = [];
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('api-key-input').value = '';
+  }
+
+  function showDashboard() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('csv-link').href = `/api/get-claims?key=${encodeURIComponent(apiKey)}`;
+  }
+
+  // ── DATA ──
+  async function loadClaims(fromLogin = false) {
+    try {
+      const resp = await fetch(`/api/admin-claims?key=${encodeURIComponent(apiKey)}`);
+      if (resp.status === 401) {
+        if (fromLogin) {
+          document.getElementById('login-error').style.display = 'block';
+        } else {
+          doLogout();
+        }
+        return;
+      }
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error);
+      sessionStorage.setItem('3m_admin_key', apiKey);
+      allClaims = data.claims || [];
+      if (fromLogin) showDashboard();
+      updateStats();
+      renderTable();
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('claims-table').style.display = 'table';
+    } catch (err) {
+      console.error('Load error:', err);
+    }
+  }
+
+  // ── STATS ──
+  function countryType(c) {
+    if (!c) return 'int';
+    const v = c.toLowerCase().trim();
+    if (v === 'canada' || v === 'ca') return 'ca';
+    if (v === 'united states' || v === 'us' || v === 'usa') return 'us';
+    return 'int';
+  }
+
+  function updateStats() {
+    const total = allClaims.length;
+    const ca = allClaims.filter(r => countryType(r.country) === 'ca').length;
+    const us = allClaims.filter(r => countryType(r.country) === 'us').length;
+    const intl = allClaims.filter(r => countryType(r.country) === 'int').length;
+    const pct = (n) => total ? Math.round(n / total * 100) + '%' : '0%';
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-ca-n').textContent = ca;
+    document.getElementById('stat-ca-p').textContent = total ? ` · ${pct(ca)}` : '';
+    document.getElementById('stat-us-n').textContent = us;
+    document.getElementById('stat-us-p').textContent = total ? ` · ${pct(us)}` : '';
+    document.getElementById('stat-int-n').textContent = intl;
+    document.getElementById('stat-int-p').textContent = total ? ` · ${pct(intl)}` : '';
+  }
+
+  // ── TABLE ──
+  function sortBy(col) {
+    if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = 1; }
+    document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+    event.currentTarget.classList.add('sorted');
+    renderTable();
+  }
+
+  function renderTable() {
+    const search = (document.getElementById('search-input').value || '').toLowerCase();
+    let rows = allClaims.filter(r => {
+      const type = countryType(r.country);
+      if (activeFilter !== 'all' && type !== activeFilter) return false;
+      if (search) {
+        const haystack = `${r.name} ${r.email} ${r.gift} ${r.country} ${r.discord}`.toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+      return true;
+    });
+
+    rows.sort((a, b) => {
+      const av = (a[sortCol] || '').toString().toLowerCase();
+      const bv = (b[sortCol] || '').toString().toLowerCase();
+      return av < bv ? -sortDir : av > bv ? sortDir : 0;
+    });
+
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = rows.map(r => {
+      const type = countryType(r.country);
+      const badgeClass = type === 'ca' ? 'ca' : type === 'us' ? 'us' : 'int';
+      const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+      return `<tr onclick="openPanel(${JSON.stringify(r.whop_user_id || r.claim_id || '').replace(/"/g, '&quot;')})">
+        <td class="name-cell">${esc(r.name)}</td>
+        <td>${esc(r.email)}</td>
+        <td><span class="gift-badge">${esc(r.gift)}</span></td>
+        <td><span class="country-badge ${badgeClass}">${esc(r.country)}</span></td>
+        <td>${date}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── DETAIL PANEL ──
+  function openPanel(id) {
+    const r = allClaims.find(c => (c.whop_user_id || c.claim_id) === id);
+    if (!r) return;
+    document.getElementById('panel-name').textContent = r.name || '—';
+    const date = r.created_at ? new Date(r.created_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+    document.getElementById('panel-body').innerHTML = `
+      <div class="panel-section">
+        <div class="panel-section-title">Identity</div>
+        <div class="panel-field"><label>Full Name</label><value>${esc(r.name)}</value></div>
+        <div class="panel-field"><label>Email</label><value>${esc(r.email)}</value></div>
+        <div class="panel-field"><label>Discord</label><value>${esc(r.discord) || '—'}</value></div>
+        <div class="panel-field"><label>Whop User ID</label><value>${esc(r.whop_user_id)}</value></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Gift</div>
+        <div class="panel-field"><label>Selected Gift</label><value>${esc(r.gift)}</value></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Shipping Address</div>
+        <div class="panel-field"><label>Address Line 1</label><value>${esc(r.address1)}</value></div>
+        ${r.address2 ? `<div class="panel-field"><label>Address Line 2</label><value>${esc(r.address2)}</value></div>` : ''}
+        <div class="panel-field"><label>City</label><value>${esc(r.city)}</value></div>
+        ${r.state ? `<div class="panel-field"><label>State / Province</label><value>${esc(r.state)}</value></div>` : ''}
+        ${r.zip ? `<div class="panel-field"><label>Postal / ZIP Code</label><value>${esc(r.zip)}</value></div>` : ''}
+        <div class="panel-field"><label>Country</label><value>${esc(r.country)}</value></div>
+        <div class="panel-field"><label>Phone</label><value>${esc(r.phone)}</value></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Submission Info</div>
+        <div class="panel-field"><label>Submitted</label><value>${date}</value></div>
+        <div class="panel-field"><label>Claim ID</label><value>${esc(r.claim_id) || '—'}</value></div>
+      </div>
+    `;
+    document.getElementById('panel-overlay').classList.add('open');
+    document.getElementById('detail-panel').classList.add('open');
+  }
+
+  function closePanel() {
+    document.getElementById('panel-overlay').classList.remove('open');
+    document.getElementById('detail-panel').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+</body>
+</html>
