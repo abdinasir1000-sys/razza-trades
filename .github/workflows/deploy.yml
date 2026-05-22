@@ -7,6 +7,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # Static identifiers; the org ID is resolved at runtime from the
+      # Vercel API because hard-coding it makes the workflow brittle.
+      VERCEL_PROJECT_ID: prj_cN3FkhM8AWqw7GhVgyhINKUyf66J
     steps:
       - uses: actions/checkout@v4
 
@@ -15,31 +19,64 @@ jobs:
           node-version: '20'
 
       - name: Install Vercel CLI
-        # Pinned to the version that was `latest` on 2026-05-21 when this
-        # workflow last deployed successfully (commit dd3d1c5). Avoids
-        # surprises from future CLI releases changing pull/build/deploy
-        # semantics.
+        # Pinned to the last release that was `latest` while this workflow
+        # was deploying successfully (commit dd3d1c5, 2026-05-21).
+        # Bumping the CLI without testing is the most common cause of
+        # silent breakage here, so do not change this without checking.
         run: npm install -g vercel@54.2.0
 
-      - name: Verify token
+      - name: Verify token and resolve org ID
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          set -x
-          RESP=$(curl -s -o /tmp/whoami.json -w "%{http_code}" \
+          set -e
+          # Sanity check: token must authenticate against the Vercel API.
+          WHOAMI_HTTP=$(curl -sS -o /tmp/whoami.json -w "%{http_code}" \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
             "https://api.vercel.com/v2/user")
-          echo "HTTP status: $RESP"
-          cat /tmp/whoami.json
+          echo "whoami HTTP $WHOAMI_HTTP"
+          if [ "$WHOAMI_HTTP" != "200" ]; then
+            echo "Token rejected by Vercel API. Body:"
+            cat /tmp/whoami.json
+            exit 1
+          fi
+          # Resolve the project's accountId, which is the orgId the CLI needs.
+          PROJECT_HTTP=$(curl -sS -o /tmp/project.json -w "%{http_code}" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}")
+          echo "project lookup HTTP $PROJECT_HTTP"
+          if [ "$PROJECT_HTTP" != "200" ]; then
+            echo "Project lookup failed. Body:"
+            cat /tmp/project.json
+            exit 1
+          fi
+          ORG_ID=$(node -e 'process.stdout.write(require("/tmp/project.json").accountId || "")')
+          if [ -z "$ORG_ID" ]; then
+            echo "ERROR: accountId not present in project response"
+            cat /tmp/project.json
+            exit 1
+          fi
+          echo "Resolved VERCEL_ORG_ID (length=${#ORG_ID})"
+          # Export for subsequent steps. Setting both env vars is the
+          # officially supported way to drive `vercel pull/build/deploy`
+          # in a non-interactive CI environment.
+          echo "VERCEL_ORG_ID=$ORG_ID" >> "$GITHUB_ENV"
 
       - name: Deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./claim
         run: |
-          set -x
-          mkdir -p claim/.vercel
-          echo '{"projectId":"prj_cN3FkhM8AWqw7GhVgyhINKUyf66J","orgId":""}' > claim/.vercel/project.json
-          cd claim
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN" 2>&1 || true
-          vercel build --prod --token="$VERCEL_TOKEN" 2>&1
-          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" 2>&1
+          set -e
+          # Belt-and-braces: also write a full project.json with the
+          # resolved orgId. Recent CLI versions accept it as a fallback
+          # when the env-var route is missing.
+          mkdir -p .vercel
+          printf '{"projectId":"%s","orgId":"%s"}\n' \
+            "$VERCEL_PROJECT_ID" "$VERCEL_ORG_ID" > .vercel/project.json
+          echo "project.json written:"
+          node -e 'const p=require("./.vercel/project.json"); console.log({projectId:p.projectId,orgIdLen:p.orgId.length})'
+
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
