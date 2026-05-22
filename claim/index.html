@@ -1334,9 +1334,12 @@ async function verifyMembership(token) {
 
     // Admin redirect — goes straight to dashboard
     if (whopUser.email && whopUser.email.toLowerCase() === "3mfx.inquiries@gmail.com") {
-      sessionStorage.setItem("3m_admin_token", sessionStorage.getItem("whop_access_token") || "");
-      window.location.href = "/admin";
-      return;
+      const preview = new URLSearchParams(window.location.search).get("preview");
+      if (!preview) {
+        sessionStorage.setItem("3m_admin_token", sessionStorage.getItem("whop_access_token") || "");
+        window.location.href = "/admin";
+        return;
+      }
     }
 
     if (!whopUser.id) {

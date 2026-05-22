@@ -176,6 +176,7 @@
       <h1>Claims Dashboard</h1>
     </div>
     <div class="topbar-actions">
+      <a class="btn-csv" href="/?preview=1" target="_blank">View as Member</a>
       <a class="btn-csv" id="csv-link" href="#">Download CSV</a>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
@@ -186,6 +187,27 @@
       <div class="stat-card"><div><span class="stat-num" id="stat-ca-n">—</span><span class="stat-pct" id="stat-ca-p"></span></div><div class="stat-label">Canada</div></div>
       <div class="stat-card"><div><span class="stat-num" id="stat-us-n">—</span><span class="stat-pct" id="stat-us-p"></span></div><div class="stat-label">United States</div></div>
       <div class="stat-card"><div><span class="stat-num" id="stat-int-n">—</span><span class="stat-pct" id="stat-int-p"></span></div><div class="stat-label">International</div></div>
+    </div>
+
+    <!-- Shipping estimate banner -->
+    <div id="shipping-banner" style="background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-dim);margin-bottom:0.4rem;">Total Shipping Estimate</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;color:var(--green);">
+          <span id="ship-low">—</span> <span style="color:var(--text-dim);font-size:1rem;">–</span> <span id="ship-high">—</span> <span style="color:var(--text-dim);font-size:0.9rem;font-family:'Space Mono',monospace;">CAD</span>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text-faint);margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.1em;">Conservative estimate · Canada &amp; US free · International variable</div>
+      </div>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-mid);">$0</div>
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);">CA / US per item</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--amber);">$25–$55</div>
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);">International per item</div>
+        </div>
+      </div>
     </div>
     <div class="filter-row">
       <button class="filter-tab active" data-filter="all">All</button>
@@ -203,6 +225,7 @@
             <th onclick="sortBy('email',this)">Email ↕</th>
             <th onclick="sortBy('gift',this)">Gift ↕</th>
             <th onclick="sortBy('country',this)">Country ↕</th>
+            <th>Shipping Est.</th>
             <th onclick="sortBy('created_at',this)">Submitted ↕</th>
           </tr>
         </thead>
@@ -386,6 +409,24 @@
     if (v === 'united states' || v === 'us' || v === 'usa') return 'us';
     return 'int';
   }
+
+  function shippingEst(country) {
+    if (!country) return { low: 25, high: 55 };
+    const c = country.toLowerCase().trim();
+    if (c === 'canada' || c === 'ca') return { low: 0, high: 0 };
+    if (c === 'united states' || c === 'us' || c === 'usa') return { low: 0, high: 0 };
+    if (/united kingdom|uk|england|scotland|wales/.test(c)) return { low: 25, high: 45 };
+    if (/australia/.test(c)) return { low: 30, high: 55 };
+    if (/new zealand/.test(c)) return { low: 30, high: 55 };
+    if (/germany|france|spain|italy|netherlands|belgium|sweden|norway|denmark|finland|switzerland|austria|portugal|poland/.test(c)) return { low: 22, high: 42 };
+    if (/japan|china|korea|singapore|hong kong|taiwan|thailand|malaysia|indonesia|philippines|vietnam/.test(c)) return { low: 25, high: 50 };
+    if (/brazil|mexico|argentina|colombia|chile/.test(c)) return { low: 22, high: 48 };
+    if (/india|pakistan|bangladesh|sri lanka/.test(c)) return { low: 25, high: 50 };
+    if (/uae|saudi|qatar|kuwait|bahrain/.test(c)) return { low: 28, high: 52 };
+    return { low: 25, high: 55 };
+  }
+
+  function fmtCAD(n) { return '$' + n.toLocaleString('en-CA'); }
   function updateStats() {
     const total = allClaims.length;
     const ca    = allClaims.filter(r => countryType(r.country) === 'ca').length;
@@ -399,6 +440,12 @@
     document.getElementById('stat-us-p').textContent  = total ? ` · ${pct(us)}`   : '';
     document.getElementById('stat-int-n').textContent = intl;
     document.getElementById('stat-int-p').textContent = total ? ` · ${pct(intl)}` : '';
+
+    // Total shipping estimate
+    let totalLow = 0, totalHigh = 0;
+    allClaims.forEach(r => { const e = shippingEst(r.country); totalLow += e.low; totalHigh += e.high; });
+    document.getElementById('ship-low').textContent  = fmtCAD(totalLow);
+    document.getElementById('ship-high').textContent = fmtCAD(totalHigh);
   }
 
   // ── TABLE ──
@@ -426,7 +473,9 @@
       const cls  = type === 'ca' ? 'ca' : type === 'us' ? 'us' : 'int';
       const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : '—';
       const rid  = esc(r.whop_user_id || r.claim_id || '');
-      return `<tr onclick="openPanel('${rid}')"><td class="name-cell">${esc(r.name)}</td><td>${esc(r.email)}</td><td><span class="gift-badge">${esc(r.gift)}</span></td><td><span class="country-badge ${cls}">${esc(r.country)}</span></td><td>${date}</td></tr>`;
+      const est = shippingEst(r.country);
+      const shipStr = est.low === 0 ? '<span style="color:var(--green-core);font-family:Space Mono,monospace;font-size:0.72rem;">Free</span>' : `<span style="color:var(--amber);font-family:Space Mono,monospace;font-size:0.72rem;">${fmtCAD(est.low)}–${fmtCAD(est.high)}</span>`;
+      return `<tr onclick="openPanel('${rid}')"><td class="name-cell">${esc(r.name)}</td><td>${esc(r.email)}</td><td><span class="gift-badge">${esc(r.gift)}</span></td><td><span class="country-badge ${cls}">${esc(r.country)}</span></td><td>${shipStr}</td><td>${date}</td></tr>`;
     }).join('');
   }
 
@@ -459,6 +508,7 @@
         ${r.zip?`<div class="panel-field"><label>Postal / ZIP</label><span>${esc(r.zip)}</span></div>`:''}
         <div class="panel-field"><label>Country</label><span>${esc(r.country)}</span></div>
         <div class="panel-field"><label>Phone</label><span>${esc(r.phone)}</span></div>
+        <div class="panel-field"><label>Shipping Estimate</label><span style="color:${shippingEst(r.country).low===0?'var(--green-core)':'var(--amber)'};">${shippingEst(r.country).low===0?'Free (Canada / US)':fmtCAD(shippingEst(r.country).low)+' – '+fmtCAD(shippingEst(r.country).high)+' CAD'}</span></div>
       </div>
       <div class="panel-section">
         <div class="panel-section-title">Submission Info</div>
