@@ -214,55 +214,66 @@ function makeTex(drawFn, w, h) {
 
 function mkMug() {
   const g = new THREE.Group();
+
+  // Squat profile: height ~1.18, radius 0.48–0.58 — real coffee mug proportions
   const pts = [
-    new THREE.Vector2(0.00, -0.80),
-    new THREE.Vector2(0.40, -0.80),
-    new THREE.Vector2(0.42, -0.76),
-    new THREE.Vector2(0.44, -0.40),
-    new THREE.Vector2(0.45,  0.00),
-    new THREE.Vector2(0.46,  0.50),
-    new THREE.Vector2(0.48,  0.68),
-    new THREE.Vector2(0.49,  0.74),
-    new THREE.Vector2(0.47,  0.80),
+    new THREE.Vector2(0.00, -0.58),
+    new THREE.Vector2(0.48, -0.58),
+    new THREE.Vector2(0.50, -0.53),
+    new THREE.Vector2(0.54, -0.20),
+    new THREE.Vector2(0.56,  0.12),
+    new THREE.Vector2(0.57,  0.42),
+    new THREE.Vector2(0.58,  0.54),
+    new THREE.Vector2(0.58,  0.58),
+    new THREE.Vector2(0.56,  0.60),
   ];
+
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
     [0.75 * w, 0.25 * w].forEach(lx => {
       const ly = h * 0.50;
-      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.19);
-      grd.addColorStop(0, 'rgba(126,207,126,0.36)'); grd.addColorStop(1, 'transparent');
+      // Ambient radial glow
+      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.22);
+      grd.addColorStop(0, 'rgba(74,222,128,0.28)'); grd.addColorStop(1, 'transparent');
       ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 22;
-      ctx.font = `bold ${Math.round(w * 0.15)}px Arial`;
+      // Pixel-style bloom: 5 passes decreasing blur → crisp neon
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('3M', lx, ly - h * 0.07);
-      ctx.shadowBlur = 8;
-      ctx.font = `bold ${Math.round(w * 0.050)}px Arial`;
-      ctx.fillStyle = '#5aaa60';
-      ctx.fillText('TRADING', lx, ly + h * 0.075);
+      [[60, 0.10], [38, 0.20], [18, 0.35], [7, 0.70], [2, 1.0]].forEach(([blur, alpha]) => {
+        ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
+        ctx.fillStyle = `rgba(74,222,128,${alpha})`;
+        ctx.font = `900 ${Math.round(w * 0.20)}px monospace`;
+        ctx.fillText('3M', lx, ly - h * 0.06);
+        ctx.font = `bold ${Math.round(w * 0.060)}px monospace`;
+        ctx.fillText('TRADING', lx, ly + h * 0.088);
+      });
+      ctx.shadowBlur = 0;
     });
   }, 512, 512);
+
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(pts, 80, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
+    new THREE.MeshStandardMaterial({ color: 0x111111, map: bodyTex, roughness: 0.30 })
   ));
+
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(iPts, 40, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
+    new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9, side: THREE.BackSide })
   ));
+
   const hCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.46,  0.28, 0),
-    new THREE.Vector3(0.60,  0.22, 0),
-    new THREE.Vector3(0.76,  0.00, 0),
-    new THREE.Vector3(0.60, -0.35, 0),
-    new THREE.Vector3(0.44, -0.44, 0),
+    new THREE.Vector3(0.57,  0.22, 0),
+    new THREE.Vector3(0.72,  0.16, 0),
+    new THREE.Vector3(0.86,  0.00, 0),
+    new THREE.Vector3(0.72, -0.26, 0),
+    new THREE.Vector3(0.52, -0.36, 0),
   ]);
   g.add(new THREE.Mesh(
     new THREE.TubeGeometry(hCurve, 32, 0.055, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.28 })
+    new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.28 })
   ));
-  g.scale.setScalar(0.70);
+
+  g.scale.setScalar(0.75);
   return g;
 }
 
@@ -270,23 +281,48 @@ function mkPhoneCase() {
   const g = new THREE.Group();
   const W = 0.90, H = 2.00, D = 0.16;
   const logoTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
-    const cx = w / 2, cy = h / 2;
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.45);
-    grd.addColorStop(0, 'rgba(126,207,126,0.22)'); grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 40;
-    ctx.font = `bold ${Math.round(h * 0.24)}px Arial`;
+    // Dark case background
+    ctx.fillStyle = '#0b0c0b'; ctx.fillRect(0, 0, w, h);
+
+    // --- Pixelated text layer: draw at 1/5 scale, scale up → chunky pixel look ---
+    const pw = Math.floor(w / 5), ph = Math.floor(h / 5);
+    const oc = document.createElement('canvas');
+    oc.width = pw; oc.height = ph;
+    const p = oc.getContext('2d');
+    p.fillStyle = '#0b0c0b'; p.fillRect(0, 0, pw, ph);
+    p.fillStyle = '#3ddc6a';
+    p.font = `900 ${Math.floor(ph * 0.30)}px monospace`;
+    p.textAlign = 'center'; p.textBaseline = 'middle';
+    p.fillText('3M', pw / 2, ph * 0.38);
+    p.font = `bold ${Math.floor(ph * 0.090)}px monospace`;
+    p.fillText('TRADING', pw / 2, ph * 0.57);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(oc, 0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+
+    // --- Bloom glow: 6 passes, wide→tight, builds the neon halo ---
+    const y3m = h * 0.38, ytrd = h * 0.57;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', cx, cy - h * 0.09);
-    ctx.shadowBlur = 12;
-    ctx.font = `bold ${Math.round(h * 0.072)}px Arial`;
-    ctx.fillStyle = '#5aaa60';
-    ctx.fillText('TRADING', cx, cy + h * 0.10);
+    [[110, 0.10], [75, 0.17], [45, 0.28], [22, 0.45], [9, 0.72], [3, 1.0]].forEach(([blur, alpha]) => {
+      ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
+      ctx.fillStyle = `rgba(74,222,128,${alpha})`;
+      ctx.font = `900 ${Math.round(h * 0.245)}px monospace`;
+      ctx.fillText('3M', w / 2, y3m);
+      ctx.font = `bold ${Math.round(h * 0.074)}px monospace`;
+      ctx.fillText('TRADING', w / 2, ytrd);
+    });
+    ctx.shadowBlur = 0;
+
+    // --- Radial ambient green glow behind the logo ---
+    const grd = ctx.createRadialGradient(w / 2, h * 0.46, 0, w / 2, h * 0.46, w * 0.50);
+    grd.addColorStop(0, 'rgba(74,222,128,0.22)');
+    grd.addColorStop(0.55, 'rgba(74,222,128,0.07)');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
   }, 512, 1024);
   g.add(new THREE.Mesh(
     new RoundedBoxGeometry(W, H, D, 4, 0.06),
-    new THREE.MeshStandardMaterial({ color: 0x1e1e1e, roughness: 0.55, metalness: 0.0 })
+    new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.72, metalness: 0.0 })
   ));
   const logoPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(W - 0.08, H - 0.08),
@@ -452,9 +488,8 @@ function makeScene(canvasId, modelFn, opts) {
 }
 
 // Mug: zoomed in close so it fills the frame; logo faces camera
-makeScene('canvas-mug',     mkMug,         { camZ: 2.8, rotY: 0,    rotX: -0.15, scale: 1.10 });
-// Phone: zoomed in, slight angle shows camera module depth + logo
-makeScene('canvas-phone',   mkPhoneCase,   { camZ: 3.0, rotY: 0.20, rotX: -0.10, scale: 1.10 });
+makeScene('canvas-mug',     mkMug,         { camZ: 2.4, rotY: 0,    rotX: -0.12, scale: 1.0  });
+makeScene('canvas-phone',   mkPhoneCase,   { camZ: 2.8, rotY: 0.12, rotX: -0.06, scale: 1.10 });
 // Sticker: fills frame nicely already
 makeScene('canvas-sticker', mkStickerPack, { camZ: 2.6, rotY: 0,    rotX: 0,     scale: 1.0  });
 </script>

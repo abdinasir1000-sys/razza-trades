@@ -1695,24 +1695,21 @@ function makeTex(drawFn, w, h) {
 function mkMug() {
   const g = new THREE.Group();
 
-  // Wider profile: height 1.60, radius 0.42–0.50 → ~1:1 height:diameter
+  // Squat profile: height ~1.18, radius 0.48–0.58 — looks like a real coffee mug, not a bottle
   const pts = [
-    new THREE.Vector2(0.00, -0.80),
-    new THREE.Vector2(0.40, -0.80),
-    new THREE.Vector2(0.42, -0.76),
-    new THREE.Vector2(0.44, -0.40),
-    new THREE.Vector2(0.45,  0.00),
-    new THREE.Vector2(0.46,  0.50),
-    new THREE.Vector2(0.48,  0.68),
-    new THREE.Vector2(0.49,  0.74),
-    new THREE.Vector2(0.47,  0.80),
+    new THREE.Vector2(0.00, -0.58),
+    new THREE.Vector2(0.48, -0.58),
+    new THREE.Vector2(0.50, -0.53),
+    new THREE.Vector2(0.54, -0.20),
+    new THREE.Vector2(0.56,  0.12),
+    new THREE.Vector2(0.57,  0.42),
+    new THREE.Vector2(0.58,  0.54),
+    new THREE.Vector2(0.58,  0.58),
+    new THREE.Vector2(0.56,  0.60),
   ];
 
-  // phiStart=π/2: seam sits at +X (behind handle, partially hidden).
-  // U=0.75 = +Z (front, camera start), U=0.25 = -Z (back) — logos on both sides.
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
-    // Draw logo at both front (U=0.75, x=384) and back (U=0.25, x=128)
     [0.75 * w, 0.25 * w].forEach(lx => {
       const ly = h * 0.50;
       const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.19);
@@ -1734,28 +1731,26 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
   ));
 
-  // Inner cavity
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(iPts, 40, Math.PI / 2, Math.PI * 2),
     new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
   ));
 
-  // D-shaped handle on +X (right) side — classic coffee mug grip
-  // Points in XY plane: Z=0 keeps it on the side away from front logo face (+Z)
+  // Handle scaled to match wider body
   const hCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.46,  0.28, 0),
-    new THREE.Vector3(0.60,  0.22, 0),
-    new THREE.Vector3(0.76,  0.00, 0),
-    new THREE.Vector3(0.60, -0.35, 0),
-    new THREE.Vector3(0.44, -0.44, 0),
+    new THREE.Vector3(0.57,  0.22, 0),
+    new THREE.Vector3(0.72,  0.16, 0),
+    new THREE.Vector3(0.86,  0.00, 0),
+    new THREE.Vector3(0.72, -0.26, 0),
+    new THREE.Vector3(0.52, -0.36, 0),
   ]);
   g.add(new THREE.Mesh(
     new THREE.TubeGeometry(hCurve, 32, 0.055, 10, false),
     new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.28 })
   ));
 
-  g.scale.setScalar(0.70);
+  g.scale.setScalar(0.75);
   return g;
 }
 
