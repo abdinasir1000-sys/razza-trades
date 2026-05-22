@@ -196,12 +196,16 @@
         <div style="font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;color:var(--green);">
           <span id="ship-low">—</span> <span style="color:var(--text-dim);font-size:1rem;">–</span> <span id="ship-high">—</span> <span style="color:var(--text-dim);font-size:0.9rem;font-family:'Space Mono',monospace;">CAD</span>
         </div>
-        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text-faint);margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.1em;">Conservative estimate · Canada &amp; US free · International variable</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text-faint);margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.1em;">Conservative estimate · free to members · actual cost to 3M Trading</div>
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
         <div style="text-align:center;">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-mid);">$0</div>
-          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);">CA / US per item</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-mid);">$10–$18</div>
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);">Canada per item</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-mid);">$15–$28</div>
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);">US per item</div>
         </div>
         <div style="text-align:center;">
           <div style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--amber);">$25–$55</div>
@@ -413,8 +417,8 @@
   function shippingEst(country) {
     if (!country) return { low: 25, high: 55 };
     const c = country.toLowerCase().trim();
-    if (c === 'canada' || c === 'ca') return { low: 0, high: 0 };
-    if (c === 'united states' || c === 'us' || c === 'usa') return { low: 0, high: 0 };
+    if (c === 'canada' || c === 'ca') return { low: 10, high: 18 };
+    if (c === 'united states' || c === 'us' || c === 'usa') return { low: 15, high: 28 };
     if (/united kingdom|uk|england|scotland|wales/.test(c)) return { low: 25, high: 45 };
     if (/australia/.test(c)) return { low: 30, high: 55 };
     if (/new zealand/.test(c)) return { low: 30, high: 55 };
@@ -474,7 +478,7 @@
       const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : '—';
       const rid  = esc(r.whop_user_id || r.claim_id || '');
       const est = shippingEst(r.country);
-      const shipStr = est.low === 0 ? '<span style="color:var(--green-core);font-family:Space Mono,monospace;font-size:0.72rem;">Free</span>' : `<span style="color:var(--amber);font-family:Space Mono,monospace;font-size:0.72rem;">${fmtCAD(est.low)}–${fmtCAD(est.high)}</span>`;
+      const shipStr = `<span style="color:var(--amber);font-family:Space Mono,monospace;font-size:0.72rem;">${fmtCAD(est.low)}–${fmtCAD(est.high)}</span>`;
       return `<tr onclick="openPanel('${rid}')"><td class="name-cell">${esc(r.name)}</td><td>${esc(r.email)}</td><td><span class="gift-badge">${esc(r.gift)}</span></td><td><span class="country-badge ${cls}">${esc(r.country)}</span></td><td>${shipStr}</td><td>${date}</td></tr>`;
     }).join('');
   }
@@ -508,7 +512,7 @@
         ${r.zip?`<div class="panel-field"><label>Postal / ZIP</label><span>${esc(r.zip)}</span></div>`:''}
         <div class="panel-field"><label>Country</label><span>${esc(r.country)}</span></div>
         <div class="panel-field"><label>Phone</label><span>${esc(r.phone)}</span></div>
-        <div class="panel-field"><label>Shipping Estimate</label><span style="color:${shippingEst(r.country).low===0?'var(--green-core)':'var(--amber)'};">${shippingEst(r.country).low===0?'Free (Canada / US)':fmtCAD(shippingEst(r.country).low)+' – '+fmtCAD(shippingEst(r.country).high)+' CAD'}</span></div>
+        <div class="panel-field"><label>Shipping Estimate (cost to 3M)</label><span style="color:var(--amber);">${fmtCAD(shippingEst(r.country).low)} – ${fmtCAD(shippingEst(r.country).high)} CAD</span></div>
       </div>
       <div class="panel-section">
         <div class="panel-section-title">Submission Info</div>
