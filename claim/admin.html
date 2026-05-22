@@ -446,9 +446,9 @@
   function fmtCAD(n) { return '$' + n.toLocaleString('en-CA'); }
   function giftImageURL(gift) {
     const map = {
-      '3M Coffee Mug':     'https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png',
-      '3M Phone Case':     'https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png',
-      '3M Sticker Packet': 'https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png',
+      '3M Coffee Mug':     '/images/products/mug.png',
+      '3M Phone Case':     '/images/products/phone.png',
+      '3M Sticker Packet': '/images/products/sticker.png',
     };
     return map[gift] || '';
   }
@@ -523,7 +523,7 @@
       <div class="panel-section">
         <div class="panel-section-title">Gift Selection</div>
         <div class="panel-field"><label>Selected Gift</label><span>${esc(r.gift)}</span></div>
-        ${giftImageURL(r.gift) ? `<div class="panel-field"><label>Preview</label><img src="${giftImageURL(r.gift)}" alt="${esc(r.gift)}" style="max-width:240px;display:block;margin-top:6px;background:transparent;-webkit-mask-image:radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);mask-image:radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);filter:drop-shadow(0 0 14px rgba(74,222,128,0.4));"/></div>` : ''}
+        ${giftImageURL(r.gift) ? `<div class="panel-field"><label>Preview</label><img src="${giftImageURL(r.gift)}" alt="${esc(r.gift)}" style="max-width:240px;display:block;margin-top:6px;background:transparent;filter:drop-shadow(0 0 18px rgba(74,222,128,0.5));"/></div>` : ''}
       </div>
       <div class="panel-section">
         <div class="panel-section-title">Shipping Address</div>

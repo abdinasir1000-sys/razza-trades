@@ -735,17 +735,14 @@
   .mb-0 { margin-bottom: 0; }
   .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
 
-  /* Gift picker SVG icons — radial mask fades the photo's rectangular
-     background into the card so only the product appears to float. */
+  /* Gift picker icons — transparent PNGs of the products */
   .gift-svg {
     width: 56px; height: 56px;
     display: block;
     margin: 0 auto 0.5rem;
     object-fit: contain;
     background: transparent !important;
-    filter: drop-shadow(0 4px 10px rgba(126, 207, 126, 0.3));
-    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%);
-            mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%);
+    filter: drop-shadow(0 4px 10px rgba(126, 207, 126, 0.4));
     transition: filter 0.25s ease, transform 0.5s ease;
   }
   .gift-option.selected .gift-svg {
@@ -780,9 +777,7 @@
   #model-canvas img {
     max-width: 88%; max-height: 88%; object-fit: contain;
     background: transparent;
-    filter: drop-shadow(0 0 26px rgba(74,222,128,0.45));
-    -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 55%, transparent 100%);
-            mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 55%, transparent 100%);
+    filter: drop-shadow(0 0 30px rgba(74,222,128,0.5));
     animation: gentleRock 5s ease-in-out infinite;
     transform-style: preserve-3d;
     will-change: transform;
@@ -1004,15 +999,15 @@
           <h2 style="margin-bottom:1.1rem;font-size:1.2rem;">Select Your Gift</h2>
           <div class="gift-picker" id="gift-picker">
             <div class="gift-option" data-gift="3M Coffee Mug">
-              <img class="gift-svg" src="https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png" alt="3M Coffee Mug" style="object-fit:contain;background:transparent;"/>
+              <img class="gift-svg" src="/images/products/mug.png" alt="3M Coffee Mug" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Coffee Mug</div>
             </div>
             <div class="gift-option" data-gift="3M Sticker Packet">
-              <img class="gift-svg" src="https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png" alt="3M Sticker Packet" style="object-fit:contain;background:transparent;"/>
+              <img class="gift-svg" src="/images/products/sticker.png" alt="3M Sticker Packet" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Sticker Packet</div>
             </div>
             <div class="gift-option" data-gift="3M Phone Case">
-              <img class="gift-svg" src="https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png" alt="3M Phone Case" style="object-fit:contain;background:transparent;"/>
+              <img class="gift-svg" src="/images/products/phone.png" alt="3M Phone Case" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Phone Case</div>
             </div>
           </div>
@@ -1681,9 +1676,9 @@ function fireConfetti() {
 
 <script>
 const GIFT_IMAGES = {
-  '3M Coffee Mug':     'https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png',
-  '3M Phone Case':     'https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png',
-  '3M Sticker Packet': 'https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png',
+  '3M Coffee Mug':     '/images/products/mug.png',
+  '3M Phone Case':     '/images/products/phone.png',
+  '3M Sticker Packet': '/images/products/sticker.png',
 };
 
 window.setGiftModel = function(giftName) {
