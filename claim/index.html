@@ -1332,6 +1332,13 @@ async function verifyMembership(token) {
       username: me.preferred_username || me.name || ""
     };
 
+    // Admin redirect — goes straight to dashboard
+    if (whopUser.email && whopUser.email.toLowerCase() === "3mfx.inquiries@gmail.com") {
+      sessionStorage.setItem("3m_admin_token", sessionStorage.getItem("whop_access_token") || "");
+      window.location.href = "/admin";
+      return;
+    }
+
     if (!whopUser.id) {
       console.error("No sub/id on userinfo response", me);
       sessionStorage.removeItem(STORAGE_TOKEN_KEY);
