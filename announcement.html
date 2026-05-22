@@ -87,10 +87,15 @@
 
   .product-canvas-wrap {
     width: 210px; height: 140px; display: flex; align-items: center; justify-content: center;
+    perspective: 800px;
   }
   .product-canvas-wrap img {
     max-width: 100%; max-height: 100%; object-fit: contain; display: block;
-    filter: drop-shadow(0 0 14px rgba(74,222,128,0.25));
+    background: transparent;
+    filter: drop-shadow(0 0 18px rgba(74,222,128,0.35));
+    -webkit-mask-image: radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);
+            mask-image: radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);
+    transform: rotateY(-8deg) rotateX(4deg);
   }
 
   .product-name {

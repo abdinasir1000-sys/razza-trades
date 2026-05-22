@@ -735,16 +735,26 @@
   .mb-0 { margin-bottom: 0; }
   .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
 
-  /* Gift picker SVG icons */
+  /* Gift picker SVG icons — radial mask fades the photo's rectangular
+     background into the card so only the product appears to float. */
   .gift-svg {
-    width: 48px; height: 48px;
+    width: 56px; height: 56px;
     display: block;
     margin: 0 auto 0.5rem;
+    object-fit: contain;
+    background: transparent !important;
     filter: drop-shadow(0 4px 10px rgba(126, 207, 126, 0.3));
-    transition: filter 0.2s;
+    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%);
+            mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%);
+    transition: filter 0.25s ease, transform 0.5s ease;
   }
   .gift-option.selected .gift-svg {
-    filter: drop-shadow(0 0 14px rgba(126, 207, 126, 0.7));
+    filter: drop-shadow(0 0 18px rgba(126, 207, 126, 0.8));
+    animation: giftIconTilt 3s ease-in-out infinite;
+  }
+  @keyframes giftIconTilt {
+    0%, 100% { transform: rotateY(-14deg) rotateX(4deg); }
+    50%      { transform: rotateY(14deg)  rotateX(-4deg); }
   }
 
   /* 3D model viewer */
@@ -765,17 +775,21 @@
     border: 1px solid var(--green-border);
     box-shadow: 0 0 40px rgba(74,128,80,0.12);
     overflow: hidden;
-    perspective: 800px;
+    perspective: 1000px;
   }
   #model-canvas img {
-    max-width: 86%; max-height: 86%; object-fit: contain;
-    filter: drop-shadow(0 0 18px rgba(74,222,128,0.30));
-    animation: gentleRock 4.2s ease-in-out infinite;
+    max-width: 88%; max-height: 88%; object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 0 26px rgba(74,222,128,0.45));
+    -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 55%, transparent 100%);
+            mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 55%, transparent 100%);
+    animation: gentleRock 5s ease-in-out infinite;
     transform-style: preserve-3d;
+    will-change: transform;
   }
   @keyframes gentleRock {
-    0%, 100% { transform: rotateY(-22deg); }
-    50%      { transform: rotateY(22deg); }
+    0%, 100% { transform: rotateY(-20deg) rotateX(6deg); }
+    50%      { transform: rotateY(20deg)  rotateX(-6deg); }
   }
   @media (max-width: 480px) {
     #model-canvas { width: 220px; height: 220px; }

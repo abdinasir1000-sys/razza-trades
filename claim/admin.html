@@ -523,7 +523,7 @@
       <div class="panel-section">
         <div class="panel-section-title">Gift Selection</div>
         <div class="panel-field"><label>Selected Gift</label><span>${esc(r.gift)}</span></div>
-        ${giftImageURL(r.gift) ? `<div class="panel-field"><label>Preview</label><img src="${giftImageURL(r.gift)}" alt="${esc(r.gift)}" style="max-width:240px;border-radius:8px;border:1px solid var(--green-border);display:block;margin-top:6px;"/></div>` : ''}
+        ${giftImageURL(r.gift) ? `<div class="panel-field"><label>Preview</label><img src="${giftImageURL(r.gift)}" alt="${esc(r.gift)}" style="max-width:240px;display:block;margin-top:6px;background:transparent;-webkit-mask-image:radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);mask-image:radial-gradient(ellipse 78% 80% at 50% 50%, #000 55%, transparent 100%);filter:drop-shadow(0 0 14px rgba(74,222,128,0.4));"/></div>` : ''}
       </div>
       <div class="panel-section">
         <div class="panel-section-title">Shipping Address</div>
