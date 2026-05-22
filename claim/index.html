@@ -980,33 +980,15 @@
           <h2 style="margin-bottom:1.1rem;font-size:1.2rem;">Select Your Gift</h2>
           <div class="gift-picker" id="gift-picker">
             <div class="gift-option" data-gift="3M Coffee Mug">
-              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="6" y="14" width="26" height="24" rx="3" fill="#111"/>
-                <rect x="6" y="12" width="26" height="4" rx="2" fill="#1a1a1a"/>
-                <rect x="6" y="12" width="26" height="3" rx="1.5" fill="#4A8050"/>
-                <path d="M32 20 Q41 20 41 26 Q41 32 32 32" stroke="#4A8050" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <text x="19" y="30" font-size="11" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
-              </svg>
+              <img class="gift-svg" src="https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png" alt="3M Coffee Mug" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Coffee Mug</div>
             </div>
             <div class="gift-option" data-gift="3M Sticker Packet">
-              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="9" y="17" width="30" height="20" rx="3" fill="#0d0d0d" stroke="#2a4a2a" stroke-width="1.5" transform="rotate(-6 24 27)"/>
-                <rect x="9" y="17" width="30" height="20" rx="3" fill="#0f150f" stroke="#3a6a3a" stroke-width="1.5" transform="rotate(3 24 27)"/>
-                <rect x="9" y="16" width="30" height="20" rx="3" fill="#111" stroke="#7ECF7E" stroke-width="1.5"/>
-                <text x="24" y="27" font-size="10" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
-                <text x="24" y="33" font-size="5.5" font-weight="bold" fill="#4A8050" text-anchor="middle" font-family="Arial,sans-serif">TRADING</text>
-              </svg>
+              <img class="gift-svg" src="https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png" alt="3M Sticker Packet" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Sticker Packet</div>
             </div>
             <div class="gift-option" data-gift="3M Phone Case">
-              <svg class="gift-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="13" y="4" width="22" height="40" rx="5" fill="#111" stroke="#4A8050" stroke-width="1.5"/>
-                <circle cx="24" cy="12" r="3.5" fill="#0d0d0d" stroke="#7ECF7E" stroke-width="1"/>
-                <circle cx="24" cy="12" r="1.8" fill="#111133"/>
-                <rect x="13" y="38" width="22" height="6" rx="3" fill="#4A8050"/>
-                <text x="24" y="32" font-size="10" font-weight="bold" fill="#7ECF7E" text-anchor="middle" font-family="Arial,sans-serif">3M</text>
-              </svg>
+              <img class="gift-svg" src="https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png" alt="3M Phone Case" style="object-fit:contain;background:transparent;"/>
               <div class="gift-title">3M Phone Case</div>
             </div>
           </div>
@@ -1689,347 +1671,44 @@ function makeTex(drawFn, w, h) {
 }
 
 /* ================================================================
-   COFFEE MUG — wider profile so it looks like a real mug, not a bottle
-   Logo baked into body texture at U=0.50 (phiStart=π puts seam at -Z back, U=0.5=+Z front)
+   PHOTO BILLBOARD — uses actual reference photos as textures
    ================================================================ */
-function mkMug() {
+function mkPhotoBillboard(url, fallbackRatio) {
   const g = new THREE.Group();
+  const H = 1.6;
+  const geo = new THREE.PlaneGeometry(H * (fallbackRatio || 1.0), H);
+  const mat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(geo, mat);
+  g.add(mesh);
 
-  // Squat profile: height ~1.18, radius 0.48–0.58 — looks like a real coffee mug, not a bottle
-  const pts = [
-    new THREE.Vector2(0.00, -0.58),
-    new THREE.Vector2(0.48, -0.58),
-    new THREE.Vector2(0.50, -0.53),
-    new THREE.Vector2(0.54, -0.20),
-    new THREE.Vector2(0.56,  0.12),
-    new THREE.Vector2(0.57,  0.42),
-    new THREE.Vector2(0.58,  0.54),
-    new THREE.Vector2(0.58,  0.58),
-    new THREE.Vector2(0.56,  0.60),
-  ];
-
-  // Black body texture — pixelated "3M TRADING" + neon bloom
-  // Both logos drawn on ONE offscreen canvas to avoid overwrite bug
-  const bodyTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h);
-    const oc = document.createElement('canvas');
-    oc.width = 128; oc.height = 128;
-    const p = oc.getContext('2d');
-    p.fillStyle = '#0b0b0b'; p.fillRect(0, 0, 128, 128);
-    p.fillStyle = '#3ddc6a';
-    // Draw logo at BOTH x=32 (25%) and x=96 (75%) on the same offscreen canvas
-    [32, 96].forEach(px => {
-      p.font = '900 26px monospace'; p.textAlign = 'center'; p.textBaseline = 'middle';
-      p.fillText('3M', px, 56);
-      p.font = 'bold 8px monospace'; p.fillText('TRADING', px, 80);
-    });
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(oc, 0, 0, w, h);
-    ctx.imageSmoothingEnabled = true;
-    // Bloom: 5 passes wide→tight for neon glow — draw at both positions
-    [0.75 * w, 0.25 * w].forEach(lx => {
-      const ly = h * 0.50;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      [[80, 0.10], [50, 0.20], [24, 0.38], [9, 0.70], [2, 1.0]].forEach(([blur, a]) => {
-        ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
-        ctx.fillStyle = `rgba(74,222,128,${a})`;
-        ctx.font = `900 ${Math.round(w * 0.205)}px monospace`;
-        ctx.fillText('3M', lx, ly - h * 0.055);
-        ctx.font = `bold ${Math.round(w * 0.062)}px monospace`;
-        ctx.fillText('TRADING', lx, ly + h * 0.100);
-      });
-      ctx.shadowBlur = 0;
-    });
-  }, 512, 512);
-
-  // Matte black body
-  g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(pts, 80, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0x0a0a0a, map: bodyTex, roughness: 0.32, metalness: 0.04 })
-  ));
-
-  // Green interior (visible looking down)
-  const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
-  g.add(new THREE.Mesh(
-    new THREE.LatheGeometry(iPts, 40, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0x3ddc6a, roughness: 0.35, side: THREE.BackSide })
-  ));
-
-  // Green handle matching reference
-  const hCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.57,  0.22, 0),
-    new THREE.Vector3(0.72,  0.16, 0),
-    new THREE.Vector3(0.86,  0.00, 0),
-    new THREE.Vector3(0.72, -0.26, 0),
-    new THREE.Vector3(0.52, -0.36, 0),
-  ]);
-  g.add(new THREE.Mesh(
-    new THREE.TubeGeometry(hCurve, 32, 0.058, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x3ddc6a, roughness: 0.30, metalness: 0.04 })
-  ));
-
-  // Solid bottom cap — prevents hollow/transparent look from above
-  const botCap = new THREE.Mesh(
-    new THREE.CircleGeometry(0.48, 48),
-    new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4 })
-  );
-  botCap.rotation.x = -Math.PI / 2;
-  botCap.position.y = -0.585;
-  g.add(botCap);
-
-  g.scale.setScalar(0.75);
-  return g;
-}
-
-/* ================================================================
-   PHONE CASE — iPhone 16 Pro style, RoundedBoxGeometry
-   Key fix: NO high-metalness materials (they need an HDRI env to show up;
-   without one they go pitch black). All materials use low metalness.
-   Logo plane uses emissive so it glows regardless of lighting.
-   ================================================================ */
-function mkPhoneCase() {
-  const g = new THREE.Group();
-  const W = 0.90, H = 2.00, D = 0.16;
-
-  const logoTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#0b0c0b'; ctx.fillRect(0, 0, w, h);
-    const pw = Math.floor(w / 5), ph = Math.floor(h / 5);
-    const oc = document.createElement('canvas');
-    oc.width = pw; oc.height = ph;
-    const p = oc.getContext('2d');
-    p.fillStyle = '#0b0c0b'; p.fillRect(0, 0, pw, ph);
-    p.fillStyle = '#3ddc6a';
-    p.font = `900 ${Math.floor(ph * 0.30)}px monospace`;
-    p.textAlign = 'center'; p.textBaseline = 'middle';
-    p.fillText('3M', pw / 2, ph * 0.62);
-    p.font = `bold ${Math.floor(ph * 0.090)}px monospace`;
-    p.fillText('TRADING', pw / 2, ph * 0.78);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(oc, 0, 0, w, h);
-    ctx.imageSmoothingEnabled = true;
-    const y3m = h * 0.62, ytrd = h * 0.78;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    [[110, 0.10], [75, 0.17], [45, 0.28], [22, 0.45], [9, 0.72], [3, 1.0]].forEach(([blur, alpha]) => {
-      ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
-      ctx.fillStyle = `rgba(74,222,128,${alpha})`;
-      ctx.font = `900 ${Math.round(h * 0.245)}px monospace`;
-      ctx.fillText('3M', w / 2, y3m);
-      ctx.font = `bold ${Math.round(h * 0.074)}px monospace`;
-      ctx.fillText('TRADING', w / 2, ytrd);
-    });
-    ctx.shadowBlur = 0;
-    const grd = ctx.createRadialGradient(w / 2, h * 0.68, 0, w / 2, h * 0.68, w * 0.50);
-    grd.addColorStop(0, 'rgba(74,222,128,0.22)');
-    grd.addColorStop(0.55, 'rgba(74,222,128,0.07)');
-    grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-  }, 512, 1024);
-
-  g.add(new THREE.Mesh(
-    new RoundedBoxGeometry(W, H, D, 4, 0.06),
-    new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.72, metalness: 0.0 })
-  ));
-
-  // Logo plane on the +Z face — emissive so it GLOWS regardless of lighting
-  const logoPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(W - 0.08, H - 0.08),
-    new THREE.MeshStandardMaterial({
-      color: 0xffffff, map: logoTex, roughness: 0.4,
-      emissive: 0xffffff, emissiveMap: logoTex, emissiveIntensity: 0.9,
-    })
-  );
-  logoPlane.position.set(0, 0, D / 2 + 0.010);
-  g.add(logoPlane);
-
-  // === iPhone 16 Pro camera module: large square island, top-left of back ===
-  const islandM = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.38, metalness: 0.12 });
-  // Island is ~58% of phone width — matches real iPhone 16 Pro camera hump proportions
-  const island = new THREE.Mesh(new RoundedBoxGeometry(0.54, 0.54, 0.065, 4, 0.08), islandM);
-  island.position.set(-0.17, 0.74, D / 2 + 0.033);
-  g.add(island);
-
-  const ringM  = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.28, metalness: 0.18 });
-  const glassM = new THREE.MeshStandardMaterial({ color: 0x080814, roughness: 0.06, metalness: 0.25,
-    emissive: 0x050510, emissiveIntensity: 0.4 });
-
-  // 3 lenses in triangle: top-left, top-right, bottom-center — iPhone 16 Pro layout
-  [[-0.28, 0.87], [-0.07, 0.87], [-0.17, 0.68]].forEach(([lx, ly]) => {
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.046, 24), ringM);
-    ring.rotation.x = Math.PI / 2; ring.position.set(lx, ly, D / 2 + 0.052); g.add(ring);
-    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.026, 24), glassM);
-    lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, D / 2 + 0.067); g.add(lens);
-  });
-
-  // Flash — bright oval between top-right lens and center
-  const flashM = new THREE.MeshStandardMaterial({ color: 0xf0e8c0, roughness: 0.20, metalness: 0.10,
-    emissive: 0xd4c070, emissiveIntensity: 0.5 });
-  const flash = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.022, 16), flashM);
-  flash.rotation.x = Math.PI / 2; flash.position.set(-0.07, 0.68, D / 2 + 0.044); g.add(flash);
-
-  // LiDAR — small dark disc on the island
-  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.022, 16), ringM);
-  lidar.rotation.x = Math.PI / 2; lidar.position.set(-0.28, 0.68, D / 2 + 0.040); g.add(lidar);
-
-  // Side buttons — action button left, volume + power right
-  const btnM = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.42, metalness: 0.08 });
-  // Action button (left side)
-  const aBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.14, 0.10), btnM);
-  aBtn.position.set(-W / 2 - 0.016, 0.50, 0); g.add(aBtn);
-  // Volume up, volume down (right side)
-  [0.40, 0.18].forEach(by => {
-    const vBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.16, 0.10), btnM);
-    vBtn.position.set(W / 2 + 0.016, by, 0); g.add(vBtn);
-  });
-  // Power button (right side, taller)
-  const pBtn = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.22, 0.10), btnM);
-  pBtn.position.set(W / 2 + 0.016, -0.15, 0); g.add(pBtn);
-
-  // USB-C port hint at bottom center
-  const portM = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.7 });
-  const port = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.038, D + 0.01), portM);
-  port.position.set(0, -H / 2 + 0.030, 0); g.add(port);
-
-  // Speaker grille dots either side of USB-C
-  [-0.22, 0.22].forEach(sx => {
-    for (let i = 0; i < 4; i++) {
-      const dot = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, D + 0.01, 8), portM);
-      dot.rotation.x = Math.PI / 2;
-      dot.position.set(sx + i * 0.022, -H / 2 + 0.030, 0); g.add(dot);
+  const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+  loader.load(url, (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    mat.map = tex;
+    mat.needsUpdate = true;
+    const img = tex.image;
+    if (img && img.width && img.height) {
+      const ratio = img.width / img.height;
+      mesh.geometry.dispose();
+      mesh.geometry = new THREE.PlaneGeometry(H * ratio, H);
     }
   });
-
-  // Green accent bottom bar
-  const greenBar = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.45, 0.014, D + 0.01),
-    new THREE.MeshStandardMaterial({ color: GREEN_D, roughness: 0.3, emissive: GREEN_D, emissiveIntensity: 0.9 })
-  );
-  greenBar.position.set(0, -H / 2 + 0.060, 0);
-  g.add(greenBar);
-
-  g.scale.setScalar(1.18);
   return g;
 }
 
-/* ================================================================
-   STICKER PACK — fanned white sticker sheets like Sticker Mule
-   6 flat sheets laid horizontally, slightly fanned + tilted toward camera
-   Top sheet shows actual sticker designs on white background
-   ================================================================ */
+function mkMug() {
+  return mkPhotoBillboard('https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png', 1.0);
+}
+
+function mkPhoneCase() {
+  return mkPhotoBillboard('https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png', 0.7);
+}
+
 function mkStickerPack() {
-  const g = new THREE.Group();
-  // Each sheet: W wide, very thin (T), H tall — laid flat (XZ plane, Y is up)
-  const W = 1.50, SH = 1.10, T = 0.014;
-  const N = 6;
-
-  const topTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#F5F5F2'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = '#E0DEDD'; ctx.lineWidth = 2; ctx.strokeRect(3, 3, w-6, h-6);
-
-    // --- Sticker 1: Large circle, black bg, pixel "3M TRADING" ---
-    const c1x=w*0.29, c1y=h*0.44, c1r=w*0.198;
-    ctx.save();
-    ctx.beginPath(); ctx.arc(c1x, c1y, c1r, 0, Math.PI*2);
-    ctx.fillStyle='#0d0d0d'; ctx.fill(); ctx.clip();
-    const s1=document.createElement('canvas');
-    s1.width=Math.ceil(c1r); s1.height=Math.ceil(c1r);
-    const s1c=s1.getContext('2d');
-    s1c.fillStyle='#0d0d0d'; s1c.fillRect(0,0,s1.width,s1.height);
-    s1c.fillStyle='#3ddc6a';
-    s1c.font=`900 ${Math.floor(s1.width*0.42)}px monospace`;
-    s1c.textAlign='center'; s1c.textBaseline='middle';
-    s1c.fillText('3M', s1.width/2, s1.height*0.38);
-    s1c.font=`bold ${Math.floor(s1.width*0.128)}px monospace`;
-    s1c.fillText('TRADING', s1.width/2, s1.height*0.68);
-    ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(s1, c1x-c1r, c1y-c1r, c1r*2, c1r*2);
-    ctx.imageSmoothingEnabled=true;
-    [[22,0.14],[10,0.32],[4,0.85]].forEach(([bl,al])=>{
-      ctx.shadowColor='#4ade80'; ctx.shadowBlur=bl;
-      ctx.fillStyle=`rgba(74,222,128,${al})`;
-      ctx.font=`900 ${Math.round(c1r*0.70)}px monospace`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('3M', c1x, c1y-c1r*0.13);
-      ctx.font=`bold ${Math.round(c1r*0.215)}px monospace`;
-      ctx.fillText('TRADING', c1x, c1y+c1r*0.47);
-    });
-    ctx.shadowBlur=0; ctx.restore();
-
-    // --- Sticker 2: Hexagon, green, dark "3M" ---
-    const hx=w*0.72, hy=h*0.24, hr=w*0.150;
-    ctx.beginPath();
-    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;i?ctx.lineTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a)):ctx.moveTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a));}
-    ctx.closePath(); ctx.fillStyle='#3ddc6a'; ctx.fill();
-    ctx.shadowBlur=0; ctx.fillStyle='#0d0d0d';
-    ctx.font=`900 ${Math.round(hr*0.72)}px monospace`;
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', hx, hy);
-
-    // --- Sticker 3: Rectangle, black, "RAZA TRADE$" ---
-    const rx=w*0.72, ry=h*0.59, rw=w*0.370, rht=h*0.165;
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(rx-rw/2, ry-rht/2, rw, rht, 9);
-    else ctx.rect(rx-rw/2, ry-rht/2, rw, rht);
-    ctx.fillStyle='#0d0d0d'; ctx.fill();
-    ctx.fillStyle='#3ddc6a';
-    ctx.font=`900 ${Math.round(rht*0.40)}px monospace`;
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('RAZA TRADE$', rx, ry);
-
-    // --- Sticker 4: Small circle, green, "3M" ---
-    const s4x=w*0.17, s4y=h*0.76, s4r=w*0.110;
-    ctx.beginPath(); ctx.arc(s4x,s4y,s4r,0,Math.PI*2);
-    ctx.fillStyle='#3ddc6a'; ctx.fill();
-    ctx.fillStyle='#0d0d0d';
-    ctx.font=`900 ${Math.round(s4r*0.78)}px monospace`;
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', s4x, s4y);
-
-    // --- Sticker 5: Small circle, dark, "3M.FX" ---
-    const s5x=w*0.51, s5y=h*0.79, s5r=w*0.108;
-    ctx.beginPath(); ctx.arc(s5x,s5y,s5r,0,Math.PI*2);
-    ctx.fillStyle='#0d0d0d'; ctx.fill();
-    ctx.fillStyle='#3ddc6a';
-    ctx.font=`bold ${Math.round(s5r*0.50)}px monospace`;
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M.FX', s5x, s5y);
-
-    // --- Sticker 6: Small circle, green, "3M'S NEXT" ---
-    const s6x=w*0.12, s6y=h*0.21, s6r=w*0.110;
-    ctx.beginPath(); ctx.arc(s6x,s6y,s6r,0,Math.PI*2);
-    ctx.fillStyle='#3ddc6a'; ctx.fill();
-    ctx.fillStyle='#0d0d0d';
-    ctx.font=`bold ${Math.round(s6r*0.48)}px monospace`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText("3M'S", s6x, s6y-s6r*0.20);
-    ctx.fillText('NEXT', s6x, s6y+s6r*0.38);
-  }, 768, 576);
-
-  // Plain cream sheet (for lower sheets — just the back)
-  const plainTex = makeTex((ctx,w,h) => {
-    ctx.fillStyle='#EEE9E0'; ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle='#C8C3BC'; ctx.lineWidth=2; ctx.strokeRect(2,2,w-4,h-4);
-  }, 128, 96);
-
-  for (let i = 0; i < N; i++) {
-    const isTop = (i === N - 1);
-    // BoxGeometry(W, T, SH): W along X, T (thin) along Y, SH along Z
-    // +Y face (index 2) = the top/printed surface of the sheet
-    const topMat = isTop
-      ? new THREE.MeshStandardMaterial({ color: 0xffffff, map: topTex, roughness: 0.35 })
-      : new THREE.MeshStandardMaterial({ color: 0xffffff, map: plainTex, roughness: 0.55 });
-    const edgeMat = new THREE.MeshStandardMaterial({ color: 0xE0DBD4, roughness: 0.65 });
-    // face order: +x,-x,+y,-y,+z,-z
-    const mats = [edgeMat, edgeMat, topMat, edgeMat, edgeMat, edgeMat];
-    const sheet = new THREE.Mesh(new THREE.BoxGeometry(W, T, SH), mats);
-    // Fan each sheet slightly around Y-axis
-    sheet.rotation.y = (i - (N-1)/2) * 0.055;
-    // Stack upward
-    sheet.position.y = i * (T + 0.003);
-    g.add(sheet);
-  }
-
-  // rotation.x = π/2: stands pack upright, printed +Y face points directly toward +Z camera
-  g.rotation.x = Math.PI / 2;
-  g.rotation.y = 0;
-  g.scale.setScalar(1.15);
-  return g;
+  return mkPhotoBillboard('https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png', 1.4);
 }
+
 
 /* ================================================================
    SCENE / RENDERER / ORBIT CONTROLS
@@ -2069,14 +1748,10 @@ function init() {
 
   (function loop() {
     requestAnimationFrame(loop);
-    // Sticker pack: rock left↔right so the printed face stays visible
-    // Mug/phone case: normal autoRotate spin
-    if (currentModelType === '3M Sticker Packet' && currentModel) {
+    // All three are photo billboards — rock gently so the photo stays visible
+    if (currentModel) {
       controls.autoRotate = false;
-      // Gentle rock ±28° — front sticker face stays in view throughout
-      currentModel.rotation.y = Math.sin(Date.now() * 0.0007) * 0.50;
-    } else {
-      controls.autoRotate = true;
+      currentModel.rotation.y = Math.sin(Date.now() * 0.0007) * 0.45;
     }
     controls.update();
     renderer.render(scene, camera);
@@ -2096,9 +1771,8 @@ window.setGiftModel = function(giftName) {
     else if (giftName === '3M Phone Case')     currentModel = mkPhoneCase();
     else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
     if (currentModel) scene.add(currentModel);
-    // Per-model camera distance
-    const camDist = {'3M Coffee Mug': 3.2, '3M Phone Case': 3.0, '3M Sticker Packet': 3.2};
-    camera.position.set(0, 0, camDist[giftName] || 4.2);
+    // Photo billboard — camera distance tuned to fit the photo in frame
+    camera.position.set(0, 0, 2.6);
     controls.saveState();
   } catch (e) { console.warn('3D viewer:', e); }
 };
