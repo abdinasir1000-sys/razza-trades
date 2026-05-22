@@ -444,6 +444,14 @@
   }
 
   function fmtCAD(n) { return '$' + n.toLocaleString('en-CA'); }
+  function giftImageURL(gift) {
+    const map = {
+      '3M Coffee Mug':     'https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png',
+      '3M Phone Case':     'https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png',
+      '3M Sticker Packet': 'https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png',
+    };
+    return map[gift] || '';
+  }
   function updateStats() {
     const total = allClaims.length;
     const ca    = allClaims.filter(r => countryType(r.country) === 'ca').length;
@@ -515,6 +523,7 @@
       <div class="panel-section">
         <div class="panel-section-title">Gift Selection</div>
         <div class="panel-field"><label>Selected Gift</label><span>${esc(r.gift)}</span></div>
+        ${giftImageURL(r.gift) ? `<div class="panel-field"><label>Preview</label><img src="${giftImageURL(r.gift)}" alt="${esc(r.gift)}" style="max-width:240px;border-radius:8px;border:1px solid var(--green-border);display:block;margin-top:6px;"/></div>` : ''}
       </div>
       <div class="panel-section">
         <div class="panel-section-title">Shipping Address</div>
