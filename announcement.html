@@ -622,22 +622,25 @@ function makeScene(canvasId, modelFn, opts) {
   rimLight.position.set(0, -2, -3); scene.add(rimLight);
 
   const model = modelFn();
+  // Set fixed viewing angle — logo faces camera, slight hero tilt
+  if (opts.rotY !== undefined) model.rotation.y = opts.rotY;
+  if (opts.rotX !== undefined) model.rotation.x = opts.rotX;
   scene.add(model);
 
-  (function loop() {
-    requestAnimationFrame(loop);
-    if (opts.rock) {
-      model.rotation.y = Math.sin(Date.now() * 0.0007) * 0.50;
-    } else {
-      model.rotation.y += 0.008;
-    }
+  // Render a few frames so CanvasTextures flush to GPU, then stop
+  let f = 0;
+  (function tick() {
     renderer.render(scene, camera);
+    if (++f < 8) requestAnimationFrame(tick);
   })();
 }
 
-makeScene('canvas-mug',     mkMug,         { camZ: 3.8 });
-makeScene('canvas-phone',   mkPhoneCase,   { camZ: 4.2 });
-makeScene('canvas-sticker', mkStickerPack, { camZ: 3.5, rock: true });
+// Mug: rotY=0 → logo (+Z face) points at camera; slight negative tilt shows rim
+makeScene('canvas-mug',     mkMug,         { camZ: 3.8, rotY: 0,    rotX: -0.15 });
+// Phone: rotY=0 → logo plane faces camera; slight tilt shows depth
+makeScene('canvas-phone',   mkPhoneCase,   { camZ: 4.2, rotY: 0.18, rotX: -0.10 });
+// Sticker: rotation.x=π/2 already set in mkStickerPack; rotY=0 → printed face toward camera
+makeScene('canvas-sticker', mkStickerPack, { camZ: 3.5, rotY: 0,    rotX: 0 });
 </script>
 </body>
 </html>
