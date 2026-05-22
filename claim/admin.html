@@ -540,10 +540,28 @@
         <div class="panel-section-title">Submission Info</div>
         <div class="panel-field"><label>Submitted</label><span>${date}</span></div>
         <div class="panel-field"><label>Claim ID</label><span>${esc(r.claim_id)||'—'}</span></div>
+      </div>
+      <div style="padding:1.5rem 0 0.5rem;">
+        <button onclick="deleteClaim('${esc(r.claim_id)}')" style="width:100%;padding:0.75rem;background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:8px;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">Delete Entry</button>
       </div>`;
     document.getElementById('panel-overlay').classList.add('open');
     document.getElementById('detail-panel').classList.add('open');
   }
+  async function deleteClaim(claimId) {
+    if (!confirm('Delete this entry permanently? This cannot be undone.')) return;
+    const token = sessionStorage.getItem('3m_admin_token');
+    const resp = await fetch('/api/delete-claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: token, claim_id: claimId })
+    });
+    if (!resp.ok) { alert('Delete failed. Please try again.'); return; }
+    allClaims = allClaims.filter(c => c.claim_id !== claimId);
+    updateStats();
+    renderTable();
+    closePanel();
+  }
+
   function closePanel() {
     document.getElementById('panel-overlay').classList.remove('open');
     document.getElementById('detail-panel').classList.remove('open');
