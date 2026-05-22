@@ -86,10 +86,11 @@
   }
 
   .product-canvas-wrap {
-    width: 210px; height: 140px;
+    width: 210px; height: 140px; display: flex; align-items: center; justify-content: center;
   }
-  .product-canvas-wrap canvas {
-    display: block; width: 210px !important; height: 140px !important;
+  .product-canvas-wrap img {
+    max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+    filter: drop-shadow(0 0 14px rgba(74,222,128,0.25));
   }
 
   .product-name {
@@ -160,21 +161,21 @@
   <div class="products">
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-mug" width="840" height="560"></canvas>
+        <img src="https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png" alt="3M Trading Mug" />
       </div>
       <div class="product-name">3M Trading Mug</div>
       <div class="product-tag">Ceramic · Branded</div>
     </div>
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-phone" width="840" height="560"></canvas>
+        <img src="https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png" alt="3M Phone Case" />
       </div>
       <div class="product-name">3M Phone Case</div>
       <div class="product-tag">iPhone Compatible</div>
     </div>
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-sticker" width="840" height="560"></canvas>
+        <img src="https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png" alt="3M Sticker Pack" />
       </div>
       <div class="product-name">3M Sticker Pack</div>
       <div class="product-tag">Premium Finish</div>
@@ -189,95 +190,5 @@
 
 <div class="instructions">Open in browser → zoom to fit → screenshot just the dark card (1200×630)</div>
 
-<script type="module">
-import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-
-const GREEN_D = 0x4A8050;
-
-function makeTex(drawFn, w, h) {
-  const c = document.createElement('canvas');
-  c.width = w || 512; c.height = h || 512;
-  drawFn(c.getContext('2d'), c.width, c.height);
-  return new THREE.CanvasTexture(c);
-}
-
-function mkPhotoBillboard(url, fallbackRatio) {
-  const g = new THREE.Group();
-  const H = 1.4;
-  const geo = new THREE.PlaneGeometry(H * (fallbackRatio || 1.0), H);
-  const mat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide });
-  const mesh = new THREE.Mesh(geo, mat);
-  g.add(mesh);
-
-  const loader = new THREE.TextureLoader();
-  loader.setCrossOrigin('anonymous');
-  loader.load(url, (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    mat.map = tex;
-    mat.needsUpdate = true;
-    const img = tex.image;
-    if (img && img.width && img.height) {
-      const ratio = img.width / img.height;
-      mesh.geometry.dispose();
-      mesh.geometry = new THREE.PlaneGeometry(H * ratio, H);
-    }
-  });
-  return g;
-}
-
-function mkMug() {
-  return mkPhotoBillboard('https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png', 1.0);
-}
-
-function mkPhoneCase() {
-  return mkPhotoBillboard('https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png', 0.7);
-}
-
-function mkStickerPack() {
-  return mkPhotoBillboard('https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png', 1.4);
-}
-
-
-function makeScene(canvasId, modelFn, opts) {
-  const canvas = document.getElementById(canvasId);
-  const W = 840, H = 560;
-
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(1); // canvas is already 4× CSS size — no extra scaling needed
-  renderer.setSize(W, H, false);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-  const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-  camera.position.set(0, 0, opts.camZ || 4.2);
-
-  const scene = new THREE.Scene();
-  scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-  keyLight.position.set(3, 4, 4); scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
-  fillLight.position.set(-2, 0, 3); scene.add(fillLight);
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.30);
-  rimLight.position.set(0, -2, -3); scene.add(rimLight);
-
-  const model = modelFn();
-  if (opts.rotY !== undefined) model.rotation.y = opts.rotY;
-  if (opts.rotX !== undefined) model.rotation.x += opts.rotX;
-  if (opts.scale)              model.scale.multiplyScalar(opts.scale);
-  scene.add(model);
-
-  // Render a handful of frames so GPU textures flush, then freeze
-  let f = 0;
-  (function tick() {
-    renderer.render(scene, camera);
-    if (++f < 10) requestAnimationFrame(tick);
-  })();
-}
-
-// Mug: zoomed in close so it fills the frame; logo faces camera
-makeScene('canvas-mug',     mkMug,         { camZ: 2.2, rotY: 0, rotX: 0, scale: 1.0 });
-makeScene('canvas-phone',   mkPhoneCase,   { camZ: 2.2, rotY: 0, rotX: 0, scale: 1.0 });
-makeScene('canvas-sticker', mkStickerPack, { camZ: 2.2, rotY: 0, rotX: 0, scale: 1.0 });
-</script>
 </body>
 </html>

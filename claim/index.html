@@ -761,12 +761,22 @@
     background:
       radial-gradient(circle at 50% 40%, rgba(74,128,80,0.14), transparent 70%),
       rgba(8,10,8,0.7);
-    cursor: grab;
-    display: block;
+    display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--green-border);
     box-shadow: 0 0 40px rgba(74,128,80,0.12);
+    overflow: hidden;
+    perspective: 800px;
   }
-  #model-canvas:active { cursor: grabbing; }
+  #model-canvas img {
+    max-width: 86%; max-height: 86%; object-fit: contain;
+    filter: drop-shadow(0 0 18px rgba(74,222,128,0.30));
+    animation: gentleRock 4.2s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
+  @keyframes gentleRock {
+    0%, 100% { transform: rotateY(-22deg); }
+    50%      { transform: rotateY(22deg); }
+  }
   @media (max-width: 480px) {
     #model-canvas { width: 220px; height: 220px; }
   }
@@ -996,8 +1006,8 @@
 
         <!-- 3D model preview -->
         <div id="model-viewer">
-          <canvas id="model-canvas" width="280" height="280"></canvas>
-          <span class="model-hint">Drag to rotate</span>
+          <div id="model-canvas"><img id="model-image" src="" alt="" /></div>
+          <span class="model-hint">Your gift</span>
         </div>
 
         <h2 style="margin-top: 1.5rem; margin-bottom: 1.1rem; font-size: 1.2rem;">Recipient &amp; contact</h2>
@@ -1655,126 +1665,25 @@ function fireConfetti() {
 
 </script>
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-
-const GREEN   = 0x7ECF7E;
-const GREEN_D = 0x4A8050;
-
-function makeTex(drawFn, w, h) {
-  const c = document.createElement('canvas');
-  c.width = w || 512; c.height = h || 512;
-  drawFn(c.getContext('2d'), c.width, c.height);
-  return new THREE.CanvasTexture(c);
-}
-
-/* ================================================================
-   PHOTO BILLBOARD — uses actual reference photos as textures
-   ================================================================ */
-function mkPhotoBillboard(url, fallbackRatio) {
-  const g = new THREE.Group();
-  const H = 1.6;
-  const geo = new THREE.PlaneGeometry(H * (fallbackRatio || 1.0), H);
-  const mat = new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide });
-  const mesh = new THREE.Mesh(geo, mat);
-  g.add(mesh);
-
-  const loader = new THREE.TextureLoader();
-  loader.setCrossOrigin('anonymous');
-  loader.load(url, (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    mat.map = tex;
-    mat.needsUpdate = true;
-    const img = tex.image;
-    if (img && img.width && img.height) {
-      const ratio = img.width / img.height;
-      mesh.geometry.dispose();
-      mesh.geometry = new THREE.PlaneGeometry(H * ratio, H);
-    }
-  });
-  return g;
-}
-
-function mkMug() {
-  return mkPhotoBillboard('https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png', 1.0);
-}
-
-function mkPhoneCase() {
-  return mkPhotoBillboard('https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png', 0.7);
-}
-
-function mkStickerPack() {
-  return mkPhotoBillboard('https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png', 1.4);
-}
-
-
-/* ================================================================
-   SCENE / RENDERER / ORBIT CONTROLS
-   ================================================================ */
-let renderer, camera, controls, scene, currentModel, currentModelType;
-
-function init() {
-  const canvas = document.getElementById('model-canvas');
-  const W = canvas.width || 280, H = canvas.height || 280;
-
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(W, H, false);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-  camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-  camera.position.set(0, 0, 4.2);
-
-  scene = new THREE.Scene();
-  scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-  keyLight.position.set(3, 4, 4); scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
-  fillLight.position.set(-2, 0, 3); scene.add(fillLight);
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.30);
-  rimLight.position.set(0, -2, -3); scene.add(rimLight);
-
-  controls = new OrbitControls(camera, canvas);
-  controls.enableDamping   = true;
-  controls.dampingFactor   = 0.08;
-  controls.enablePan       = false;
-  controls.autoRotate      = true;
-  controls.autoRotateSpeed = 2.0;
-  controls.minDistance     = 2.0;
-  controls.maxDistance     = 7;
-  controls.saveState();
-
-  (function loop() {
-    requestAnimationFrame(loop);
-    // All three are photo billboards — rock gently so the photo stays visible
-    if (currentModel) {
-      controls.autoRotate = false;
-      currentModel.rotation.y = Math.sin(Date.now() * 0.0007) * 0.45;
-    }
-    controls.update();
-    renderer.render(scene, camera);
-  })();
-}
+<script>
+const GIFT_IMAGES = {
+  '3M Coffee Mug':     'https://i.gyazo.com/bd23c87939be4034eb37923f9bbfdc83.png',
+  '3M Phone Case':     'https://i.gyazo.com/cd0803d84ffae11d7aad76c99262302a.png',
+  '3M Sticker Packet': 'https://i.gyazo.com/b06fd4b6c62b73e68059fecd4fe0c56d.png',
+};
 
 window.setGiftModel = function(giftName) {
   try {
     const viewer = document.getElementById('model-viewer');
-    if (!viewer) return;
+    const img = document.getElementById('model-image');
+    if (!viewer || !img) return;
     viewer.style.display = 'flex';
-    if (!renderer) init();
-    controls.reset();
-    if (currentModel) { scene.remove(currentModel); currentModel = null; }
-    currentModelType = giftName;
-    if      (giftName === '3M Coffee Mug')     currentModel = mkMug();
-    else if (giftName === '3M Phone Case')     currentModel = mkPhoneCase();
-    else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
-    if (currentModel) scene.add(currentModel);
-    // Photo billboard — camera distance tuned to fit the photo in frame
-    camera.position.set(0, 0, 2.6);
-    controls.saveState();
-  } catch (e) { console.warn('3D viewer:', e); }
+    const url = GIFT_IMAGES[giftName];
+    if (url) {
+      img.src = url;
+      img.alt = giftName;
+    }
+  } catch (e) { console.warn('gift viewer:', e); }
 };
 </script>
 </body>
