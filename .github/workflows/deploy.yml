@@ -65,7 +65,12 @@ jobs:
       - name: Deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./claim
+        # IMPORTANT: run from the repo ROOT, not ./claim. The Vercel
+        # project's "Root Directory" is set to `claim/` in the dashboard,
+        # so the CLI appends `claim/` to the current working directory.
+        # If we cd into ./claim first, the CLI looks for ./claim/claim
+        # and dies with:
+        #   Error: The provided path ".../claim/claim" does not exist.
         run: |
           set -e
           # Belt-and-braces: also write a full project.json with the
