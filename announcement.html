@@ -170,21 +170,21 @@
   <div class="products">
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-mug" width="420" height="280"></canvas>
+        <canvas id="canvas-mug" width="840" height="560"></canvas>
       </div>
       <div class="product-name">3M Trading Mug</div>
       <div class="product-tag">Ceramic · Branded</div>
     </div>
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-phone" width="420" height="280"></canvas>
+        <canvas id="canvas-phone" width="840" height="560"></canvas>
       </div>
       <div class="product-name">3M Phone Case</div>
       <div class="product-tag">iPhone Compatible</div>
     </div>
     <div class="product-card">
       <div class="product-canvas-wrap">
-        <canvas id="canvas-sticker" width="420" height="280"></canvas>
+        <canvas id="canvas-sticker" width="840" height="560"></canvas>
       </div>
       <div class="product-name">3M Sticker Pack</div>
       <div class="product-tag">Premium Finish</div>
@@ -418,10 +418,10 @@ function mkStickerPack() {
 
 function makeScene(canvasId, modelFn, opts) {
   const canvas = document.getElementById(canvasId);
-  const W = 420, H = 280;
+  const W = 840, H = 560;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(1); // canvas is already 4× CSS size — no extra scaling needed
   renderer.setSize(W, H, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -440,6 +440,7 @@ function makeScene(canvasId, modelFn, opts) {
   const model = modelFn();
   if (opts.rotY !== undefined) model.rotation.y = opts.rotY;
   if (opts.rotX !== undefined) model.rotation.x += opts.rotX;
+  if (opts.scale)              model.scale.multiplyScalar(opts.scale);
   scene.add(model);
 
   // Render a handful of frames so GPU textures flush, then freeze
@@ -450,12 +451,12 @@ function makeScene(canvasId, modelFn, opts) {
   })();
 }
 
-// Mug: rotY=0 → logo faces camera; slight downward tilt shows rim
-makeScene('canvas-mug',     mkMug,         { camZ: 3.6, rotY: 0,    rotX: -0.18 });
-// Phone: slight rotY shows depth of camera module while logo stays visible
-makeScene('canvas-phone',   mkPhoneCase,   { camZ: 3.9, rotY: 0.22, rotX: -0.12 });
-// Sticker: already tilted by mkStickerPack's rotation.x=π/2; rotY=0 faces stickers at camera
-makeScene('canvas-sticker', mkStickerPack, { camZ: 3.3, rotY: 0,    rotX: 0 });
+// Mug: zoomed in close so it fills the frame; logo faces camera
+makeScene('canvas-mug',     mkMug,         { camZ: 2.8, rotY: 0,    rotX: -0.15, scale: 1.10 });
+// Phone: zoomed in, slight angle shows camera module depth + logo
+makeScene('canvas-phone',   mkPhoneCase,   { camZ: 3.0, rotY: 0.20, rotX: -0.10, scale: 1.10 });
+// Sticker: fills frame nicely already
+makeScene('canvas-sticker', mkStickerPack, { camZ: 2.6, rotY: 0,    rotX: 0,     scale: 1.0  });
 </script>
 </body>
 </html>
