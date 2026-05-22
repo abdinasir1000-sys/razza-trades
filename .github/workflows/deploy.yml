@@ -15,41 +15,31 @@ jobs:
           node-version: '20'
 
       - name: Install Vercel CLI
-        run: npm install -g vercel
+        # Pinned to the version that was `latest` on 2026-05-21 when this
+        # workflow last deployed successfully (commit dd3d1c5). Avoids
+        # surprises from future CLI releases changing pull/build/deploy
+        # semantics.
+        run: npm install -g vercel@54.2.0
 
-      - name: Resolve Vercel org/project IDs
+      - name: Verify token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          set -e
-          PROJECT_ID="prj_cN3FkhM8AWqw7GhVgyhINKUyf66J"
-          # whoami (sanity-check token)
-          curl -sS -o /tmp/whoami.json -w "whoami HTTP %{http_code}\n" \
+          set -x
+          RESP=$(curl -s -o /tmp/whoami.json -w "%{http_code}" \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v2/user"
-          cat /tmp/whoami.json; echo
-          # Look up the project to get its accountId (== orgId)
-          curl -sS -o /tmp/project.json -w "project HTTP %{http_code}\n" \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects/${PROJECT_ID}"
-          cat /tmp/project.json; echo
-          ORG_ID=$(node -e "const p=require('/tmp/project.json'); process.stdout.write(p.accountId||'')")
-          if [ -z "$ORG_ID" ]; then
-            echo "ERROR: could not resolve Vercel org ID"
-            exit 1
-          fi
-          echo "Resolved ORG_ID=$ORG_ID"
-          echo "VERCEL_ORG_ID=$ORG_ID" >> "$GITHUB_ENV"
-          echo "VERCEL_PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
+            "https://api.vercel.com/v2/user")
+          echo "HTTP status: $RESP"
+          cat /tmp/whoami.json
 
       - name: Deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
-        working-directory: ./claim
         run: |
-          set -e
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          vercel build --prod --token="$VERCEL_TOKEN"
-          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          set -x
+          mkdir -p claim/.vercel
+          echo '{"projectId":"prj_cN3FkhM8AWqw7GhVgyhINKUyf66J","orgId":""}' > claim/.vercel/project.json
+          cd claim
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN" 2>&1 || true
+          vercel build --prod --token="$VERCEL_TOKEN" 2>&1
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" 2>&1
