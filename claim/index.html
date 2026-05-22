@@ -1709,35 +1709,36 @@ function mkMug() {
   ];
 
   // Black body texture — pixelated "3M TRADING" + neon bloom
+  // Both logos drawn on ONE offscreen canvas to avoid overwrite bug
   const bodyTex = makeTex((ctx, w, h) => {
     ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h);
+    const oc = document.createElement('canvas');
+    oc.width = 128; oc.height = 128;
+    const p = oc.getContext('2d');
+    p.fillStyle = '#0b0b0b'; p.fillRect(0, 0, 128, 128);
+    p.fillStyle = '#3ddc6a';
+    // Draw logo at BOTH x=32 (25%) and x=96 (75%) on the same offscreen canvas
+    [32, 96].forEach(px => {
+      p.font = '900 26px monospace'; p.textAlign = 'center'; p.textBaseline = 'middle';
+      p.fillText('3M', px, 56);
+      p.font = 'bold 8px monospace'; p.fillText('TRADING', px, 80);
+    });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(oc, 0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    // Bloom: 5 passes wide→tight for neon glow — draw at both positions
     [0.75 * w, 0.25 * w].forEach(lx => {
       const ly = h * 0.50;
-      const oc = document.createElement('canvas');
-      oc.width = 128; oc.height = 128;
-      const p = oc.getContext('2d');
-      p.fillStyle = '#0b0b0b'; p.fillRect(0, 0, 128, 128);
-      const plx = Math.round(lx / w * 128);
-      p.fillStyle = '#3ddc6a';
-      p.font = '900 22px monospace'; p.textAlign = 'center'; p.textBaseline = 'middle';
-      p.fillText('3M', plx, 60);
-      p.font = 'bold 7px monospace'; p.fillText('TRADING', plx, 82);
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(oc, 0, 0, w, h);
-      ctx.imageSmoothingEnabled = true;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      [[80, 0.08], [50, 0.16], [24, 0.32], [9, 0.65], [2, 1.0]].forEach(([blur, a]) => {
+      [[80, 0.10], [50, 0.20], [24, 0.38], [9, 0.70], [2, 1.0]].forEach(([blur, a]) => {
         ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
         ctx.fillStyle = `rgba(74,222,128,${a})`;
-        ctx.font = `900 ${Math.round(w * 0.185)}px monospace`;
+        ctx.font = `900 ${Math.round(w * 0.205)}px monospace`;
         ctx.fillText('3M', lx, ly - h * 0.055);
-        ctx.font = `bold ${Math.round(w * 0.057)}px monospace`;
-        ctx.fillText('TRADING', lx, ly + h * 0.088);
+        ctx.font = `bold ${Math.round(w * 0.062)}px monospace`;
+        ctx.fillText('TRADING', lx, ly + h * 0.100);
       });
       ctx.shadowBlur = 0;
-      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.20);
-      grd.addColorStop(0, 'rgba(74,222,128,0.18)'); grd.addColorStop(1, 'transparent');
-      ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
     });
   }, 512, 512);
 
@@ -1767,6 +1768,15 @@ function mkMug() {
     new THREE.MeshStandardMaterial({ color: 0x3ddc6a, roughness: 0.30, metalness: 0.04 })
   ));
 
+  // Solid bottom cap — prevents hollow/transparent look from above
+  const botCap = new THREE.Mesh(
+    new THREE.CircleGeometry(0.48, 48),
+    new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4 })
+  );
+  botCap.rotation.x = -Math.PI / 2;
+  botCap.position.y = -0.585;
+  g.add(botCap);
+
   g.scale.setScalar(0.75);
   return g;
 }
@@ -1791,13 +1801,13 @@ function mkPhoneCase() {
     p.fillStyle = '#3ddc6a';
     p.font = `900 ${Math.floor(ph * 0.30)}px monospace`;
     p.textAlign = 'center'; p.textBaseline = 'middle';
-    p.fillText('3M', pw / 2, ph * 0.38);
+    p.fillText('3M', pw / 2, ph * 0.62);
     p.font = `bold ${Math.floor(ph * 0.090)}px monospace`;
-    p.fillText('TRADING', pw / 2, ph * 0.57);
+    p.fillText('TRADING', pw / 2, ph * 0.78);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(oc, 0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
-    const y3m = h * 0.38, ytrd = h * 0.57;
+    const y3m = h * 0.62, ytrd = h * 0.78;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     [[110, 0.10], [75, 0.17], [45, 0.28], [22, 0.45], [9, 0.72], [3, 1.0]].forEach(([blur, alpha]) => {
       ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
@@ -1808,7 +1818,7 @@ function mkPhoneCase() {
       ctx.fillText('TRADING', w / 2, ytrd);
     });
     ctx.shadowBlur = 0;
-    const grd = ctx.createRadialGradient(w / 2, h * 0.46, 0, w / 2, h * 0.46, w * 0.50);
+    const grd = ctx.createRadialGradient(w / 2, h * 0.68, 0, w / 2, h * 0.68, w * 0.50);
     grd.addColorStop(0, 'rgba(74,222,128,0.22)');
     grd.addColorStop(0.55, 'rgba(74,222,128,0.07)');
     grd.addColorStop(1, 'transparent');
@@ -1896,7 +1906,7 @@ function mkPhoneCase() {
   greenBar.position.set(0, -H / 2 + 0.060, 0);
   g.add(greenBar);
 
-  g.scale.setScalar(0.76);
+  g.scale.setScalar(1.18);
   return g;
 }
 
@@ -1945,7 +1955,7 @@ function mkStickerPack() {
     ctx.shadowBlur=0; ctx.restore();
 
     // --- Sticker 2: Hexagon, green, dark "3M" ---
-    const hx=w*0.72, hy=h*0.24, hr=w*0.127;
+    const hx=w*0.72, hy=h*0.24, hr=w*0.150;
     ctx.beginPath();
     for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;i?ctx.lineTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a)):ctx.moveTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a));}
     ctx.closePath(); ctx.fillStyle='#3ddc6a'; ctx.fill();
@@ -1954,7 +1964,7 @@ function mkStickerPack() {
     ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', hx, hy);
 
     // --- Sticker 3: Rectangle, black, "RAZA TRADE$" ---
-    const rx=w*0.72, ry=h*0.59, rw=w*0.344, rht=h*0.150;
+    const rx=w*0.72, ry=h*0.59, rw=w*0.370, rht=h*0.165;
     ctx.beginPath();
     if(ctx.roundRect) ctx.roundRect(rx-rw/2, ry-rht/2, rw, rht, 9);
     else ctx.rect(rx-rw/2, ry-rht/2, rw, rht);
@@ -1964,7 +1974,7 @@ function mkStickerPack() {
     ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('RAZA TRADE$', rx, ry);
 
     // --- Sticker 4: Small circle, green, "3M" ---
-    const s4x=w*0.17, s4y=h*0.76, s4r=w*0.088;
+    const s4x=w*0.17, s4y=h*0.76, s4r=w*0.110;
     ctx.beginPath(); ctx.arc(s4x,s4y,s4r,0,Math.PI*2);
     ctx.fillStyle='#3ddc6a'; ctx.fill();
     ctx.fillStyle='#0d0d0d';
@@ -1972,7 +1982,7 @@ function mkStickerPack() {
     ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', s4x, s4y);
 
     // --- Sticker 5: Small circle, dark, "3M.FX" ---
-    const s5x=w*0.51, s5y=h*0.79, s5r=w*0.086;
+    const s5x=w*0.51, s5y=h*0.79, s5r=w*0.108;
     ctx.beginPath(); ctx.arc(s5x,s5y,s5r,0,Math.PI*2);
     ctx.fillStyle='#0d0d0d'; ctx.fill();
     ctx.fillStyle='#3ddc6a';
@@ -1980,7 +1990,7 @@ function mkStickerPack() {
     ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M.FX', s5x, s5y);
 
     // --- Sticker 6: Small circle, green, "3M'S NEXT" ---
-    const s6x=w*0.12, s6y=h*0.21, s6r=w*0.090;
+    const s6x=w*0.12, s6y=h*0.21, s6r=w*0.110;
     ctx.beginPath(); ctx.arc(s6x,s6y,s6r,0,Math.PI*2);
     ctx.fillStyle='#3ddc6a'; ctx.fill();
     ctx.fillStyle='#0d0d0d';
@@ -2017,7 +2027,7 @@ function mkStickerPack() {
   // rotation.x = π/2: stands pack upright, printed +Y face points directly toward +Z camera
   g.rotation.x = Math.PI / 2;
   g.rotation.y = 0;
-  g.scale.setScalar(1.05);
+  g.scale.setScalar(1.15);
   return g;
 }
 
@@ -2086,6 +2096,10 @@ window.setGiftModel = function(giftName) {
     else if (giftName === '3M Phone Case')     currentModel = mkPhoneCase();
     else if (giftName === '3M Sticker Packet') currentModel = mkStickerPack();
     if (currentModel) scene.add(currentModel);
+    // Per-model camera distance
+    const camDist = {'3M Coffee Mug': 3.2, '3M Phone Case': 3.0, '3M Sticker Packet': 3.2};
+    camera.position.set(0, 0, camDist[giftName] || 4.2);
+    controls.saveState();
   } catch (e) { console.warn('3D viewer:', e); }
 };
 </script>
