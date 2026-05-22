@@ -1078,7 +1078,7 @@
           <span>I understand that shipping is free within Canada and the United States. There may be a cost associated with shipping if I live outside of these regions.</span>
         </label>
 
-        <button class="btn" id="btn-submit">Proceed to Payment &rarr;</button>
+        <button class="btn" id="btn-submit">Click to Submit &rarr;</button>
       </div>
     </section>
 
@@ -1708,36 +1708,53 @@ function mkMug() {
     new THREE.Vector2(0.56,  0.60),
   ];
 
+  // Black body texture — pixelated "3M TRADING" + neon bloom
   const bodyTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h);
     [0.75 * w, 0.25 * w].forEach(lx => {
       const ly = h * 0.50;
-      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.19);
-      grd.addColorStop(0, 'rgba(126,207,126,0.36)'); grd.addColorStop(1, 'transparent');
-      ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 22;
-      ctx.font = `bold ${Math.round(w * 0.15)}px Arial`;
+      const oc = document.createElement('canvas');
+      oc.width = 128; oc.height = 128;
+      const p = oc.getContext('2d');
+      p.fillStyle = '#0b0b0b'; p.fillRect(0, 0, 128, 128);
+      const plx = Math.round(lx / w * 128);
+      p.fillStyle = '#3ddc6a';
+      p.font = '900 22px monospace'; p.textAlign = 'center'; p.textBaseline = 'middle';
+      p.fillText('3M', plx, 60);
+      p.font = 'bold 7px monospace'; p.fillText('TRADING', plx, 82);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(oc, 0, 0, w, h);
+      ctx.imageSmoothingEnabled = true;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('3M', lx, ly - h * 0.07);
-      ctx.shadowBlur = 8;
-      ctx.font = `bold ${Math.round(w * 0.050)}px Arial`;
-      ctx.fillStyle = '#5aaa60';
-      ctx.fillText('TRADING', lx, ly + h * 0.075);
+      [[80, 0.08], [50, 0.16], [24, 0.32], [9, 0.65], [2, 1.0]].forEach(([blur, a]) => {
+        ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
+        ctx.fillStyle = `rgba(74,222,128,${a})`;
+        ctx.font = `900 ${Math.round(w * 0.185)}px monospace`;
+        ctx.fillText('3M', lx, ly - h * 0.055);
+        ctx.font = `bold ${Math.round(w * 0.057)}px monospace`;
+        ctx.fillText('TRADING', lx, ly + h * 0.088);
+      });
+      ctx.shadowBlur = 0;
+      const grd = ctx.createRadialGradient(lx, ly, 0, lx, ly, w * 0.20);
+      grd.addColorStop(0, 'rgba(74,222,128,0.18)'); grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
     });
   }, 512, 512);
 
+  // Matte black body
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(pts, 80, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.22 })
+    new THREE.MeshStandardMaterial({ color: 0x0a0a0a, map: bodyTex, roughness: 0.32, metalness: 0.04 })
   ));
 
+  // Green interior (visible looking down)
   const iPts = pts.slice(1).map(v => new THREE.Vector2(v.x * 0.87, v.y + 0.01));
   g.add(new THREE.Mesh(
     new THREE.LatheGeometry(iPts, 40, Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ color: 0x060606, roughness: 0.9, side: THREE.BackSide })
+    new THREE.MeshStandardMaterial({ color: 0x3ddc6a, roughness: 0.35, side: THREE.BackSide })
   ));
 
-  // Handle scaled to match wider body
+  // Green handle matching reference
   const hCurve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(0.57,  0.22, 0),
     new THREE.Vector3(0.72,  0.16, 0),
@@ -1746,8 +1763,8 @@ function mkMug() {
     new THREE.Vector3(0.52, -0.36, 0),
   ]);
   g.add(new THREE.Mesh(
-    new THREE.TubeGeometry(hCurve, 32, 0.055, 10, false),
-    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.28 })
+    new THREE.TubeGeometry(hCurve, 32, 0.058, 10, false),
+    new THREE.MeshStandardMaterial({ color: 0x3ddc6a, roughness: 0.30, metalness: 0.04 })
   ));
 
   g.scale.setScalar(0.75);
@@ -1764,31 +1781,43 @@ function mkPhoneCase() {
   const g = new THREE.Group();
   const W = 0.90, H = 2.00, D = 0.16;
 
-  // Logo canvas: big "3M TRADING" centred at canvas (w/2, h/2)
-  // Centred so UV flipY doesn't matter — it's always in the middle
   const logoTex = makeTex((ctx, w, h) => {
-    ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h);
-    const cx = w / 2, cy = h / 2;
-    // Subtle green radial glow
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.45);
-    grd.addColorStop(0, 'rgba(126,207,126,0.22)'); grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
-    // "3M" — large and bright
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 40;
-    ctx.font = `bold ${Math.round(h * 0.24)}px Arial`;
+    ctx.fillStyle = '#0b0c0b'; ctx.fillRect(0, 0, w, h);
+    const pw = Math.floor(w / 5), ph = Math.floor(h / 5);
+    const oc = document.createElement('canvas');
+    oc.width = pw; oc.height = ph;
+    const p = oc.getContext('2d');
+    p.fillStyle = '#0b0c0b'; p.fillRect(0, 0, pw, ph);
+    p.fillStyle = '#3ddc6a';
+    p.font = `900 ${Math.floor(ph * 0.30)}px monospace`;
+    p.textAlign = 'center'; p.textBaseline = 'middle';
+    p.fillText('3M', pw / 2, ph * 0.38);
+    p.font = `bold ${Math.floor(ph * 0.090)}px monospace`;
+    p.fillText('TRADING', pw / 2, ph * 0.57);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(oc, 0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    const y3m = h * 0.38, ytrd = h * 0.57;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', cx, cy - h * 0.09);
-    // "TRADING"
-    ctx.shadowBlur = 12;
-    ctx.font = `bold ${Math.round(h * 0.072)}px Arial`;
-    ctx.fillStyle = '#5aaa60';
-    ctx.fillText('TRADING', cx, cy + h * 0.10);
+    [[110, 0.10], [75, 0.17], [45, 0.28], [22, 0.45], [9, 0.72], [3, 1.0]].forEach(([blur, alpha]) => {
+      ctx.shadowColor = '#4ade80'; ctx.shadowBlur = blur;
+      ctx.fillStyle = `rgba(74,222,128,${alpha})`;
+      ctx.font = `900 ${Math.round(h * 0.245)}px monospace`;
+      ctx.fillText('3M', w / 2, y3m);
+      ctx.font = `bold ${Math.round(h * 0.074)}px monospace`;
+      ctx.fillText('TRADING', w / 2, ytrd);
+    });
+    ctx.shadowBlur = 0;
+    const grd = ctx.createRadialGradient(w / 2, h * 0.46, 0, w / 2, h * 0.46, w * 0.50);
+    grd.addColorStop(0, 'rgba(74,222,128,0.22)');
+    grd.addColorStop(0.55, 'rgba(74,222,128,0.07)');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
   }, 512, 1024);
 
-  // Body: low metalness so ambient + directional light actually illuminate it
   g.add(new THREE.Mesh(
     new RoundedBoxGeometry(W, H, D, 4, 0.06),
-    new THREE.MeshStandardMaterial({ color: 0x1e1e1e, roughness: 0.55, metalness: 0.0 })
+    new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.72, metalness: 0.0 })
   ));
 
   // Logo plane on the +Z face — emissive so it GLOWS regardless of lighting
@@ -1882,77 +1911,83 @@ function mkStickerPack() {
   const W = 1.50, SH = 1.10, T = 0.014;
   const N = 6;
 
-  // Top sheet texture: white paper with individual sticker designs
   const topTex = makeTex((ctx, w, h) => {
-    // White/cream sheet background
-    ctx.fillStyle = '#F8F6F1'; ctx.fillRect(0, 0, w, h);
-    // Very subtle page border
-    ctx.strokeStyle = '#D8D3CC'; ctx.lineWidth = 3;
-    ctx.strokeRect(4, 4, w-8, h-8);
+    ctx.fillStyle = '#F5F5F2'; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = '#E0DEDD'; ctx.lineWidth = 2; ctx.strokeRect(3, 3, w-6, h-6);
 
-    // -- Sticker 1: large circle, left-center — black bg, green 3M --
-    const c1x = w*0.28, c1y = h*0.42, c1r = w*0.175;
+    // --- Sticker 1: Large circle, black bg, pixel "3M TRADING" ---
+    const c1x=w*0.29, c1y=h*0.44, c1r=w*0.198;
+    ctx.save();
     ctx.beginPath(); ctx.arc(c1x, c1y, c1r, 0, Math.PI*2);
-    ctx.fillStyle = '#0d0d0d'; ctx.fill();
-    ctx.strokeStyle = '#7ECF7E'; ctx.lineWidth = 5; ctx.stroke();
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowColor = '#7ECF7E'; ctx.shadowBlur = 8;
-    ctx.font = `bold ${Math.round(c1r*0.58)}px Arial`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', c1x, c1y - c1r*0.14);
-    ctx.shadowBlur = 0; ctx.font = `bold ${Math.round(c1r*0.24)}px Arial`;
-    ctx.fillStyle = '#5a9060'; ctx.fillText('TRADING', c1x, c1y + c1r*0.40);
+    ctx.fillStyle='#0d0d0d'; ctx.fill(); ctx.clip();
+    const s1=document.createElement('canvas');
+    s1.width=Math.ceil(c1r); s1.height=Math.ceil(c1r);
+    const s1c=s1.getContext('2d');
+    s1c.fillStyle='#0d0d0d'; s1c.fillRect(0,0,s1.width,s1.height);
+    s1c.fillStyle='#3ddc6a';
+    s1c.font=`900 ${Math.floor(s1.width*0.42)}px monospace`;
+    s1c.textAlign='center'; s1c.textBaseline='middle';
+    s1c.fillText('3M', s1.width/2, s1.height*0.38);
+    s1c.font=`bold ${Math.floor(s1.width*0.128)}px monospace`;
+    s1c.fillText('TRADING', s1.width/2, s1.height*0.68);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(s1, c1x-c1r, c1y-c1r, c1r*2, c1r*2);
+    ctx.imageSmoothingEnabled=true;
+    [[22,0.14],[10,0.32],[4,0.85]].forEach(([bl,al])=>{
+      ctx.shadowColor='#4ade80'; ctx.shadowBlur=bl;
+      ctx.fillStyle=`rgba(74,222,128,${al})`;
+      ctx.font=`900 ${Math.round(c1r*0.70)}px monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('3M', c1x, c1y-c1r*0.13);
+      ctx.font=`bold ${Math.round(c1r*0.215)}px monospace`;
+      ctx.fillText('TRADING', c1x, c1y+c1r*0.47);
+    });
+    ctx.shadowBlur=0; ctx.restore();
 
-    // -- Sticker 2: hexagon, top-right — green bg, dark 3M --
-    const hx = w*0.73, hy = h*0.28, hr = w*0.135;
+    // --- Sticker 2: Hexagon, green, dark "3M" ---
+    const hx=w*0.72, hy=h*0.24, hr=w*0.127;
     ctx.beginPath();
-    for (let i=0;i<6;i++){const a=(Math.PI/3)*i-Math.PI/6; i?ctx.lineTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a)):ctx.moveTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a));}
-    ctx.closePath(); ctx.fillStyle = '#7ECF7E'; ctx.fill();
-    ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.fillStyle = '#0d0d0d';
-    ctx.font = `bold ${Math.round(hr*0.70)}px Arial`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('3M', hx, hy);
+    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;i?ctx.lineTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a)):ctx.moveTo(hx+hr*Math.cos(a),hy+hr*Math.sin(a));}
+    ctx.closePath(); ctx.fillStyle='#3ddc6a'; ctx.fill();
+    ctx.shadowBlur=0; ctx.fillStyle='#0d0d0d';
+    ctx.font=`900 ${Math.round(hr*0.72)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', hx, hy);
 
-    // -- Sticker 3: rectangle, right-center — dark bg, green text --
-    const rx=w*0.70, ry=h*0.60, rw=w*0.34, rht=h*0.17;
+    // --- Sticker 3: Rectangle, black, "RAZA TRADE$" ---
+    const rx=w*0.72, ry=h*0.59, rw=w*0.344, rht=h*0.150;
     ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(rx-rw/2, ry-rht/2, rw, rht, 10);
+    if(ctx.roundRect) ctx.roundRect(rx-rw/2, ry-rht/2, rw, rht, 9);
     else ctx.rect(rx-rw/2, ry-rht/2, rw, rht);
-    ctx.fillStyle = '#111111'; ctx.fill();
-    ctx.strokeStyle = '#4A8050'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.fillStyle = '#7ECF7E'; ctx.shadowBlur = 0;
-    ctx.font = `bold ${Math.round(rht*0.42)}px Arial`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('RAZA TRADES', rx, ry);
+    ctx.fillStyle='#0d0d0d'; ctx.fill();
+    ctx.fillStyle='#3ddc6a';
+    ctx.font=`900 ${Math.round(rht*0.40)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('RAZA TRADE$', rx, ry);
 
-    // -- Sticker 4: small circle bottom-left --
-    const s4x=w*0.20, s4y=h*0.76, s4r=w*0.088;
+    // --- Sticker 4: Small circle, green, "3M" ---
+    const s4x=w*0.17, s4y=h*0.76, s4r=w*0.088;
     ctx.beginPath(); ctx.arc(s4x,s4y,s4r,0,Math.PI*2);
-    ctx.fillStyle='#4A8050'; ctx.fill();
-    ctx.fillStyle='#ffffff';
-    ctx.font=`bold ${Math.round(s4r*0.60)}px Arial`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('3M', s4x, s4y);
+    ctx.fillStyle='#3ddc6a'; ctx.fill();
+    ctx.fillStyle='#0d0d0d';
+    ctx.font=`900 ${Math.round(s4r*0.78)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M', s4x, s4y);
 
-    // -- Sticker 5: small circle bottom-center --
-    const s5x=w*0.50, s5y=h*0.78, s5r=w*0.088;
+    // --- Sticker 5: Small circle, dark, "3M.FX" ---
+    const s5x=w*0.51, s5y=h*0.79, s5r=w*0.086;
     ctx.beginPath(); ctx.arc(s5x,s5y,s5r,0,Math.PI*2);
     ctx.fillStyle='#0d0d0d'; ctx.fill();
-    ctx.strokeStyle='#7ECF7E'; ctx.lineWidth=3; ctx.stroke();
-    ctx.fillStyle='#7ECF7E';
-    ctx.font=`bold ${Math.round(s5r*0.44)}px Arial`;
-    ctx.fillText('3M.CA', s5x, s5y);
+    ctx.fillStyle='#3ddc6a';
+    ctx.font=`bold ${Math.round(s5r*0.50)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('3M.FX', s5x, s5y);
 
-    // -- Sticker 6: small star/badge top-left --
-    const s6x=w*0.14, s6y=h*0.20, s6r=w*0.090;
+    // --- Sticker 6: Small circle, green, "3M'S NEXT" ---
+    const s6x=w*0.12, s6y=h*0.21, s6r=w*0.090;
     ctx.beginPath(); ctx.arc(s6x,s6y,s6r,0,Math.PI*2);
-    ctx.fillStyle='#7ECF7E'; ctx.fill();
+    ctx.fillStyle='#3ddc6a'; ctx.fill();
     ctx.fillStyle='#0d0d0d';
-    ctx.font=`bold ${Math.round(s6r*0.44)}px Arial`;
+    ctx.font=`bold ${Math.round(s6r*0.48)}px monospace`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('NEW', s6x, s6y-s6r*0.18);
-    ctx.font=`bold ${Math.round(s6r*0.34)}px Arial`;
-    ctx.fillText('2025', s6x, s6y+s6r*0.42);
+    ctx.fillText("3M'S", s6x, s6y-s6r*0.20);
+    ctx.fillText('NEXT', s6x, s6y+s6r*0.38);
   }, 768, 576);
 
   // Plain cream sheet (for lower sheets — just the back)
