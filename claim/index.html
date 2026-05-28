@@ -873,7 +873,7 @@
           <div class="stat-label">Free Shipping</div>
         </div>
         <div class="stat">
-          <div class="stat-num"><span class="led"></span> Open</div>
+          <div class="stat-num"><span class="led"></span> Closed</div>
           <div class="stat-label">Window Status</div>
         </div>
       </div>
@@ -890,6 +890,26 @@
         <p class="footer-note" style="margin-top: 1.5rem;">
           Sign in with your Whop account to continue
         </p>
+      </div>
+    </section>
+
+    <!-- ========== SCREEN: SUBMISSIONS CLOSED ========== -->
+    <section id="screen-closed" class="screen hero-centered">
+      <div class="brand-row">
+        <div class="brand">
+          <div class="brand-logo">
+            <img src="https://lh3.googleusercontent.com/d/1UE0R7NFGpM31sA3uaVOyzPbLlgz8OGtb" alt="3M Trading" class="brand-logo-img" />
+          </div>
+          <div class="brand-text">
+            <div class="brand-name">3M <span class="accent">Trading</span></div>
+            <div class="brand-sub">Raza's VIP Mentorship Students</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-quiet text-center">
+        <div style="font-size: 3.5rem; color: var(--text-faint); margin-bottom: 0.6rem;">ⓘ</div>
+        <h1 class="text-center">Submissions Closed</h1>
+        <p class="lede" style="margin: 0.5rem auto 0;">The free gift claim window is now closed. Thank you to everyone who claimed &mdash; if you submitted a claim, your gift is on its way. Questions? Reach out in the 3M Trading Discord support channel.</p>
       </div>
     </section>
 
@@ -1127,6 +1147,7 @@ const WHOP_CHECKOUT_URL = "PASTE_WHOP_CHECKOUT_URL_HERE";
 // =============================================================================
 // HELPERS
 // =============================================================================
+const CLAIMS_CLOSED = true;
 const $ = (id) => document.getElementById(id);
 const GIFT_ICONS = { "3M Coffee Mug": "☕", "3M Sticker Packet": "🎨", "3M Phone Case": "📱" };
 
@@ -1456,6 +1477,10 @@ $("btn-submit").addEventListener("click", async function () {
   };
 
   const submitResult = await submitClaim(payload);
+  if (submitResult.closed) {
+    showScreen("screen-closed");
+    return;
+  }
   if (submitResult.alreadyClaimed) {
     submitBtn.textContent = originalLabel;
     submitBtn.disabled = false;
@@ -1491,6 +1516,7 @@ async function submitClaim(payload) {
     if (resp.status === 409) return { ok: false, alreadyClaimed: true };
     if (!resp.ok) {
       const body = await resp.json().catch(() => ({}));
+      if (body.error === "submissions_closed") return { ok: false, closed: true };
       const detail = body.supabase_error || body.error || ("HTTP " + resp.status);
       console.error("submit-claim failed:", detail);
       return { ok: false, detail };
@@ -1539,6 +1565,11 @@ function fireConfetti() {
 // PAGE BOOT — handle OAuth callback if present
 // =============================================================================
 (function boot() {
+  // Submissions are closed — short-circuit before any auth/OAuth/form logic.
+  if (CLAIMS_CLOSED) {
+    showScreen("screen-closed");
+    return;
+  }
   try {
     const params = new URLSearchParams(window.location.search);
 

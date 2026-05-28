@@ -1,7 +1,12 @@
 module.exports = async function handler(req, res) {
+  const CLAIMS_CLOSED = true;
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  if (CLAIMS_CLOSED) {
+    return res.status(403).json({ ok: false, error: "submissions_closed" });
+  }
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
