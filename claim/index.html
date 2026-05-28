@@ -851,7 +851,7 @@
   <div class="container">
 
     <!-- ========== SCREEN 1: SIGN IN ========== -->
-    <section id="screen-signin" class="screen active hero-centered">
+    <section id="screen-signin" class="screen hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
@@ -894,7 +894,7 @@
     </section>
 
     <!-- ========== SCREEN: SUBMISSIONS CLOSED ========== -->
-    <section id="screen-closed" class="screen hero-centered">
+    <section id="screen-closed" class="screen active hero-centered">
       <div class="brand-row">
         <div class="brand">
           <div class="brand-logo">
@@ -1379,6 +1379,7 @@ async function verifyMembership(token) {
 // SIGN-IN SCREEN
 // =============================================================================
 $("btn-signin").addEventListener("click", function () {
+  if (CLAIMS_CLOSED) { showScreen("screen-closed"); return; }
   if (!WHOP_CLIENT_ID || WHOP_CLIENT_ID.indexOf("PASTE_") === 0) {
     showError("signin-error", "Whop sign-in isn't configured yet. Please contact support in the 3M Trading Discord.");
     return;
